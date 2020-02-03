@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "rrr",
+    "rbr",
+    "rrr"
+  ],
+  "key": {
+    "r": {
+      "item": "minecraft:bucket"
+    },
+    "b": {
+      "item": "minecraft:coal_block"
+    }
+  },
+  "result": {
+    "item": "tanknull:tank_1"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "type": "tanknull:upgrade",
+  "pattern": [
+    "iii",
+    "i1i",
+    "iii"
+  ],
+  "key": {
+    "i": {
+      "tag": "forge:storage_blocks/diamond"
+    },
+    "1": {
+      "item": "tanknull:tank_4"
+    }
+  },
+  "result": {
+    "item": "tanknull:tank_5"
+  }
+}

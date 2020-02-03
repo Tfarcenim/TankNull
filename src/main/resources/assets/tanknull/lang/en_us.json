@@ -1,0 +1,58 @@
+{
+  "block.tanknull.tank_1": "tank 1",
+  "block.tanknull.tank_2": "tank 2",
+  "block.tanknull.tank_3": "tank 3",
+  "block.tanknull.tank_4": "tank 4",
+  "block.tanknull.tank_5": "tank 5",
+  "block.tanknull.tank_6": "tank 6",
+  "block.tanknull.tank_7": "tank 7",
+
+  "item.tanknull.1_to_2": "1 to 2",
+  "item.tanknull.2_to_3": "2 to 3",
+  "item.tanknull.3_to_4": "3 to 4",
+  "item.tanknull.4_to_5": "4 to 5",
+  "item.tanknull.5_to_6": "5 to 6",
+  "item.tanknull.6_to_7": "6 to 7",
+
+  "container.tanknull.tank_1": "tank 1",
+  "container.tanknull.tank_2": "tank 2",
+  "container.tanknull.tank_3": "tank 3",
+  "container.tanknull.tank_4": "tank 4",
+  "container.tanknull.tank_5": "tank 5",
+  "container.tanknull.tank_6": "tank 6",
+  "container.tanknull.tank_7": "tank 7",
+
+  "tanknull.mode.normal": "Normal",
+  "tanknull.mode.pickup_all": "Pickup All",
+  "tanknull.mode.filtered_pickup": "Filtered Pickup",
+  "tanknull.mode.void_pickup": "Void Pickup",
+
+  "key.tanknull.pickup": "Toggle Mode",
+  "key.tanknull.construction": "Construction Mode",
+
+  "key.categories.tanknull": "Tank Null",
+
+  "text.tanknull.shift": "Press %s for Info",
+  "text.tanknull.empty": "Empty",
+  "text.tanknull.lock": "Press %s to Lock",
+
+
+  "text.tanknull.changemode": "Press %s to change mode",
+  "text.tanknull.currentmode": "Current Usetype: %s",
+
+  "text.tanknull.changeusetype": "Press %s to change usetype",
+  "text.tanknull.currentusetype": "Current Usetype: %s",
+
+  "tanknull.usetype.bag": "Bag",
+  "tanknull.usetype.construction": "Construction",
+  "tanknull.usetype.chest": "Chest",
+
+  "text.tanknull.blacklisted_storage": "This item has been blacklisted from storage!",
+  "text.tanknull.blacklisted_usage": "This item cannot be used from storage!",
+
+  "text.tanknull.stacklimit": "Stack Limit: %s",
+
+  "text.tanknull.exact": "Exact Count: %s",
+
+  "text.tanknull.formatcontaineditems" : "%s %s"
+}
