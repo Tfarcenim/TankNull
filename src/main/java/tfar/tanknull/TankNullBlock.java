@@ -24,6 +24,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fml.network.NetworkHooks;
+import tfar.tanknull.inventory.FluidHandlerHelper;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -88,5 +89,16 @@ public class TankNullBlock extends Block {
         }
       }
     }
+  }
+
+  @Override
+  public boolean hasComparatorInputOverride(BlockState state) {
+    return true;
+  }
+
+  @Override
+  public int getComparatorInputOverride(BlockState blockState, World worldIn, BlockPos pos) {
+    TileEntity blockEntity = worldIn.getTileEntity(pos);
+    return blockEntity instanceof TankNullBlockEntity ? FluidHandlerHelper.calcRedstoneFromInventory(((TankNullBlockEntity) blockEntity).handler) : 0;
   }
 }

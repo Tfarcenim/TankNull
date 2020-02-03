@@ -109,7 +109,7 @@ public class FluidStackHandler implements IMultiTank, INBTSerializable<CompoundN
         } else {
           totalDrain.grow(singleDrain.getAmount());
         }
-        toDrain = new FluidStack(toDrain.getFluid(), toDrain.getAmount() - singleDrain.getAmount());
+        toDrain = new FluidStack(toDrain, toDrain.getAmount() - singleDrain.getAmount());
       }
     }
     return totalDrain;

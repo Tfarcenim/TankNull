@@ -117,7 +117,7 @@ public class ItemStackFluidStackHandler implements IMultiTankItem, INBTSerializa
         }
         int a = toDrain.getAmount();
         int b = singleDrain.getAmount();
-        toDrain = new FluidStack(toDrain.getFluid(), a - b);
+        toDrain = new FluidStack(toDrain, a - b);
       }
     }
     return totalDrain;
@@ -175,7 +175,7 @@ public class ItemStackFluidStackHandler implements IMultiTankItem, INBTSerializa
     }
     validateSlotIndex(tank);
     if (existingFluid.isEmpty()) {
-      int filled = 0;
+      int filled;
       if (resource.getAmount() > capacity) {
         filled = capacity;
         if (action.execute()) {
