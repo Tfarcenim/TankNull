@@ -1,11 +1,11 @@
 {
-  "block.tanknull.tank_1": "tank 1",
-  "block.tanknull.tank_2": "tank 2",
-  "block.tanknull.tank_3": "tank 3",
-  "block.tanknull.tank_4": "tank 4",
-  "block.tanknull.tank_5": "tank 5",
-  "block.tanknull.tank_6": "tank 6",
-  "block.tanknull.tank_7": "tank 7",
+  "block.tanknull.tank_1": "Tank 1",
+  "block.tanknull.tank_2": "Tank 2",
+  "block.tanknull.tank_3": "Tank 3",
+  "block.tanknull.tank_4": "Tank 4",
+  "block.tanknull.tank_5": "Tank 5",
+  "block.tanknull.tank_6": "Tank 6",
+  "block.tanknull.tank_7": "Tank 7",
 
   "item.tanknull.1_to_2": "1 to 2",
   "item.tanknull.2_to_3": "2 to 3",
@@ -14,13 +14,13 @@
   "item.tanknull.5_to_6": "5 to 6",
   "item.tanknull.6_to_7": "6 to 7",
 
-  "container.tanknull.tank_1": "tank 1",
-  "container.tanknull.tank_2": "tank 2",
-  "container.tanknull.tank_3": "tank 3",
-  "container.tanknull.tank_4": "tank 4",
-  "container.tanknull.tank_5": "tank 5",
-  "container.tanknull.tank_6": "tank 6",
-  "container.tanknull.tank_7": "tank 7",
+  "container.tanknull.tank_1": "Tank 1",
+  "container.tanknull.tank_2": "Tank 2",
+  "container.tanknull.tank_3": "Tank 3",
+  "container.tanknull.tank_4": "Tank 4",
+  "container.tanknull.tank_5": "Tank 5",
+  "container.tanknull.tank_6": "Tank 6",
+  "container.tanknull.tank_7": "Tank 7",
 
   "tanknull.mode.normal": "Normal",
   "tanknull.mode.pickup_all": "Pickup All",
@@ -50,9 +50,9 @@
   "text.tanknull.blacklisted_storage": "This item has been blacklisted from storage!",
   "text.tanknull.blacklisted_usage": "This item cannot be used from storage!",
 
-  "text.tanknull.stacklimit": "Stack Limit: %s",
+  "text.tanknull.stacklimit": "Tank Capacity: %s",
 
-  "text.tanknull.exact": "Exact Count: %s",
+  "text.tanknull.exact": "Exact Volume: %s",
 
-  "text.tanknull.formatcontaineditems" : "%s %s"
+  "text.tanknull.formatcontainedfluids" : "%s %s"
 }
