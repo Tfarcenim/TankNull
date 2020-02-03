@@ -48,6 +48,7 @@ public class TankNull {
     RegistryObjects.BLOCKS.register(iEventBus);
     RegistryObjects.BLOCK_ENTITIES.register(iEventBus);
     RegistryObjects.MENUS.register(iEventBus);
+    RegistryObjects.RECIPE_SERIALIZERS.register(iEventBus);
     EVENT_BUS.addListener(this::sponge);
   }
 
