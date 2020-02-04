@@ -10,6 +10,7 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import tfar.tanknull.TankNullItem;
+import tfar.tanknull.UseMode;
 import tfar.tanknull.Utils;
 
 import javax.annotation.Nonnull;
@@ -47,6 +48,14 @@ public class TankNullItemStackFluidStackHandler extends ItemStackFluidStackHandl
     return this;
   }
 
+  public boolean canPickup(FluidStack stack){
+    return hasRoomForBlockFluid(stack);
+  }
+
+  public boolean hasRoomForBlockFluid(FluidStack toPickup){
+    return toPickup.getAmount() == fill1000(FluidAction.SIMULATE, toPickup);
+  }
+
   public FluidStack drain1000(FluidAction action) {
     return drain(selectedTank, 1000, action);
   }
@@ -81,7 +90,7 @@ public class TankNullItemStackFluidStackHandler extends ItemStackFluidStackHandl
     nbt.putInt("SelectedTank", selectedTank);
     nbt.putBoolean("fill", fill);
     nbt.putBoolean("sponge", sponge);
-    nbt.putBoolean("mode", sponge);
+    nbt.putInt("mode", mode);
     return nbt;
   }
 
@@ -121,5 +130,15 @@ public class TankNullItemStackFluidStackHandler extends ItemStackFluidStackHandl
   public void toggleSponge() {
     sponge = !sponge;
     saveToItemStack();
+  }
+
+  public void cycleMode(){
+    mode++;
+    if (mode >= UseMode.VALUES.length)mode=0;
+    saveToItemStack();
+  }
+
+  public UseMode getMode(){
+    return UseMode.VALUES[mode];
   }
 }

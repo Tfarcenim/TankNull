@@ -17,6 +17,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
@@ -76,10 +77,13 @@ public class TankNullBlock extends Block {
     if (stack.hasTag() && Utils.DEV) tooltip.add(new StringTextComponent(stack.getTag().toString()));
     CompoundNBT nbt = stack.getTag();
     if (nbt != null && !nbt.getCompound("fluidinv").isEmpty()) {
-      ITextComponent component = nbt.getBoolean("fill") ? new StringTextComponent("Filling")
-              : new StringTextComponent("Emptying");
+      CompoundNBT fluidTag = nbt.getCompound("fluidinv");
+      ITextComponent component = fluidTag.getBoolean("fill") ? new StringTextComponent("Filling") : new StringTextComponent("Emptying");
+      UseMode mode = UseMode.VALUES[fluidTag.getInt("mode")];
+      ITextComponent component1 = new TranslationTextComponent(mode.toString());
+      tooltip.add(component1);
       tooltip.add(component);
-      ListNBT tagList = nbt.getList("Fluids", Constants.NBT.TAG_COMPOUND);
+      ListNBT tagList = fluidTag.getList("Fluids", Constants.NBT.TAG_COMPOUND);
       for (int i = 0; i < tagList.size(); i++) {
         CompoundNBT fluidTags = tagList.getCompound(i);
         int slot = fluidTags.getInt("Tank");

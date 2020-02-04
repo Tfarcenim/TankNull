@@ -94,15 +94,11 @@ public class Utils {
   }
 
   public static void toggleMode(ItemStack bag){
-    int mode = bag.getOrCreateChildTag("fluidinv").getInt("mode");
-    mode++;
-    if (mode >= UseMode.VALUES.length)mode=0;
-    bag.getOrCreateChildTag("fluidinv").putInt("mode",mode);
+    TankNullItemStackFluidStackHandler.create(bag).cycleMode();
   }
 
   public static UseMode getMode(ItemStack stack){
-    int mode = stack.getOrCreateChildTag("fluidinv").getInt("mode");
-    return UseMode.VALUES[mode];
+    return TankNullItemStackFluidStackHandler.create(stack).getMode();
   }
 
   public static void changeSlot(ItemStack bag, boolean right) {

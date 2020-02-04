@@ -1,10 +1,7 @@
 package tfar.tanknull;
 
 import net.minecraft.advancements.CriteriaTriggers;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.IBucketPickupHandler;
-import net.minecraft.block.ILiquidContainer;
+import net.minecraft.block.*;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -38,6 +35,7 @@ public class TankNullItem extends BlockItem {
     super(blockIn, builder);
   }
 
+  @Nonnull
   @Override
   public ActionResult<ItemStack> onItemRightClick(World world, PlayerEntity player, Hand hand) {
     ItemStack itemstack = player.getHeldItem(hand);
@@ -49,112 +47,127 @@ public class TankNullItem extends BlockItem {
         TankNullItemStackFluidStackHandler handler = TankNullItemStackFluidStackHandler.create(itemstack);
         boolean filling = handler.fill;
         if (filling) {
-          FluidStack selectedFluidStack = handler.getFluidInTank(handler.selectedTank);
-          RayTraceResult raytraceresult = rayTrace(world, player, RayTraceContext.FluidMode.SOURCE_ONLY);
-          ActionResult<ItemStack> ret = net.minecraftforge.event.ForgeEventFactory.onBucketUse(player, world, itemstack, raytraceresult);
-          if (ret != null) return ret;
-          if (raytraceresult.getType() == RayTraceResult.Type.MISS) {
-            return ActionResult.func_226250_c_(itemstack);
-          } else if (raytraceresult.getType() != RayTraceResult.Type.BLOCK) {
-            return ActionResult.func_226250_c_(itemstack);
-          } else {
-            BlockRayTraceResult blockraytraceresult = (BlockRayTraceResult) raytraceresult;
-            BlockPos blockpos = blockraytraceresult.getPos();
-            Direction direction = blockraytraceresult.getFace();
-            BlockPos blockpos1 = blockpos.offset(direction);
-            if (world.isBlockModifiable(player, blockpos) && player.canPlayerEdit(blockpos1, direction, itemstack)) {
-              if (selectedFluidStack.isEmpty()) {
-                BlockState blockstate1 = world.getBlockState(blockpos);
-                if (blockstate1.getBlock() instanceof IBucketPickupHandler) {
-                  Fluid fluid = ((IBucketPickupHandler) blockstate1.getBlock()).pickupFluid(world, blockpos, blockstate1);
-                  if (fluid != Fluids.EMPTY) {
-                    player.addStat(Stats.ITEM_USED.get(this));
-
-                    SoundEvent soundevent = selectedFluidStack.getFluid().getAttributes().getEmptySound();
-                    if (soundevent == null)
-                      soundevent = fluid.isIn(FluidTags.LAVA) ? SoundEvents.ITEM_BUCKET_FILL_LAVA : SoundEvents.ITEM_BUCKET_FILL;
-                    player.playSound(soundevent, 1.0F, 1.0F);
-
-                    return ActionResult.func_226248_a_(this.fillBucket(fluid, itemstack, handler, player));
-                  }
-                }
-
-                return ActionResult.func_226251_d_(itemstack);
-              } else {
-                BlockState blockstate = world.getBlockState(blockpos);
-                BlockPos blockpos2 = blockstate.getBlock() instanceof ILiquidContainer && selectedFluidStack.getFluid() == Fluids.WATER ? blockpos : blockpos1;
-                if (this.tryPlaceContainedLiquid(player, world, blockpos2, blockraytraceresult, selectedFluidStack)) {
-                  this.onLiquidPlaced(world, itemstack, blockpos2);
-                  if (player instanceof ServerPlayerEntity) {
-                    CriteriaTriggers.PLACED_BLOCK.trigger((ServerPlayerEntity) player, blockpos2, itemstack);
-                  }
-
-                  player.addStat(Stats.ITEM_USED.get(this));
-                  return ActionResult.func_226248_a_(this.emptyBucket(itemstack, handler, player));
-                } else {
-                  return ActionResult.func_226251_d_(itemstack);
-                }
-              }
-            } else {
-              return ActionResult.func_226251_d_(itemstack);
-            }
-          }
+          return fill(world, player, hand,itemstack,handler);
         } else {
-          FluidStack selectedFluidStack = handler.getFluidInTank(handler.selectedTank);
-          RayTraceResult raytraceresult = rayTrace(world, player, selectedFluidStack.isEmpty()
-                  ? RayTraceContext.FluidMode.SOURCE_ONLY : RayTraceContext.FluidMode.NONE);
-          ActionResult<ItemStack> ret = net.minecraftforge.event.ForgeEventFactory.onBucketUse(player, world, itemstack, raytraceresult);
-          if (ret != null) return ret;
-          if (raytraceresult.getType() == RayTraceResult.Type.MISS) {
-            return ActionResult.func_226250_c_(itemstack);
-          } else if (raytraceresult.getType() != RayTraceResult.Type.BLOCK) {
-            return ActionResult.func_226250_c_(itemstack);
-          } else {
-            BlockRayTraceResult blockraytraceresult = (BlockRayTraceResult) raytraceresult;
-            BlockPos blockpos = blockraytraceresult.getPos();
-            Direction direction = blockraytraceresult.getFace();
-            BlockPos blockpos1 = blockpos.offset(direction);
-            if (world.isBlockModifiable(player, blockpos) && player.canPlayerEdit(blockpos1, direction, itemstack)) {
-              if (selectedFluidStack.isEmpty()) {
-                BlockState blockstate1 = world.getBlockState(blockpos);
-                if (blockstate1.getBlock() instanceof IBucketPickupHandler) {
-                  Fluid fluid = ((IBucketPickupHandler) blockstate1.getBlock()).pickupFluid(world, blockpos, blockstate1);
-                  if (fluid != Fluids.EMPTY) {
-                    player.addStat(Stats.ITEM_USED.get(this));
-
-                    SoundEvent soundevent = selectedFluidStack.getFluid().getAttributes().getEmptySound();
-                    if (soundevent == null)
-                      soundevent = fluid.isIn(FluidTags.LAVA) ? SoundEvents.ITEM_BUCKET_FILL_LAVA : SoundEvents.ITEM_BUCKET_FILL;
-                    player.playSound(soundevent, 1.0F, 1.0F);
-
-                    return ActionResult.func_226248_a_(this.fillBucket(fluid, itemstack, handler, player));
-                  }
-                }
-
-                return ActionResult.func_226251_d_(itemstack);
-              } else {
-                BlockState blockstate = world.getBlockState(blockpos);
-                BlockPos blockpos2 = blockstate.getBlock() instanceof ILiquidContainer && selectedFluidStack.getFluid() == Fluids.WATER ? blockpos : blockpos1;
-                if (this.tryPlaceContainedLiquid(player, world, blockpos2, blockraytraceresult, selectedFluidStack)) {
-                  this.onLiquidPlaced(world, itemstack, blockpos2);
-                  if (player instanceof ServerPlayerEntity) {
-                    CriteriaTriggers.PLACED_BLOCK.trigger((ServerPlayerEntity) player, blockpos2, itemstack);
-                  }
-
-                  player.addStat(Stats.ITEM_USED.get(this));
-                  return ActionResult.func_226248_a_(this.emptyBucket(itemstack, handler, player));
-                } else {
-                  return ActionResult.func_226251_d_(itemstack);
-                }
-              }
-            } else {
-              return ActionResult.func_226251_d_(itemstack);
-            }
-          }
+          return empty(world,player,hand,itemstack,handler);
         }
       }
     }
     return new ActionResult<>(ActionResultType.PASS, player.getHeldItem(hand));
+  }
+
+  public ActionResult<ItemStack> fill(World world, PlayerEntity player, Hand hand, ItemStack itemstack,TankNullItemStackFluidStackHandler handler){
+
+    FluidStack selectedFluidStack = handler.getFluidInTank(handler.selectedTank);
+    RayTraceResult raytraceresult = rayTrace(world, player, RayTraceContext.FluidMode.SOURCE_ONLY);
+    ActionResult<ItemStack> ret = net.minecraftforge.event.ForgeEventFactory.onBucketUse(player, world, itemstack, raytraceresult);
+    if (ret != null) return ret;
+    if (raytraceresult.getType() == RayTraceResult.Type.MISS) {
+      return ActionResult.func_226250_c_(itemstack);
+    } else if (raytraceresult.getType() != RayTraceResult.Type.BLOCK) {
+      return ActionResult.func_226250_c_(itemstack);
+    } else {
+      BlockRayTraceResult blockraytraceresult = (BlockRayTraceResult) raytraceresult;
+      BlockPos tracedPos = blockraytraceresult.getPos();
+
+      Direction direction = blockraytraceresult.getFace();
+      BlockPos offsetPos = tracedPos.offset(direction);
+      if (world.isBlockModifiable(player, tracedPos) && player.canPlayerEdit(offsetPos, direction, itemstack)) {
+          BlockState rayTracedState = world.getBlockState(tracedPos);
+          if (rayTracedState.getBlock() instanceof IBucketPickupHandler) {
+            Fluid fluid = Fluids.EMPTY;
+            if (rayTracedState.getBlock() instanceof IWaterLoggable)
+            fluid = Fluids.WATER;
+            else if (rayTracedState.getBlock() instanceof FlowingFluidBlock)
+              fluid = (((FlowingFluidBlock) rayTracedState.getBlock()).getFluid());
+            if (fluid != Fluids.EMPTY) {
+              if (handler.hasRoomForBlockFluid(new FluidStack(fluid,1000))/*todo or isvoid*/) {
+                ((IBucketPickupHandler) rayTracedState.getBlock()).pickupFluid(world, tracedPos, rayTracedState);
+                player.addStat(Stats.ITEM_USED.get(this));
+              SoundEvent soundevent = selectedFluidStack.getFluid().getAttributes().getEmptySound();
+              if (soundevent == null)
+                soundevent = fluid.isIn(FluidTags.LAVA) ? SoundEvents.ITEM_BUCKET_FILL_LAVA : SoundEvents.ITEM_BUCKET_FILL;
+              player.playSound(soundevent, 1.0F, 1.0F);
+
+              return ActionResult.func_226248_a_(this.fillBucket(fluid, itemstack, handler, player));
+            }
+          }
+          return ActionResult.func_226251_d_(itemstack);
+        } else {
+          return ActionResult.func_226251_d_(itemstack);
+        }
+      } else {
+        return ActionResult.func_226251_d_(itemstack);
+      }
+    }
+  }
+
+  public ActionResult<ItemStack> empty(World world, PlayerEntity player, Hand hand, ItemStack itemstack,TankNullItemStackFluidStackHandler handler){
+    FluidStack selectedFluidStack = handler.getFluidInTank(handler.selectedTank);
+    if (selectedFluidStack.isEmpty())return ActionResult.func_226251_d_(itemstack);
+
+    selectedFluidStack.isEmpty();
+    RayTraceResult raytraceresult = rayTrace(world, player, RayTraceContext.FluidMode.SOURCE_ONLY);
+    ActionResult<ItemStack> ret = net.minecraftforge.event.ForgeEventFactory.onBucketUse(player, world, itemstack, raytraceresult);
+    if (ret != null) return ret;
+    if (raytraceresult.getType() == RayTraceResult.Type.MISS) {
+      return ActionResult.func_226250_c_(itemstack);
+    } else if (raytraceresult.getType() != RayTraceResult.Type.BLOCK) {
+      return ActionResult.func_226250_c_(itemstack);
+    }
+    BlockRayTraceResult blockraytraceresult = (BlockRayTraceResult) raytraceresult;
+    BlockPos rayTracePoa = blockraytraceresult.getPos();
+    Direction direction = blockraytraceresult.getFace();
+    BlockPos placingPosition = rayTracePoa.offset(direction);
+    if (world.isBlockModifiable(player, rayTracePoa) && player.canPlayerEdit(placingPosition, direction, itemstack)) {
+
+      if (this.tryPlaceContainedLiquid(player, world, placingPosition, blockraytraceresult, selectedFluidStack)) {
+        this.onLiquidPlaced(world, itemstack, placingPosition);
+        if (player instanceof ServerPlayerEntity) {
+          CriteriaTriggers.PLACED_BLOCK.trigger((ServerPlayerEntity) player, placingPosition, itemstack);
+        }
+
+        player.addStat(Stats.ITEM_USED.get(this));
+        return ActionResult.func_226248_a_(this.emptyBucket(itemstack, handler, player));
+      }
+      return ActionResult.func_226251_d_(itemstack);
+    }
+    return ActionResult.func_226251_d_(itemstack);
+
+    //BlockState blockstate1 = world.getBlockState(rayTracePoa);
+
+
+
+       /* if (blockstate1.getBlock() instanceof IBucketPickupHandler) {
+          Fluid fluid = ((IBucketPickupHandler) blockstate1.getBlock()).pickupFluid(world, rayTracePoa, blockstate1);
+          if (fluid != Fluids.EMPTY) {
+            player.addStat(Stats.ITEM_USED.get(this));
+
+            SoundEvent soundevent = selectedFluidStack.getFluid().getAttributes().getEmptySound();
+            if (soundevent == null)
+              soundevent = fluid.isIn(FluidTags.LAVA) ? SoundEvents.ITEM_BUCKET_FILL_LAVA : SoundEvents.ITEM_BUCKET_FILL;
+            player.playSound(soundevent, 1.0F, 1.0F);
+
+            return ActionResult.func_226248_a_(this.fillBucket(fluid, itemstack, handler, player));
+          }
+
+        return ActionResult.func_226251_d_(itemstack);
+      } else {
+        BlockState blockstate = world.getBlockState(rayTracePoa);
+        BlockPos blockpos2 = blockstate.getBlock() instanceof ILiquidContainer && selectedFluidStack.getFluid() == Fluids.WATER ? rayTracePoa : placingPosition;
+        if (this.tryPlaceContainedLiquid(player, world, blockpos2, blockraytraceresult, selectedFluidStack)) {
+          this.onLiquidPlaced(world, itemstack, blockpos2);
+          if (player instanceof ServerPlayerEntity) {
+            CriteriaTriggers.PLACED_BLOCK.trigger((ServerPlayerEntity) player, blockpos2, itemstack);
+          }
+
+          player.addStat(Stats.ITEM_USED.get(this));
+          return ActionResult.func_226248_a_(this.emptyBucket(itemstack, handler, player));
+        } else {
+          return ActionResult.func_226251_d_(itemstack);
+        }
+      }*/
+    //return ActionResult.func_226251_d_(itemstack);
   }
 
   protected ItemStack emptyBucket(ItemStack current, TankNullItemStackFluidStackHandler handler, PlayerEntity player) {

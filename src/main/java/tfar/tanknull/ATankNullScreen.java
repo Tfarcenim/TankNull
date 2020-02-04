@@ -28,6 +28,12 @@ public abstract class ATankNullScreen<T extends ATankNullMenu> extends Container
   public void render(int p_render_1_, int p_render_2_, float p_render_3_) {
     renderBackground();
     super.render(p_render_1_, p_render_2_, p_render_3_);
+    this.renderHoveredToolTip(p_render_1_, p_render_2_);
+  }
+
+  @Override
+  protected void renderHoveredToolTip(int mouseX, int mouseY) {
+    super.renderHoveredToolTip(mouseX, mouseY);
   }
 
   /**
