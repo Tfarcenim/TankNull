@@ -10,7 +10,6 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import tfar.tanknull.TankNullItem;
-import tfar.tanknull.UseMode;
 import tfar.tanknull.Utils;
 
 import javax.annotation.Nonnull;
@@ -22,7 +21,6 @@ public class TankNullItemStackFluidStackHandler extends ItemStackFluidStackHandl
   protected final LazyOptional<IFluidHandlerItem> holder = LazyOptional.of(() -> TankNullItemStackFluidStackHandler.create(container));
   public boolean fill = false;
   public boolean sponge = false;
-  public int mode = 0;
 
   public TankNullItemStackFluidStackHandler(int tanks, int capacity, ItemStack container) {
     super(tanks, capacity, container);
@@ -48,11 +46,11 @@ public class TankNullItemStackFluidStackHandler extends ItemStackFluidStackHandl
     return this;
   }
 
-  public boolean canPickup(FluidStack stack){
+  public boolean canPickup(FluidStack stack) {
     return hasRoomForBlockFluid(stack);
   }
 
-  public boolean hasRoomForBlockFluid(FluidStack toPickup){
+  public boolean hasRoomForBlockFluid(FluidStack toPickup) {
     return toPickup.getAmount() == fill1000(FluidAction.SIMULATE, toPickup);
   }
 
@@ -64,7 +62,7 @@ public class TankNullItemStackFluidStackHandler extends ItemStackFluidStackHandl
     return fill(toPickup, action);
   }
 
-  public FluidStack getSelectedFluid(){
+  public FluidStack getSelectedFluid() {
     return getFluidInTank(selectedTank);
   }
 
@@ -90,7 +88,6 @@ public class TankNullItemStackFluidStackHandler extends ItemStackFluidStackHandl
     nbt.putInt("SelectedTank", selectedTank);
     nbt.putBoolean("fill", fill);
     nbt.putBoolean("sponge", sponge);
-    nbt.putInt("mode", mode);
     return nbt;
   }
 
@@ -100,7 +97,6 @@ public class TankNullItemStackFluidStackHandler extends ItemStackFluidStackHandl
     selectedTank = nbt.getInt("SelectedTank");
     fill = nbt.getBoolean("fill");
     sponge = nbt.getBoolean("sponge");
-    mode = nbt.getInt("mode");
   }
 
   public static TankNullItemStackFluidStackHandler create(ItemStack stack) {
@@ -130,15 +126,5 @@ public class TankNullItemStackFluidStackHandler extends ItemStackFluidStackHandl
   public void toggleSponge() {
     sponge = !sponge;
     saveToItemStack();
-  }
-
-  public void cycleMode(){
-    mode++;
-    if (mode >= UseMode.VALUES.length)mode=0;
-    saveToItemStack();
-  }
-
-  public UseMode getMode(){
-    return UseMode.VALUES[mode];
   }
 }

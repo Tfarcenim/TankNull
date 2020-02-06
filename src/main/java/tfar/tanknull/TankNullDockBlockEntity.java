@@ -1,9 +1,11 @@
 package tfar.tanknull;
 
+import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.INamedContainerProvider;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SUpdateTileEntityPacket;
@@ -22,7 +24,7 @@ import tfar.tanknull.inventory.TankNullBlockFluidStackHandler;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class TankNullBlockEntity extends TileEntity implements INamedContainerProvider {
+public class TankNullDockBlockEntity extends TileEntity implements INamedContainerProvider {
 
   public TankNullBlockFluidStackHandler handler = new TankNullBlockFluidStackHandler(0,0){
     @Override
@@ -33,7 +35,7 @@ public class TankNullBlockEntity extends TileEntity implements INamedContainerPr
   };
   private LazyOptional<IFluidHandler> optional = LazyOptional.of(() -> handler);
 
-  public TankNullBlockEntity() {
+  public TankNullDockBlockEntity() {
     super(RegistryObjects.blockentity.get());
   }
   public FluidStackHandler getHandler(){
@@ -108,6 +110,28 @@ public class TankNullBlockEntity extends TileEntity implements INamedContainerPr
   public void remove() {
     super.remove();
     optional.invalidate();
+  }
+
+  public void removeTank(){
+    int tier = getBlockState().get(TankNullDockBlock.TIER);
+    CompoundNBT nbt = handler.serializeNBT();
+    world.setBlockState(pos,getBlockState().with(TankNullDockBlock.TIER,0));
+    optional.invalidate();
+    ItemStack stack = new ItemStack(Utils.getItem(tier));
+    stack.getOrCreateTag().put("fluidinv",nbt);
+    ItemEntity entity = new ItemEntity(world,pos.getX(),pos.getY(),pos.getZ(),stack);
+    world.addEntity(entity);
+  }
+
+  public void addTank(ItemStack tank){
+    if (tank.getItem() instanceof TankNullItem) {
+      int tier = ((TankNullItem)tank.getItem()).tier;
+      world.setBlockState(pos,getBlockState().with(TankNullDockBlock.TIER,tier));
+      handler.setCapacity(Utils.getCapacity(tank)).setSize(Utils.getTanks(tank));
+      handler.deserializeNBT(tank.getOrCreateTag().getCompound("fluidinv"));
+      optional = LazyOptional.of(() -> handler);
+      tank.shrink(1);
+    }
   }
 
   @Override

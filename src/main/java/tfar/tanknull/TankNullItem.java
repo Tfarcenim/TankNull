@@ -3,54 +3,97 @@ package tfar.tanknull;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.block.*;
 import net.minecraft.block.material.Material;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.fluid.FlowingFluid;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.BlockItem;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUseContext;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceContext;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fml.network.NetworkHooks;
+import tfar.tanknull.client.TankNullClient;
 import tfar.tanknull.container.NamedMenuProvider;
 import tfar.tanknull.inventory.TankNullItemStackFluidStackHandler;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.List;
 
-public class TankNullItem extends BlockItem {
-  public TankNullItem(Block blockIn, Properties builder) {
-    super(blockIn, builder);
+public class TankNullItem extends Item {
+  public final int tier;
+
+  public TankNullItem(Properties builder, int tier) {
+    super(builder);
+    this.tier = tier;
   }
+
+  @Override
+  @OnlyIn(Dist.CLIENT)
+  public void addInformation(ItemStack stack, @Nullable World p_190948_2_, List<ITextComponent> tooltip, ITooltipFlag p_190948_4_) {
+    if (stack.hasTag() && Utils.DEV) tooltip.add(new StringTextComponent(stack.getTag().toString()).applyTextStyle(TextFormatting.DARK_GRAY));
+    CompoundNBT nbt = stack.getTag();
+    tooltip.add(new TranslationTextComponent("text.tanknull.stacklimit",Utils.getCapacity(this)));
+    if (nbt != null && !nbt.getCompound("fluidinv").isEmpty()) {
+      CompoundNBT fluidTag = nbt.getCompound("fluidinv");
+      ITextComponent text = new TranslationTextComponent("text.tanknull.mode",
+              fluidTag.getBoolean("fill") ?
+                      new TranslationTextComponent("text.tanknull.mode.fill").applyTextStyle(TextFormatting.AQUA) :
+                      new TranslationTextComponent("text.tanknull.mode.empty").applyTextStyle(TextFormatting.AQUA));
+      tooltip.add(text);
+      tooltip.add(new TranslationTextComponent("text.tanknull.settings",
+              new StringTextComponent(TankNullClient.MODE.getLocalizedName()).applyTextStyle(TextFormatting.YELLOW)));
+      ListNBT tagList = fluidTag.getList("Fluids", Constants.NBT.TAG_COMPOUND);
+      for (int i = 0; i < tagList.size(); i++) {
+        CompoundNBT fluidTags = tagList.getCompound(i);
+        FluidStack fluidStack = FluidStack.loadFluidStackFromNBT(fluidTags);
+        if (!fluidStack.isEmpty()) {
+          tooltip.add(new TranslationTextComponent("text.tanknull.formatcontainedfluids",
+                  new StringTextComponent(String.valueOf(i)).applyTextStyle(TextFormatting.GREEN),
+                  new StringTextComponent(String.valueOf(fluidStack.getAmount())).applyTextStyle(TextFormatting.AQUA),
+                  fluidStack.getDisplayName().getFormattedText()).applyTextStyle(TextFormatting.WHITE));
+        }
+      }
+    }
+  }
+
 
   @Nonnull
   @Override
   public ActionResult<ItemStack> onItemRightClick(World world, PlayerEntity player, Hand hand) {
     ItemStack itemstack = player.getHeldItem(hand);
     if (!world.isRemote) {
-      if (Utils.getMode(itemstack) == UseMode.ITEM) {
-        NetworkHooks.openGui((ServerPlayerEntity) player, new NamedMenuProvider(itemstack));
-        return super.onItemRightClick(world, player, hand);
+      TankNullItemStackFluidStackHandler handler = TankNullItemStackFluidStackHandler.create(itemstack);
+      boolean filling = handler.fill;
+      if (filling) {
+        return fill(world, player, hand,itemstack,handler);
       } else {
-        TankNullItemStackFluidStackHandler handler = TankNullItemStackFluidStackHandler.create(itemstack);
-        boolean filling = handler.fill;
-        if (filling) {
-          return fill(world, player, hand,itemstack,handler);
-        } else {
-          return empty(world,player,hand,itemstack,handler);
-        }
+        return empty(world,player,hand,itemstack,handler);
       }
     }
     return new ActionResult<>(ActionResultType.PASS, player.getHeldItem(hand));
@@ -235,15 +278,23 @@ public class TankNullItem extends BlockItem {
   @Nonnull
   @Override
   public ActionResultType onItemUse(ItemUseContext ctx) {
-    ItemStack bag = ctx.getItem();
-    if (ctx.getPlayer()!= null && Utils.getMode(bag) == UseMode.BLOCK)
-      return super.onItemUse(ctx);
+    BlockPos pos = ctx.getPos();
+    World world = ctx.getWorld();
+    BlockState state =  world.getBlockState(pos);
+    if (!(state.getBlock() instanceof TankNullDockBlock))
     return ActionResultType.PASS;
-  }
+    int blockTier = state.get(TankNullDockBlock.TIER);
 
-  @Override
-  public TankNullBlock getBlock() {
-    return (TankNullBlock)super.getBlock();
+    if (blockTier == 0){
+      TileEntity blockEntity = world.getTileEntity(pos);
+      if (blockEntity instanceof TankNullDockBlockEntity){
+        ((TankNullDockBlockEntity) blockEntity).addTank(ctx.getItem());
+      }
+      return ActionResultType.SUCCESS;
+    }
+
+
+    return ActionResultType.PASS;
   }
 
   public static class ItemUseContextExt extends ItemUseContext {

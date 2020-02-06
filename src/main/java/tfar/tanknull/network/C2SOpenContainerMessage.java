@@ -6,24 +6,25 @@ import net.minecraftforge.fml.network.NetworkDirection;
 import net.minecraftforge.fml.network.NetworkEvent;
 import tfar.tanknull.TankNullItem;
 import tfar.tanknull.Utils;
+import tfar.tanknull.container.ItemStackTankNullMenu;
+import tfar.tanknull.container.NamedMenuProvider;
 
 import java.util.function.Supplier;
 
-public class C2SToggleModeMessage {
+public class C2SOpenContainerMessage {
   public void handle(Supplier<NetworkEvent.Context> ctx) {
     ServerPlayerEntity player = ctx.get().getSender();
 
     if (player == null) return;
 
-    ctx.get().enqueueWork(  ()->  {
-      ItemStack bag = player.getHeldItemMainhand();
-      if (!(bag.getItem() instanceof TankNullItem)){
-        bag = player.getHeldItemOffhand();
-        if (!(bag.getItem() instanceof TankNullItem))return;
-      }
-      Utils.toggleMode(bag);
-      Messages.INSTANCE.sendTo(new S2CSyncItemStackMessage(player.currentWindowId, bag), player.connection.getNetworkManager(), NetworkDirection.PLAY_TO_CLIENT);
-    });
+    ctx.get().enqueueWork(  ()-> {
+              ItemStack tank = player.getHeldItemMainhand();
+              if (!(tank.getItem() instanceof TankNullItem)) {
+                tank = player.getHeldItemOffhand();
+                if (!(tank.getItem() instanceof TankNullItem)) return;
+              }
+              player.openContainer(new NamedMenuProvider(tank));
+            });
     ctx.get().setPacketHandled(true);
   }
 }

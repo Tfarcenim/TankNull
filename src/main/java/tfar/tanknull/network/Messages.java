@@ -18,15 +18,15 @@ public class Messages {
             buffer -> new C2SToggleFillMessage(),
             C2SToggleFillMessage::handle);
 
+    INSTANCE.registerMessage(id++, C2SOpenContainerMessage.class,
+            (message, buffer) -> {},
+            buffer -> new C2SOpenContainerMessage(),
+            C2SOpenContainerMessage::handle);
+
     INSTANCE.registerMessage(id++, C2SToggleSpongeMessage.class,
             (message, buffer) -> {},
             buffer -> new C2SToggleSpongeMessage(),
             C2SToggleSpongeMessage::handle);
-
-    INSTANCE.registerMessage(id++, C2SToggleModeMessage.class,
-            (message, buffer) -> {},
-            buffer -> new C2SToggleModeMessage(),
-            C2SToggleModeMessage::handle);
 
     INSTANCE.registerMessage(id++, C2SMessageScrollTank.class,
             C2SMessageScrollTank::encode,

@@ -1,0 +1,6 @@
+{
+  "parent": "tanknull:block/filled_dock",
+  "textures": {
+    "1": "tanknull:block/tank_4"
+  }
+}

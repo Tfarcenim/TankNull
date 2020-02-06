@@ -3,7 +3,6 @@
 	"credit": "Made with Blockbench",
 	"textures": {
 		"0": "tanknull:block/tank_edge",
-		"1": "tanknull:block/tank_1",
 		"particle": "tanknull:block/tank_edge"
 	},
 	"elements": [
@@ -149,18 +148,6 @@
 				"west": {"uv": [0, 4, 4, 12], "texture": "#0"},
 				"up": {"uv": [0, 0, 4, 4], "texture": "#0"},
 				"down": {"uv": [0, 0, 4, 4], "texture": "#0"}
-			}
-		},
-		{
-			"from": [4, 4, 4],
-			"to": [12, 12, 12],
-			"faces": {
-				"north": {"uv": [0, 0, 16, 16], "texture": "#1"},
-				"east": {"uv": [0, 0, 16, 16], "texture": "#1"},
-				"south": {"uv": [0, 0, 16, 16], "texture": "#1"},
-				"west": {"uv": [0, 0, 16, 16], "texture": "#1"},
-				"up": {"uv": [0, 0, 16, 16], "texture": "#1"},
-				"down": {"uv": [0, 0, 16, 16], "texture": "#1"}
 			}
 		}
 	],

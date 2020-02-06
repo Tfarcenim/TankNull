@@ -9,7 +9,7 @@ public class TileTankNullScreen extends ATankNullScreen<BlockTankNullMenu> {
   public final ResourceLocation background;
   public TileTankNullScreen(BlockTankNullMenu screenContainer, PlayerInventory inv, ITextComponent titleIn) {
     super(screenContainer, inv, titleIn);
-    this.background = Utils.getBackground(screenContainer.te.getBlockState().getBlock());
+    this.background = Utils.getBackground(screenContainer.te.getBlockState().get(TankNullDockBlock.TIER));
   }
 
   @Override

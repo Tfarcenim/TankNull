@@ -3,6 +3,7 @@ package tfar.tanknull.client;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.settings.KeyBinding;
@@ -20,7 +21,8 @@ import tfar.tanknull.TankNull;
 import tfar.tanknull.TankNullItem;
 import tfar.tanknull.inventory.TankNullItemStackFluidStackHandler;
 import tfar.tanknull.network.C2SMessageScrollTank;
-import tfar.tanknull.network.C2SToggleModeMessage;
+import tfar.tanknull.network.C2SOpenContainerMessage;
+import tfar.tanknull.network.C2SToggleFillMessage;
 import tfar.tanknull.network.Messages;
 
 import static tfar.tanknull.ATankNullScreen.getFluidTexture;
@@ -50,7 +52,17 @@ public class TankNullClient {
             mc.player.getHeldItemOffhand().getItem() instanceof TankNullItem))
       return;
     if (MODE.isPressed()) {
-      Messages.INSTANCE.sendToServer(new C2SToggleModeMessage());
+      Messages.INSTANCE.sendToServer(new C2SOpenContainerMessage());
+    }
+  }
+
+  @SubscribeEvent
+  public static void onKeyInput(InputEvent.MouseInputEvent event) {
+    if (mc.player == null || !(mc.player.getHeldItemMainhand().getItem() instanceof TankNullItem ||
+            mc.player.getHeldItemOffhand().getItem() instanceof TankNullItem) || event.getAction() != 1)
+      return;
+    if (Screen.hasAltDown()){
+      Messages.INSTANCE.sendToServer(new C2SToggleFillMessage());
     }
   }
 

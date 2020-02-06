@@ -1,0 +1,12 @@
+{
+  "variants": {
+    "tier=0": { "model": "tanknull:block/empty_dock" },
+    "tier=1": { "model": "tanknull:block/dock_1" },
+    "tier=2": { "model": "tanknull:block/dock_2" },
+    "tier=3": { "model": "tanknull:block/dock_3" },
+    "tier=4": { "model": "tanknull:block/dock_4" },
+    "tier=5": { "model": "tanknull:block/dock_5" },
+    "tier=6": { "model": "tanknull:block/dock_6" },
+    "tier=7": { "model": "tanknull:block/dock_7" }
+  }
+}

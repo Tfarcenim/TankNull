@@ -1,11 +1,13 @@
 {
-  "block.tanknull.tank_1": "Tank 1",
-  "block.tanknull.tank_2": "Tank 2",
-  "block.tanknull.tank_3": "Tank 3",
-  "block.tanknull.tank_4": "Tank 4",
-  "block.tanknull.tank_5": "Tank 5",
-  "block.tanknull.tank_6": "Tank 6",
-  "block.tanknull.tank_7": "Tank 7",
+  "block.tanknull.dock": "Tank Null Dock",
+
+  "item.tanknull.tank_1": "Tank 1",
+  "item.tanknull.tank_2": "Tank 2",
+  "item.tanknull.tank_3": "Tank 3",
+  "item.tanknull.tank_4": "Tank 4",
+  "item.tanknull.tank_5": "Tank 5",
+  "item.tanknull.tank_6": "Tank 6",
+  "item.tanknull.tank_7": "Tank 7",
 
   "item.tanknull.1_to_2": "1 to 2",
   "item.tanknull.2_to_3": "2 to 3",
@@ -22,37 +24,19 @@
   "container.tanknull.tank_6": "Tank 6",
   "container.tanknull.tank_7": "Tank 7",
 
-  "tanknull.mode.normal": "Normal",
-  "tanknull.mode.pickup_all": "Pickup All",
-  "tanknull.mode.filtered_pickup": "Filtered Pickup",
-  "tanknull.mode.void_pickup": "Void Pickup",
+  "text.tanknull.mode.fill": "Fill",
+  "text.tanknull.mode.empty": "Empty",
 
-  "key.tanknull.pickup": "Toggle Mode",
-  "key.tanknull.construction": "Construction Mode",
+  "text.tanknull.mode": "Mode: %s",
 
   "key.categories.tanknull": "Tank Null",
 
   "text.tanknull.shift": "Press %s for Info",
-  "text.tanknull.empty": "Empty",
   "text.tanknull.lock": "Press %s to Lock",
 
+  "text.tanknull.settings": "Press %s to open settings",
 
-  "text.tanknull.changemode": "Press %s to change mode",
-  "text.tanknull.currentmode": "Current Usetype: %s",
+  "text.tanknull.stacklimit": "Tank Capacity: %smB",
 
-  "text.tanknull.changeusetype": "Press %s to change usetype",
-  "text.tanknull.currentusetype": "Current Usetype: %s",
-
-  "tanknull.usetype.bag": "Bag",
-  "tanknull.usetype.construction": "Construction",
-  "tanknull.usetype.chest": "Chest",
-
-  "text.tanknull.blacklisted_storage": "This item has been blacklisted from storage!",
-  "text.tanknull.blacklisted_usage": "This item cannot be used from storage!",
-
-  "text.tanknull.stacklimit": "Tank Capacity: %s",
-
-  "text.tanknull.exact": "Exact Volume: %s",
-
-  "text.tanknull.formatcontainedfluids" : "%s %s"
+  "text.tanknull.formatcontainedfluids" : "Tank %s: %smB %s"
 }

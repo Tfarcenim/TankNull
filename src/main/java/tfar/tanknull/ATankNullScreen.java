@@ -73,7 +73,7 @@ public abstract class ATankNullScreen<T extends ATankNullMenu> extends Container
           TextureAtlasSprite textureAtlasSprite = getFluidTexture(fluidStack);
           RenderSystem.color3f((color >> 16 & 0xff) / 255f, (color >> 8 & 0xff) / 255f, (color & 0xff) / 255f);
           blit(xPos + x * 18,yPos+y * 18, 0, 16, 16, textureAtlasSprite);
-          font.drawStringWithShadow(getStringFromInt(fluidStack.getAmount()),xPos + x * 18,yPos+y * 18+10,0xffffff);
+          font.drawStringWithShadow(getStringFromInt(fluidStack.getAmount()),xPos + x * 18,yPos+y * 18+9,0xffffff);
         }
       }
   }

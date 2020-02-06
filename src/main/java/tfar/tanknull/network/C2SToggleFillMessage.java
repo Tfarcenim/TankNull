@@ -7,6 +7,8 @@ import net.minecraftforge.fml.network.NetworkDirection;
 import net.minecraftforge.fml.network.NetworkEvent;
 import tfar.tanknull.TankNullItem;
 import tfar.tanknull.Utils;
+import tfar.tanknull.container.BlockTankNullMenu;
+import tfar.tanknull.container.ItemStackTankNullMenu;
 
 import java.util.function.Supplier;
 
@@ -23,6 +25,7 @@ public class C2SToggleFillMessage {
         if (!(bag.getItem() instanceof TankNullItem))return;
       }
       Utils.toggleFill(bag,player);
+      if (player.openContainer instanceof ItemStackTankNullMenu)
       Messages.INSTANCE.sendTo(new S2CSyncItemStackMessage(player.currentWindowId, bag), player.connection.getNetworkManager(), NetworkDirection.PLAY_TO_CLIENT);
     });
     ctx.get().setPacketHandled(true);

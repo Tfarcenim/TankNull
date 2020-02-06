@@ -2,31 +2,37 @@ package tfar.tanknull;
 
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.TranslationTextComponent;
 import tfar.tanknull.inventory.TankNullItemStackFluidStackHandler;
 
 public class Utils {
-  public static ResourceLocation getBackground(Block block){
-    if (block instanceof TankNullBlock){
-      int tier = ((TankNullBlock) block).tier;
+  public static ResourceLocation getBackground(Item block){
+    if (block instanceof TankNullItem){
+      int tier = ((TankNullItem) block).tier;
       return new ResourceLocation(TankNull.MODID,"textures/container/gui/tank"+tier+".png");
     }
     throw new IllegalStateException("no");
+  }
+
+  public static ResourceLocation getBackground(int tier){
+      return new ResourceLocation(TankNull.MODID,"textures/container/gui/tank"+tier+".png");
   }
 
   public static ResourceLocation getBackground(ItemStack stack){
     if (stack.getItem() instanceof TankNullItem){
-      int tier = ((TankNullItem)stack.getItem()).getBlock().tier;
+      int tier = ((TankNullItem)stack.getItem()).tier;
       return new ResourceLocation(TankNull.MODID,"textures/container/gui/tank"+tier+".png");
     }
     throw new IllegalStateException("no");
   }
 
-  public static int getTanks(Block block){
-    if (block instanceof TankNullBlock){
-      int tier = ((TankNullBlock) block).tier;
+  public static int getTanks(Item block){
+    if (block instanceof TankNullItem){
+      int tier = ((TankNullItem) block).tier;
       switch (tier){
         case 1:return 3;
         case 2:return 6;
@@ -40,19 +46,33 @@ public class Utils {
     throw new IllegalStateException("no");
   }
 
+  public static Item getItem(int tier){
+    switch (tier) {
+      case 1:return RegistryObjects.tank_1.get();
+      case 2:return RegistryObjects.tank_2.get();
+      case 3:return RegistryObjects.tank_3.get();
+      case 4:return RegistryObjects.tank_4.get();
+      case 5:return RegistryObjects.tank_5.get();
+      case 6:return RegistryObjects.tank_6.get();
+      case 7:return RegistryObjects.tank_7.get();
+
+    }
+    throw new IllegalArgumentException("no "+tier);
+  }
+
   public static int getTanks(ItemStack stack){
-    Block block = Block.getBlockFromItem(stack.getItem());
+    Item block = stack.getItem();
     return getTanks(block);
   }
 
   public static int getCapacity(ItemStack stack){
-    Block block = Block.getBlockFromItem(stack.getItem());
+    Item block = stack.getItem();
     return getCapacity(block);
   }
 
-  public static int getCapacity(Block block){
-    if (block instanceof TankNullBlock){
-      int tier = ((TankNullBlock) block).tier;
+  public static int getCapacity(Item block){
+    if (block instanceof TankNullItem){
+      int tier = ((TankNullItem) block).tier;
       switch (tier){
         case 1:return 4000;
         case 2:return 16000;
@@ -82,7 +102,10 @@ public class Utils {
   }
 
   public static void toggleFill(ItemStack bag, PlayerEntity player) {
-    TankNullItemStackFluidStackHandler.create(bag).toggleFill();
+    TankNullItemStackFluidStackHandler handler = TankNullItemStackFluidStackHandler.create(bag);
+    handler.toggleFill();
+    player.sendStatusMessage(
+            new TranslationTextComponent("text."+TankNull.MODID+".mode." + (handler.fill ? "fill" : "empty")), true);
   }
 
   public static boolean isSponge(ItemStack bag, PlayerEntity player) {
@@ -91,14 +114,6 @@ public class Utils {
 
   public static void toggleSponge(ItemStack bag, PlayerEntity player) {
     TankNullItemStackFluidStackHandler.create(bag).toggleSponge();
-  }
-
-  public static void toggleMode(ItemStack bag){
-    TankNullItemStackFluidStackHandler.create(bag).cycleMode();
-  }
-
-  public static UseMode getMode(ItemStack stack){
-    return TankNullItemStackFluidStackHandler.create(stack).getMode();
   }
 
   public static void changeSlot(ItemStack bag, boolean right) {
