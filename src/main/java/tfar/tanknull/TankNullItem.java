@@ -64,7 +64,8 @@ public class TankNullItem extends Item {
       ITextComponent text = new TranslationTextComponent("text.tanknull.mode",
               fluidTag.getBoolean("fill") ?
                       new TranslationTextComponent("text.tanknull.mode.fill").applyTextStyle(TextFormatting.AQUA) :
-                      new TranslationTextComponent("text.tanknull.mode.empty").applyTextStyle(TextFormatting.AQUA));
+                      new TranslationTextComponent("text.tanknull.mode.empty").applyTextStyle(TextFormatting.AQUA)).
+              appendSibling(new TranslationTextComponent(" Alt + Right Click to swap").applyTextStyle(TextFormatting.GRAY));
       tooltip.add(text);
       tooltip.add(new TranslationTextComponent("text.tanknull.settings",
               new StringTextComponent(TankNullClient.MODE.getLocalizedName()).applyTextStyle(TextFormatting.YELLOW)));

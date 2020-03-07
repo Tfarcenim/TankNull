@@ -18,9 +18,9 @@ public class UpgradeRecipe extends ShapedRecipe {
   @Override
   public ItemStack getCraftingResult(CraftingInventory inv) {
     ItemStack tank = super.getCraftingResult(inv).copy();
-    ItemStack oldBag = inv.getStackInSlot(4).copy();
-    if (!oldBag.hasTag())return tank;
-    tank.setTag(oldBag.getTag());
+    ItemStack oldTank = inv.getStackInSlot(4).copy();
+    if (!oldTank.hasTag())return tank;
+    tank.setTag(oldTank.getTag());
     return tank;
   }
 

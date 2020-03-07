@@ -27,6 +27,18 @@ public class TankNullItemStackFluidStackHandler extends ItemStackFluidStackHandl
   }
 
   @Override
+  public ItemStackFluidStackHandler setCapacity(int capacity) {
+    super.setCapacity(Utils.getCapacity(container));
+    return this;
+  }
+
+  @Override
+  public ItemStackFluidStackHandler setTanks(int tanks) {
+    super.setTanks(Utils.getTanks(container));
+    return this;
+  }
+
+  @Override
   public void onContentsChanged() {
     super.onContentsChanged();
     saveToItemStack();
@@ -40,9 +52,7 @@ public class TankNullItemStackFluidStackHandler extends ItemStackFluidStackHandl
   @Nonnull
   public TankNullItemStackFluidStackHandler loadFromItemStack(ItemStack stack) {
     CompoundNBT nbt = stack.getOrCreateChildTag("fluidinv");
-    if (!nbt.isEmpty()) {
       deserializeNBT(nbt);
-    }
     return this;
   }
 

@@ -31,7 +31,7 @@ public class ItemStackFluidStackHandler implements IMultiTankItem, INBTSerializa
     return this;
   }
 
-  public ItemStackFluidStackHandler setSize(int tanks) {
+  public ItemStackFluidStackHandler setTanks(int tanks) {
     stacks = NonNullList.withSize(tanks, FluidStack.EMPTY);
     return this;
   }
@@ -286,7 +286,7 @@ public class ItemStackFluidStackHandler implements IMultiTankItem, INBTSerializa
   @Override
   public void deserializeNBT(CompoundNBT nbt) {
     setCapacity(nbt.contains("Capacity", Constants.NBT.TAG_INT) ? nbt.getInt("Capacity") : capacity);
-    setSize(nbt.contains("Size", Constants.NBT.TAG_INT) ? nbt.getInt("Size") : stacks.size());
+    setTanks(nbt.contains("Size", Constants.NBT.TAG_INT) ? nbt.getInt("Size") : stacks.size());
     ListNBT tagList = nbt.getList("Fluids", Constants.NBT.TAG_COMPOUND);
     for (int i = 0; i < tagList.size(); i++) {
       CompoundNBT fluidTags = tagList.getCompound(i);

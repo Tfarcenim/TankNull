@@ -48,6 +48,7 @@ public abstract class ATankNullMenu extends Container {
       this.addSlot(new SlotItemHandler(playerinventory, row, x, y));
     }
   }
+
   @Nonnull
   @Override
   public ItemStack transferStackInSlot(PlayerEntity playerIn, int index) {

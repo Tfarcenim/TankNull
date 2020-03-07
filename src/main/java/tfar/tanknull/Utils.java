@@ -1,6 +1,5 @@
 package tfar.tanknull;
 
-import net.minecraft.block.Block;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -10,22 +9,15 @@ import net.minecraft.util.text.TranslationTextComponent;
 import tfar.tanknull.inventory.TankNullItemStackFluidStackHandler;
 
 public class Utils {
-  public static ResourceLocation getBackground(Item block){
-    if (block instanceof TankNullItem){
-      int tier = ((TankNullItem) block).tier;
-      return new ResourceLocation(TankNull.MODID,"textures/container/gui/tank"+tier+".png");
-    }
-    throw new IllegalStateException("no");
-  }
 
   public static ResourceLocation getBackground(int tier){
       return new ResourceLocation(TankNull.MODID,"textures/container/gui/tank"+tier+".png");
   }
 
-  public static ResourceLocation getBackground(ItemStack stack){
+  public static ResourceLocation getBackground(ItemStack stack) {
     if (stack.getItem() instanceof TankNullItem){
       int tier = ((TankNullItem)stack.getItem()).tier;
-      return new ResourceLocation(TankNull.MODID,"textures/container/gui/tank"+tier+".png");
+      return getBackground(tier);
     }
     throw new IllegalStateException("no");
   }
@@ -55,7 +47,6 @@ public class Utils {
       case 5:return RegistryObjects.tank_5.get();
       case 6:return RegistryObjects.tank_6.get();
       case 7:return RegistryObjects.tank_7.get();
-
     }
     throw new IllegalArgumentException("no "+tier);
   }

@@ -2,12 +2,14 @@ package tfar.tanknull;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.material.MaterialColor;
 import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.crafting.IRecipeSerializer;
 import net.minecraft.tileentity.TileEntityType;
+import net.minecraftforge.common.ToolType;
 import net.minecraftforge.common.extensions.IForgeContainerType;
 import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
@@ -25,7 +27,8 @@ public class RegistryObjects {
   public static final DeferredRegister<IRecipeSerializer<?>> RECIPE_SERIALIZERS = new DeferredRegister<>(ForgeRegistries.RECIPE_SERIALIZERS, TankNull.MODID);
 
   public static final RegistryObject<Block> dock = BLOCKS.register("dock",
-          () -> new TankNullDockBlock(Block.Properties.create(Material.IRON)));
+          () -> new TankNullDockBlock(Block.Properties.create(new Material.Builder(MaterialColor.IRON).build())
+                  .hardnessAndResistance(1).harvestTool(ToolType.PICKAXE)));
 
   public static final RegistryObject<Item> dock_item = ITEMS.register("dock",
           () -> new BlockItem(dock.get(),new Item.Properties().group(ItemGroup.TOOLS)));
