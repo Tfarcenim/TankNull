@@ -110,4 +110,14 @@ public class Utils {
   public static void changeSlot(ItemStack bag, boolean right) {
       TankNullItemStackFluidStackHandler.create(bag).scroll(right);
     }
+
+    public static Item.Properties copy(Item from){
+    return new Item.Properties()
+            .containerItem(from.getContainerItem())
+            .maxDamage(from.getMaxDamage())
+            .maxStackSize(from.getMaxStackSize())
+            .group(from.getGroup())
+            .food(from.getFood())
+            .rarity(new ItemStack(from).getRarity());
+    }
   }
