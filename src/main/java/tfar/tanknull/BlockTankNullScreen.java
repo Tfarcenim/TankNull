@@ -46,11 +46,15 @@ public class BlockTankNullScreen extends ContainerScreen<BlockTankNullMenu> impl
   @Override
   protected void drawGuiContainerBackgroundLayer(MatrixStack matrixStack,float partialTicks, int mouseX, int mouseY) {
     RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-    this.minecraft.getTextureManager().bindTexture(TEXTURE);
+    this.minecraft.getTextureManager().bindTexture(getBackground());
     int i = (this.width - this.xSize) / 2;
     int j = (this.height - this.ySize) / 2;
     this.blit(matrixStack, i, j, 0, 0, this.xSize, this.ySize);
     drawFluids(matrixStack);
+  }
+
+  public ResourceLocation getBackground(){
+    return TEXTURE;
   }
 
   protected void drawFluids(MatrixStack stack) {

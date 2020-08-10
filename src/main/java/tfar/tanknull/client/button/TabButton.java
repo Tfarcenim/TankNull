@@ -40,7 +40,7 @@ public class TabButton extends Button {
       RenderSystem.enableBlend();
       RenderSystem.blendFuncSeparate(770, 771, 1, 0);
       RenderSystem.blendFunc(770, 771);
-      if (screen.isSettings() == settings)
+      if (screen.settings == settings)
       blit(matrices,x, y, 0, height, width, height,width,height * 2);
 
       else      blit(matrices,x, y, 0, 0, width, height,width,height * 2);

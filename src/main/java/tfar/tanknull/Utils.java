@@ -5,7 +5,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
@@ -77,14 +76,14 @@ public class Utils {
 	}
 
 	public static boolean isFill(ItemStack bag, PlayerEntity player) {
-		return TankNullItemStackFluidStackHandler.create(bag).fill;
+		return TankNullItemStackFluidStackHandler.create(bag).isFill;
 	}
 
 	public static void toggleFill(ItemStack bag, PlayerEntity player) {
 		TankNullItemStackFluidStackHandler handler = TankNullItemStackFluidStackHandler.create(bag);
 		handler.toggleFill();
 		player.sendStatusMessage(
-						new TranslationTextComponent("text." + TankNull.MODID + ".mode." + (handler.fill ? "fill" : "empty")), true);
+						new TranslationTextComponent("text." + TankNull.MODID + ".mode." + (handler.isFill ? "fill" : "empty")), true);
 	}
 
 	public static boolean isSponge(ItemStack bag, PlayerEntity player) {

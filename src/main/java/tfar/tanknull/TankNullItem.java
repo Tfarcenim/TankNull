@@ -17,7 +17,6 @@ import net.minecraft.nbt.ListNBT;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
@@ -35,7 +34,6 @@ import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import tfar.tanknull.client.TankNullClient;
-import tfar.tanknull.inventory.TankNullBlockFluidStackHandler;
 import tfar.tanknull.inventory.TankNullItemStackFluidStackHandler;
 
 import javax.annotation.Nonnull;
@@ -66,6 +64,10 @@ public class TankNullItem extends Item {
       tooltip.add(text);
       tooltip.add(new TranslationTextComponent("text.tanknull.settings",
               new StringTextComponent(TankNullClient.MODE.getTranslationKey()).mergeStyle(TextFormatting.YELLOW)));
+      boolean sponge = fluidTag.getBoolean("sponge");
+      if (sponge) {
+        tooltip.add(new StringTextComponent("Sponge"));
+      }
       ListNBT tagList = fluidTag.getList("Fluids", Constants.NBT.TAG_COMPOUND);
       for (int i = 0; i < tagList.size(); i++) {
         CompoundNBT fluidTags = tagList.getCompound(i);
@@ -87,7 +89,7 @@ public class TankNullItem extends Item {
     ItemStack itemstack = player.getHeldItem(hand);
     if (!world.isRemote) {
       TankNullItemStackFluidStackHandler handler = TankNullItemStackFluidStackHandler.create(itemstack);
-      boolean filling = handler.fill;
+      boolean filling = handler.isFill;
       if (filling) {
         return fill(world, player, hand,itemstack,handler);
       } else {

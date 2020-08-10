@@ -3,26 +3,19 @@ package tfar.tanknull.inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
-import net.minecraft.util.Direction;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.Constants;
-import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
-import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import tfar.tanknull.TankNullItem;
 import tfar.tanknull.Utils;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 public class TankNullItemStackFluidStackHandler extends ItemStackFluidStackHandler {
 
   public int selectedTank = 0;
-  protected final LazyOptional<IFluidHandlerItem> holder = LazyOptional.of(() -> TankNullItemStackFluidStackHandler.create(tank));
-  public boolean fill = false;
+  public boolean isFill = false;
   public boolean sponge = false;
+  public boolean smartPlacing = true;
 
   public TankNullItemStackFluidStackHandler(int tanks, int capacity, ItemStack container) {
     super(tanks, capacity, container);
@@ -67,7 +60,7 @@ public class TankNullItemStackFluidStackHandler extends ItemStackFluidStackHandl
   }
 
   public void toggleFill() {
-    fill = !fill;
+    isFill = !isFill;
     saveToItemStack();
   }
 
@@ -86,7 +79,7 @@ public class TankNullItemStackFluidStackHandler extends ItemStackFluidStackHandl
   public CompoundNBT serializeNBT() {
     CompoundNBT nbt = super.serializeNBT();
     nbt.putInt("SelectedTank", selectedTank);
-    nbt.putBoolean("fill", fill);
+    nbt.putBoolean("fill", isFill);
     nbt.putBoolean("sponge", sponge);
     return nbt;
   }
@@ -104,7 +97,7 @@ public class TankNullItemStackFluidStackHandler extends ItemStackFluidStackHandl
     }
 
     selectedTank = nbt.getInt("SelectedTank");
-    fill = nbt.getBoolean("fill");
+    isFill = nbt.getBoolean("fill");
     sponge = nbt.getBoolean("sponge");
   }
 

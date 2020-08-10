@@ -9,6 +9,7 @@ import net.minecraft.fluid.FluidState;
 import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.IRecipeSerializer;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
@@ -93,6 +94,10 @@ public class TankNull {
 
 	private void blockentities(RegistryEvent.Register<TileEntityType<?>> event) {
 		register(event.getRegistry(), "dock", RegistryObjects.blockentity);
+	}
+
+	private void recipes(RegistryEvent.Register<IRecipeSerializer<?>> event) {
+		register(event.getRegistry(), "upgrade", RegistryObjects.upgrade);
 	}
 
 	private static <T extends IForgeRegistryEntry<T>> void register(IForgeRegistry<T> registry, ResourceLocation name, T obj) {

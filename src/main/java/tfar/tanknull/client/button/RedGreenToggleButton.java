@@ -23,7 +23,7 @@ public class RedGreenToggleButton extends SmallButton {
 
   @Override
   public void render(MatrixStack stack,int mouseX, int mouseY, float partialTicks) {
-    active = visible = screen.isSettings();
+    active = visible = screen.settings;
     super.render(stack,mouseX, mouseY, partialTicks);
   }
 
