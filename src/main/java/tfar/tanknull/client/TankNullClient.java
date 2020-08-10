@@ -1,5 +1,6 @@
 package tfar.tanknull.client;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
@@ -25,7 +26,7 @@ import tfar.tanknull.network.C2SOpenContainerMessage;
 import tfar.tanknull.network.C2SToggleFillMessage;
 import tfar.tanknull.network.Messages;
 
-import static tfar.tanknull.ATankNullScreen.getFluidTexture;
+import static tfar.tanknull.BlockTankNullScreen.getFluidTexture;
 
 @Mod.EventBusSubscriber(value = Dist.CLIENT, modid = TankNull.MODID)
 public class TankNullClient {
@@ -87,21 +88,21 @@ public class TankNullClient {
     if (!fluidStack.isEmpty()) {
       final int itemX = xStart - 150;
       final int itemY = yStart - 25;
-      renderSelectedFluid(itemX, itemY, 0, player, fluidStack);
+      renderSelectedFluid(event.getMatrixStack(),itemX, itemY, 0, player, fluidStack);
     }
     mc.getTextureManager().bindTexture(AbstractGui.GUI_ICONS_LOCATION);
   }
 
-  private static void renderSelectedFluid(int x, int y, float partialTicks, PlayerEntity player, FluidStack fluidStack) {
+  private static void renderSelectedFluid(MatrixStack stack,int x, int y, float partialTicks, PlayerEntity player, FluidStack fluidStack) {
       mc.textureManager.bindTexture(AtlasTexture.LOCATION_BLOCKS_TEXTURE);
       int color = fluidStack.getFluid().getAttributes().getColor(fluidStack);
       TextureAtlasSprite textureAtlasSprite = getFluidTexture(fluidStack);
       RenderSystem.color3f((color >> 16 & 0xff) / 255f, (color >> 8 & 0xff) / 255f, (color & 0xff) / 255f);
-      AbstractGui.blit(x,y, 0, 16, 16, textureAtlasSprite);
+      AbstractGui.blit(stack,x,y, 0, 16, 16, textureAtlasSprite);
       RenderSystem.pushMatrix();
       RenderSystem.scaled(.75,.75,.75);
       int len = mc.fontRenderer.getStringWidth(fluidStack.getAmount()/1000+"B");
-      mc.fontRenderer.drawStringWithShadow(fluidStack.getAmount()/1000+"B",1.33f*(x-len+20),1.33f*(y+12),0xffffff);
+      mc.fontRenderer.drawStringWithShadow(stack,fluidStack.getAmount()/1000+"B",1.33f*(x-len+20),1.33f*(y+12),0xffffff);
       RenderSystem.popMatrix();
   }
 }

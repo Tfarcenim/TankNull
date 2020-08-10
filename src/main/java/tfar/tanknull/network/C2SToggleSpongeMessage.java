@@ -23,7 +23,7 @@ public class C2SToggleSpongeMessage {
         if (!(bag.getItem() instanceof TankNullItem))return;
       }
       Utils.toggleSponge(bag,player);
-      Messages.INSTANCE.sendTo(new S2CSyncItemStackMessage(player.currentWindowId, bag), player.connection.getNetworkManager(), NetworkDirection.PLAY_TO_CLIENT);
+      //Messages.INSTANCE.sendTo(new S2CSetFluidStackMessage(player.currentWindowId, bag), player.connection.getNetworkManager(), NetworkDirection.PLAY_TO_CLIENT);
     });
     ctx.get().setPacketHandled(true);
   }

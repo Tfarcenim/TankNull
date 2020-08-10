@@ -1,7 +1,9 @@
 package tfar.tanknull.client.button;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.util.text.StringTextComponent;
 import tfar.tanknull.client.ItemStackTankNullScreen;
 
 public class RedGreenToggleButton extends SmallButton {
@@ -10,7 +12,7 @@ public class RedGreenToggleButton extends SmallButton {
   private final ItemStackTankNullScreen screen;
 
   public RedGreenToggleButton(int x, int y, int widthIn, int heightIn, Button.IPressable callback, boolean toggled, ItemStackTankNullScreen screen) {
-    super(x, y, widthIn, heightIn,"", callback);
+    super(x, y, widthIn, heightIn,new StringTextComponent(""), callback);
     this.toggled = toggled;
     this.screen = screen;
   }
@@ -20,9 +22,9 @@ public class RedGreenToggleButton extends SmallButton {
   }
 
   @Override
-  public void render(int mouseX, int mouseY, float partialTicks) {
+  public void render(MatrixStack stack,int mouseX, int mouseY, float partialTicks) {
     active = visible = screen.isSettings();
-    super.render(mouseX, mouseY, partialTicks);
+    super.render(stack,mouseX, mouseY, partialTicks);
   }
 
   @Override

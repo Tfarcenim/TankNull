@@ -1,5 +1,6 @@
 package tfar.tanknull.client.button;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.widget.button.Button;
@@ -7,6 +8,7 @@ import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.StringTextComponent;
 import tfar.tanknull.TankNull;
 import tfar.tanknull.client.ItemStackTankNullScreen;
 import tfar.tanknull.client.TankNullClient;
@@ -18,7 +20,7 @@ public class TabButton extends Button {
   private final boolean settings;
 
   public TabButton(int x, int y, int widthIn, int heightIn, Button.IPressable callback, ItemStack stack, ItemStackTankNullScreen screen,boolean settings) {
-    super(x, y, widthIn, heightIn,"", callback);
+    super(x, y, widthIn, heightIn,new StringTextComponent(""), callback);
     this.stack = stack;
     this.screen = screen;
     this.settings = settings;
@@ -27,7 +29,7 @@ public class TabButton extends Button {
 
 
   @Override
-  public void render(int mouseX, int mouseY, float partialTicks) {
+  public void render(MatrixStack matrices,int mouseX, int mouseY, float partialTicks) {
     if (visible) {
       Minecraft minecraft = Minecraft.getInstance();
       minecraft.getTextureManager().bindTexture(TAB);
@@ -39,9 +41,9 @@ public class TabButton extends Button {
       RenderSystem.blendFuncSeparate(770, 771, 1, 0);
       RenderSystem.blendFunc(770, 771);
       if (screen.isSettings() == settings)
-      blit(x, y, 0, height, width, height,width,height * 2);
+      blit(matrices,x, y, 0, height, width, height,width,height * 2);
 
-      else      blit(x, y, 0, 0, width, height,width,height * 2);
+      else      blit(matrices,x, y, 0, 0, width, height,width,height * 2);
       if (!stack.isEmpty()) {
         // String s1 = s.getUnformattedComponentText();
         //String slot = String.valueOf(Utils.getSelectedSlot(bag));

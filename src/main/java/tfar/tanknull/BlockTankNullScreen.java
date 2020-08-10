@@ -1,5 +1,6 @@
 package tfar.tanknull;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
@@ -7,33 +8,32 @@ import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.fluid.Fluid;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.container.IContainerListener;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
-import tfar.tanknull.container.ATankNullMenu;
+import tfar.tanknull.container.BlockTankNullMenu;
 
 import javax.annotation.Nonnull;
 import java.text.DecimalFormat;
 
-public abstract class ATankNullScreen<T extends ATankNullMenu> extends ContainerScreen<T> {
-  public ATankNullScreen(T screenContainer, PlayerInventory inv, ITextComponent titleIn) {
+public class BlockTankNullScreen extends ContainerScreen<BlockTankNullMenu> implements IContainerListener {
+  public BlockTankNullScreen(BlockTankNullMenu screenContainer, PlayerInventory inv, ITextComponent titleIn) {
     super(screenContainer, inv, titleIn);
+    TEXTURE = new ResourceLocation(TankNull.MODID,"textures/container/gui/tank"+screenContainer.stats.ordinal()+".png");
     ySize += 4;
   }
-
-  public abstract ResourceLocation getBackground();
-
-  @Override
-  public void render(int p_render_1_, int p_render_2_, float p_render_3_) {
-    renderBackground();
-    super.render(p_render_1_, p_render_2_, p_render_3_);
-    this.renderHoveredToolTip(p_render_1_, p_render_2_);
-  }
+  private final ResourceLocation TEXTURE;
 
   @Override
-  protected void renderHoveredToolTip(int mouseX, int mouseY) {
-    super.renderHoveredToolTip(mouseX, mouseY);
+  public void render(MatrixStack stack,int p_render_1_, int p_render_2_, float p_render_3_) {
+    renderBackground(stack);
+    super.render(stack,p_render_1_, p_render_2_, p_render_3_);
+    this.func_230459_a_(stack,p_render_1_, p_render_2_);
   }
 
   /**
@@ -44,22 +44,17 @@ public abstract class ATankNullScreen<T extends ATankNullMenu> extends Container
    * @param mouseY
    */
   @Override
-  protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
-    minecraft.getTextureManager().bindTexture(getBackground());
-    blit(guiLeft, guiTop, 0, 0, xSize, ySize);
-    drawFluids();
+  protected void drawGuiContainerBackgroundLayer(MatrixStack matrixStack,float partialTicks, int mouseX, int mouseY) {
+    RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+    this.minecraft.getTextureManager().bindTexture(TEXTURE);
+    int i = (this.width - this.xSize) / 2;
+    int j = (this.height - this.ySize) / 2;
+    this.blit(matrixStack, i, j, 0, 0, this.xSize, this.ySize);
+    drawFluids(matrixStack);
   }
 
-  @Override
-  protected void drawGuiContainerForegroundLayer(int p_146979_1_, int p_146979_2_) {
-    this.font.drawString(this.playerInventory.getDisplayName().getUnformattedComponentText(), 8, this.ySize - 94, 0x404040);
-    int size = font.getStringWidth(title.getFormattedText());
-    int start = (this.xSize - size)/2;
-    this.font.drawString(this.title.getUnformattedComponentText(), start, 8, 0x404040);
-  }
-
-  protected void drawFluids() {
-    IFluidHandler fluidStackHandler = container.getHandler();
+  protected void drawFluids(MatrixStack stack) {
+    IFluidHandler fluidStackHandler = container.fluidStackHandler;
     int column = fluidStackHandler.getTanks() / 3;
     int xPos = guiLeft + 89 - column * 9;
     int yPos = guiTop+18;
@@ -72,8 +67,8 @@ public abstract class ATankNullScreen<T extends ATankNullMenu> extends Container
           int color = fluidStack.getFluid().getAttributes().getColor(fluidStack);
           TextureAtlasSprite textureAtlasSprite = getFluidTexture(fluidStack);
           RenderSystem.color3f((color >> 16 & 0xff) / 255f, (color >> 8 & 0xff) / 255f, (color & 0xff) / 255f);
-          blit(xPos + x * 18,yPos+y * 18, 0, 16, 16, textureAtlasSprite);
-          font.drawStringWithShadow(getStringFromInt(fluidStack.getAmount()),xPos + x * 18,yPos+y * 18+9,0xffffff);
+          blit(stack,xPos + x * 18,yPos+y * 18, 0, 16, 16, textureAtlasSprite);
+          font.drawStringWithShadow(stack,getStringFromInt(fluidStack.getAmount()),xPos + x * 18,yPos+y * 18+9,0xffffff);
         }
       }
   }
@@ -96,6 +91,21 @@ public abstract class ATankNullScreen<T extends ATankNullMenu> extends Container
   }
 
   public static TextureAtlasSprite getSprite(ResourceLocation spriteLocation) {
-    return Minecraft.getInstance().getTextureGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(spriteLocation);
+    return Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(spriteLocation);
+  }
+
+  @Override
+  public void sendAllContents(Container containerToSend, NonNullList<ItemStack> itemsList) {
+
+  }
+
+  @Override
+  public void sendSlotContents(Container containerToSend, int slotInd, ItemStack stack) {
+
+  }
+
+  @Override
+  public void sendWindowProperty(Container containerIn, int varToUpdate, int newValue) {
+
   }
 }

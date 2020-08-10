@@ -5,11 +5,12 @@ import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.NonNullList;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fluids.FluidStack;
+import tfar.tanknull.TankStats;
 
 public class TankNullBlockFluidStackHandler extends FluidStackHandler {
 
-  public TankNullBlockFluidStackHandler(int tanks, int capacity) {
-    super(tanks,capacity);
+  public TankNullBlockFluidStackHandler(TankStats stats) {
+    super(stats.slots,stats.capacity);
   }
 
   @Override

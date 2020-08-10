@@ -27,6 +27,6 @@ public class UpgradeRecipe extends ShapedRecipe {
   @Nonnull
   @Override
   public IRecipeSerializer<?> getSerializer() {
-    return RegistryObjects.upgrade.get();
+    return RegistryObjects.upgrade;
   }
 }

@@ -8,6 +8,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.server.SSetSlotPacket;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.network.NetworkEvent;
 import tfar.tanknull.TankNullItem;
@@ -17,25 +18,27 @@ import tfar.tanknull.container.ItemStackTankNullMenu;
 
 import java.util.function.Supplier;
 
-public class S2CSyncItemStackMessage {
+public class S2CSetFluidStackMessage {
   private int windowId = 0;
-  private ItemStack stack = ItemStack.EMPTY;
+  private int slotId = 0;
+  private FluidStack stack = FluidStack.EMPTY;
 
-  public S2CSyncItemStackMessage() {}
+  public S2CSetFluidStackMessage() {}
 
-  public S2CSyncItemStackMessage(int windowId, ItemStack stack) {
+  public S2CSetFluidStackMessage(int windowId, int slotId,FluidStack stack) {
     this.windowId = windowId;
     this.stack = stack;
   }
 
-  public S2CSyncItemStackMessage(PacketBuffer buf) {
-    this.windowId = buf.readByte();
-    this.stack = buf.readItemStack();
+  public S2CSetFluidStackMessage(PacketBuffer buf) {
+    this.windowId = buf.readInt();
+    this.slotId = buf.readInt();
+    this.stack = buf.readFluidStack();
   }
 
   public void encode(PacketBuffer buf) {
     buf.writeByte(this.windowId);
-    buf.writeItemStack(this.stack);
+    buf.writeFluidStack(this.stack);
   }
 
   public void handle(Supplier<NetworkEvent.Context> ctx) {
@@ -45,7 +48,7 @@ public class S2CSyncItemStackMessage {
     ctx.get().enqueueWork(() -> {
       Container container = player.openContainer;
       if (container instanceof ItemStackTankNullMenu && windowId == container.windowId) {
-        ((ItemStackTankNullMenu) container).te = stack;
+       // ((ItemStackTankNullMenu) container).te = stack;
       }
     });
     ctx.get().setPacketHandled(true);

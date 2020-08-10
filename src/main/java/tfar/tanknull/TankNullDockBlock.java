@@ -28,14 +28,24 @@ public class TankNullDockBlock extends Block {
   }
 
   @Override
-  public ActionResultType onBlockActivated(BlockState p_225533_1_, World world, BlockPos pos, PlayerEntity player, Hand p_225533_5_, BlockRayTraceResult p_225533_6_) {
-    if (!world.isRemote && p_225533_1_.get(TIER) > 0) {
+  public ActionResultType onBlockActivated(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult p_225533_6_) {
+    if (!world.isRemote) {
       final TileEntity tile = world.getTileEntity(pos);
       if (tile instanceof TankNullDockBlockEntity) {
-        if (player.isCrouching() && player.getHeldItem(p_225533_5_).isEmpty()){
+        int blockTier = state.get(TankNullDockBlock.TIER);
+
+        if (player.getHeldItem(hand).getItem() instanceof TankNullItem) {
+
+          if (blockTier == 0) {
+            ((TankNullDockBlockEntity) tile).addTank(player.getHeldItem(hand));
+            return ActionResultType.SUCCESS;
+          }
+        }
+
+        if (player.isCrouching() && player.getHeldItem(hand).isEmpty() && blockTier > 0) {
           ((TankNullDockBlockEntity) tile).removeTank();
       } else {
-          NetworkHooks.openGui((ServerPlayerEntity) player, (INamedContainerProvider) tile, tile.getPos());
+          NetworkHooks.openGui((ServerPlayerEntity) player, (INamedContainerProvider) tile, ((TankNullDockBlockEntity) tile)::writeFluids);
         }
       }
     }

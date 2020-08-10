@@ -1,5 +1,6 @@
 package tfar.tanknull.inventory;
 
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.NonNullList;
@@ -166,7 +167,7 @@ public class FluidStackHandler implements IMultiTank, INBTSerializable<CompoundN
     if (existingFluid.isEmpty()) {
       if (action.execute()) {
         stacks.set(tank, new FluidStack(resource, Math.min(capacity, resource.getAmount())));
-        onContentsChanged();
+        onContentsChanged(tank);
       }
       return resource.getAmount();
     } else {
@@ -182,7 +183,7 @@ public class FluidStackHandler implements IMultiTank, INBTSerializable<CompoundN
         }
       }
       if (filled > 0 && action.execute()) {
-        onContentsChanged();
+        onContentsChanged(tank);
       }
       return filled;
     }
@@ -233,15 +234,21 @@ public class FluidStackHandler implements IMultiTank, INBTSerializable<CompoundN
       drained = existingFluid.getAmount();
       if (action.execute()) {
         stacks.set(tank, FluidStack.EMPTY);
-        onContentsChanged();
+        onContentsChanged(tank);
       }
     } else {
       if (action.execute()) {
         stacks.set(tank, new FluidStack(existingFluid, existingFluid.getAmount() - drained));
-        onContentsChanged();
+        onContentsChanged(tank);
       }
     }
     return new FluidStack(existingFluid, drained);
+  }
+
+  public void setStackInSlot(int slot, @Nonnull FluidStack stack) {
+    validateSlotIndex(slot);
+    this.stacks.set(slot, stack);
+    onContentsChanged(slot);
   }
 
   @Override
@@ -280,7 +287,7 @@ public class FluidStackHandler implements IMultiTank, INBTSerializable<CompoundN
   protected void onLoad() {
   }
 
-  public void onContentsChanged() {
+  public void onContentsChanged(int slot) {
 
   }
 

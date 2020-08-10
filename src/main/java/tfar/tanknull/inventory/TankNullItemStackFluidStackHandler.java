@@ -2,9 +2,11 @@ package tfar.tanknull.inventory;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.Direction;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
+import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
@@ -15,10 +17,10 @@ import tfar.tanknull.Utils;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class TankNullItemStackFluidStackHandler extends ItemStackFluidStackHandler implements ICapabilityProvider {
+public class TankNullItemStackFluidStackHandler extends ItemStackFluidStackHandler {
 
   public int selectedTank = 0;
-  protected final LazyOptional<IFluidHandlerItem> holder = LazyOptional.of(() -> TankNullItemStackFluidStackHandler.create(container));
+  protected final LazyOptional<IFluidHandlerItem> holder = LazyOptional.of(() -> TankNullItemStackFluidStackHandler.create(tank));
   public boolean fill = false;
   public boolean sponge = false;
 
@@ -27,32 +29,20 @@ public class TankNullItemStackFluidStackHandler extends ItemStackFluidStackHandl
   }
 
   @Override
-  public ItemStackFluidStackHandler setCapacity(int capacity) {
-    super.setCapacity(Utils.getCapacity(container));
-    return this;
-  }
-
-  @Override
-  public ItemStackFluidStackHandler setTanks(int tanks) {
-    super.setTanks(Utils.getTanks(container));
-    return this;
-  }
-
-  @Override
-  public void onContentsChanged() {
-    super.onContentsChanged();
+  public void onContentsChanged(int slot) {
+    super.onContentsChanged(slot);
     saveToItemStack();
   }
 
   public void saveToItemStack() {
     CompoundNBT nbt = serializeNBT();
-    container.getOrCreateTag().put("fluidinv", nbt);
+    tank.getOrCreateTag().put("fluidinv", nbt);
   }
 
   @Nonnull
   public TankNullItemStackFluidStackHandler loadFromItemStack(ItemStack stack) {
     CompoundNBT nbt = stack.getOrCreateChildTag("fluidinv");
-      deserializeNBT(nbt);
+    deserializeNBT(nbt);
     return this;
   }
 
@@ -103,7 +93,16 @@ public class TankNullItemStackFluidStackHandler extends ItemStackFluidStackHandl
 
   @Override
   public void deserializeNBT(CompoundNBT nbt) {
-    super.deserializeNBT(nbt);
+
+    ListNBT tagList = nbt.getList("Fluids", Constants.NBT.TAG_COMPOUND);
+    for (int i = 0; i < tagList.size(); i++) {
+      CompoundNBT fluidTags = tagList.getCompound(i);
+      int tank = fluidTags.getInt("Tank");
+      if (tank >= 0 && tank < stacks.size()) {
+        stacks.set(tank, FluidStack.loadFluidStackFromNBT(fluidTags));
+      }
+    }
+
     selectedTank = nbt.getInt("SelectedTank");
     fill = nbt.getBoolean("fill");
     sponge = nbt.getBoolean("sponge");
@@ -114,23 +113,7 @@ public class TankNullItemStackFluidStackHandler extends ItemStackFluidStackHandl
       TankNullItemStackFluidStackHandler handler = new TankNullItemStackFluidStackHandler(Utils.getTanks(stack), Utils.getCapacity(stack), stack);
       return handler.loadFromItemStack(stack);
     }
-    throw new IllegalStateException("no");
-  }
-
-  /**
-   * Retrieves the Optional handler for the capability requested on the specific side.
-   * The return value <strong>CAN</strong> be the same for multiple faces.
-   * Modders are encouraged to cache this value, using the listener capabilities of the Optional to
-   * be notified if the requested capability get lost.
-   *
-   * @param cap
-   * @param side
-   * @return The requested an optional holding the requested capability.
-   */
-  @Nonnull
-  @Override
-  public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
-    return CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY.orEmpty(cap, holder);
+    throw new IllegalStateException("not a tank null");
   }
 
   public void toggleSponge() {

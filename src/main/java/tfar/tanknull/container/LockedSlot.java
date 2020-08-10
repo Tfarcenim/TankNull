@@ -1,13 +1,14 @@
 package tfar.tanknull.container;
 
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.container.Slot;
 import net.minecraftforge.items.SlotItemHandler;
 import net.minecraftforge.items.wrapper.InvWrapper;
 
-public class LockedSlot extends SlotItemHandler {
-  public LockedSlot(InvWrapper playerinventory, int row, int x, int y) {
+public class LockedSlot extends Slot {
+  public LockedSlot(PlayerInventory playerinventory, int row, int x, int y) {
     super(playerinventory,row,x,y);
   }
 

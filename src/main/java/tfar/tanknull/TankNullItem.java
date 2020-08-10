@@ -9,7 +9,6 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.fluid.FlowingFluid;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.Fluids;
-import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUseContext;
@@ -28,7 +27,6 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
@@ -36,9 +34,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.fml.network.NetworkHooks;
 import tfar.tanknull.client.TankNullClient;
-import tfar.tanknull.container.NamedMenuProvider;
+import tfar.tanknull.inventory.TankNullBlockFluidStackHandler;
 import tfar.tanknull.inventory.TankNullItemStackFluidStackHandler;
 
 import javax.annotation.Nonnull;
@@ -46,38 +43,38 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 public class TankNullItem extends Item {
-  public final int tier;
+  public final TankStats stats;
 
-  public TankNullItem(Properties builder, int tier) {
+  public TankNullItem(Properties builder, TankStats stats) {
     super(builder);
-    this.tier = tier;
+    this.stats = stats;
   }
 
   @Override
   @OnlyIn(Dist.CLIENT)
   public void addInformation(ItemStack stack, @Nullable World p_190948_2_, List<ITextComponent> tooltip, ITooltipFlag p_190948_4_) {
-    if (stack.hasTag() && Utils.DEV) tooltip.add(new StringTextComponent(stack.getTag().toString()).applyTextStyle(TextFormatting.DARK_GRAY));
+    if (stack.hasTag() && Utils.DEV) tooltip.add(new StringTextComponent(stack.getTag().toString()).mergeStyle(TextFormatting.DARK_GRAY));
     CompoundNBT nbt = stack.getTag();
     tooltip.add(new TranslationTextComponent("text.tanknull.stacklimit",Utils.getCapacity(this)));
     if (nbt != null && !nbt.getCompound("fluidinv").isEmpty()) {
       CompoundNBT fluidTag = nbt.getCompound("fluidinv");
       ITextComponent text = new TranslationTextComponent("text.tanknull.mode",
               fluidTag.getBoolean("fill") ?
-                      new TranslationTextComponent("text.tanknull.mode.fill").applyTextStyle(TextFormatting.AQUA) :
-                      new TranslationTextComponent("text.tanknull.mode.empty").applyTextStyle(TextFormatting.AQUA)).
-              appendSibling(new TranslationTextComponent(" Alt + Right Click to swap").applyTextStyle(TextFormatting.GRAY));
+                      new TranslationTextComponent("text.tanknull.mode.fill").mergeStyle(TextFormatting.AQUA) :
+                      new TranslationTextComponent("text.tanknull.mode.empty").mergeStyle(TextFormatting.AQUA))
+              .append(new TranslationTextComponent(" Alt + Right Click to swap").mergeStyle(TextFormatting.GRAY));
       tooltip.add(text);
       tooltip.add(new TranslationTextComponent("text.tanknull.settings",
-              new StringTextComponent(TankNullClient.MODE.getLocalizedName()).applyTextStyle(TextFormatting.YELLOW)));
+              new StringTextComponent(TankNullClient.MODE.getTranslationKey()).mergeStyle(TextFormatting.YELLOW)));
       ListNBT tagList = fluidTag.getList("Fluids", Constants.NBT.TAG_COMPOUND);
       for (int i = 0; i < tagList.size(); i++) {
         CompoundNBT fluidTags = tagList.getCompound(i);
         FluidStack fluidStack = FluidStack.loadFluidStackFromNBT(fluidTags);
         if (!fluidStack.isEmpty()) {
           tooltip.add(new TranslationTextComponent("text.tanknull.formatcontainedfluids",
-                  new StringTextComponent(String.valueOf(i)).applyTextStyle(TextFormatting.GREEN),
-                  new StringTextComponent(String.valueOf(fluidStack.getAmount())).applyTextStyle(TextFormatting.AQUA),
-                  fluidStack.getDisplayName().getFormattedText()).applyTextStyle(TextFormatting.WHITE));
+                  new StringTextComponent(String.valueOf(i)).mergeStyle(TextFormatting.GREEN),
+                  new StringTextComponent(String.valueOf(fluidStack.getAmount())).mergeStyle(TextFormatting.AQUA),
+                  fluidStack.getDisplayName()).mergeStyle(TextFormatting.WHITE));
         }
       }
     }
@@ -107,9 +104,9 @@ public class TankNullItem extends Item {
     ActionResult<ItemStack> ret = net.minecraftforge.event.ForgeEventFactory.onBucketUse(player, world, itemstack, raytraceresult);
     if (ret != null) return ret;
     if (raytraceresult.getType() == RayTraceResult.Type.MISS) {
-      return ActionResult.func_226250_c_(itemstack);
+      return ActionResult.resultFail(itemstack);
     } else if (raytraceresult.getType() != RayTraceResult.Type.BLOCK) {
-      return ActionResult.func_226250_c_(itemstack);
+      return ActionResult.resultFail(itemstack);
     } else {
       BlockRayTraceResult blockraytraceresult = (BlockRayTraceResult) raytraceresult;
       BlockPos tracedPos = blockraytraceresult.getPos();
@@ -133,31 +130,31 @@ public class TankNullItem extends Item {
                 soundevent = fluid.isIn(FluidTags.LAVA) ? SoundEvents.ITEM_BUCKET_FILL_LAVA : SoundEvents.ITEM_BUCKET_FILL;
               player.playSound(soundevent, 1.0F, 1.0F);
 
-              return ActionResult.func_226248_a_(this.fillBucket(fluid, itemstack, handler, player));
+              return ActionResult.resultConsume(this.fillBucket(fluid, itemstack, handler, player));
             }
           }
-          return ActionResult.func_226251_d_(itemstack);
+          return ActionResult.resultPass(itemstack);
         } else {
-          return ActionResult.func_226251_d_(itemstack);
+          return ActionResult.resultPass(itemstack);
         }
       } else {
-        return ActionResult.func_226251_d_(itemstack);
+        return ActionResult.resultFail(itemstack);
       }
     }
   }
 
   public ActionResult<ItemStack> empty(World world, PlayerEntity player, Hand hand, ItemStack itemstack,TankNullItemStackFluidStackHandler handler){
     FluidStack selectedFluidStack = handler.getFluidInTank(handler.selectedTank);
-    if (selectedFluidStack.isEmpty())return ActionResult.func_226251_d_(itemstack);
+    if (selectedFluidStack.isEmpty())return ActionResult.resultFail(itemstack);
 
     selectedFluidStack.isEmpty();
     RayTraceResult raytraceresult = rayTrace(world, player, RayTraceContext.FluidMode.SOURCE_ONLY);
     ActionResult<ItemStack> ret = net.minecraftforge.event.ForgeEventFactory.onBucketUse(player, world, itemstack, raytraceresult);
     if (ret != null) return ret;
     if (raytraceresult.getType() == RayTraceResult.Type.MISS) {
-      return ActionResult.func_226250_c_(itemstack);
+      return ActionResult.resultFail(itemstack);
     } else if (raytraceresult.getType() != RayTraceResult.Type.BLOCK) {
-      return ActionResult.func_226250_c_(itemstack);
+      return ActionResult.resultFail(itemstack);
     }
     BlockRayTraceResult blockraytraceresult = (BlockRayTraceResult) raytraceresult;
     BlockPos rayTracePoa = blockraytraceresult.getPos();
@@ -172,11 +169,11 @@ public class TankNullItem extends Item {
         }
 
         player.addStat(Stats.ITEM_USED.get(this));
-        return ActionResult.func_226248_a_(this.emptyBucket(itemstack, handler, player));
+        return ActionResult.resultConsume(this.emptyBucket(itemstack, handler, player));
       }
-      return ActionResult.func_226251_d_(itemstack);
+      return ActionResult.resultPass(itemstack);
     }
-    return ActionResult.func_226251_d_(itemstack);
+    return ActionResult.resultPass(itemstack);
 
     //BlockState blockstate1 = world.getBlockState(rayTracePoa);
 
@@ -236,7 +233,7 @@ public class TankNullItem extends Item {
       boolean flag = blockstate.isReplaceable(selectedFluidStack.getFluid());
       if (blockstate.isAir(worldIn, posIn) || flag || blockstate.getBlock() instanceof ILiquidContainer && ((ILiquidContainer)blockstate.getBlock())
               .canContainFluid(worldIn, posIn, blockstate, selectedFluidStack.getFluid())) {
-        if (worldIn.dimension.doesWaterVaporize() && selectedFluidStack.getFluid().isIn(FluidTags.WATER)) {
+        if (worldIn.func_230315_m_().func_236040_e_() && selectedFluidStack.getFluid().isIn(FluidTags.WATER)) {
           int i = posIn.getX();
           int j = posIn.getY();
           int k = posIn.getZ();
@@ -273,7 +270,7 @@ public class TankNullItem extends Item {
 
   @Override
   public net.minecraftforge.common.capabilities.ICapabilityProvider initCapabilities(ItemStack stack, @Nullable net.minecraft.nbt.CompoundNBT nbt) {
-      return TankNullItemStackFluidStackHandler.create(stack);
+      return Utils.createFluidProvider(TankNullItemStackFluidStackHandler.create(stack));
   }
 
   @Nonnull
@@ -284,15 +281,6 @@ public class TankNullItem extends Item {
     BlockState state =  world.getBlockState(pos);
     if (!(state.getBlock() instanceof TankNullDockBlock))
     return ActionResultType.PASS;
-    int blockTier = state.get(TankNullDockBlock.TIER);
-
-    if (blockTier == 0){
-      TileEntity blockEntity = world.getTileEntity(pos);
-      if (blockEntity instanceof TankNullDockBlockEntity){
-        ((TankNullDockBlockEntity) blockEntity).addTank(ctx.getItem());
-      }
-      return ActionResultType.SUCCESS;
-    }
 
 
     return ActionResultType.PASS;

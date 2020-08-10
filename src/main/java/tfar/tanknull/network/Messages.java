@@ -33,9 +33,9 @@ public class Messages {
             C2SMessageScrollTank::new,
             C2SMessageScrollTank::handle);
 
-    INSTANCE.registerMessage(id++, S2CSyncItemStackMessage.class,
-            S2CSyncItemStackMessage::encode,
-            S2CSyncItemStackMessage::new,
-            S2CSyncItemStackMessage::handle);
+    INSTANCE.registerMessage(id++, S2CSetFluidStackMessage.class,
+            S2CSetFluidStackMessage::encode,
+            S2CSetFluidStackMessage::new,
+            S2CSetFluidStackMessage::handle);
   }
 }

@@ -1,15 +1,19 @@
 package tfar.tanknull;
 
+import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.gui.ScreenManager;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.FluidState;
-import net.minecraft.fluid.IFluidState;
+import net.minecraft.inventory.container.ContainerType;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntityType;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fluids.FluidStack;
@@ -19,6 +23,8 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.registries.IForgeRegistry;
+import net.minecraftforge.registries.IForgeRegistryEntry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.glfw.GLFW;
@@ -44,12 +50,57 @@ public class TankNull {
 		iEventBus.addListener(this::setup);
 		// Register the doClientStuff method for modloading
 		iEventBus.addListener(this::doClientStuff);
-		RegistryObjects.ITEMS.register(iEventBus);
-		RegistryObjects.BLOCKS.register(iEventBus);
-		RegistryObjects.BLOCK_ENTITIES.register(iEventBus);
-		RegistryObjects.MENUS.register(iEventBus);
-		RegistryObjects.RECIPE_SERIALIZERS.register(iEventBus);
 		EVENT_BUS.addListener(this::sponge);
+		iEventBus.addGenericListener(Item.class, this::items);
+		iEventBus.addGenericListener(Block.class, this::blocks);
+		iEventBus.addGenericListener(ContainerType.class, this::menus);
+		iEventBus.addGenericListener(TileEntityType.class, this::blockentities);
+
+	}
+
+	private void blocks(RegistryEvent.Register<Block> event) {
+		register(event.getRegistry(), "dock", RegistryObjects.dock);
+	}
+
+	private void items(RegistryEvent.Register<Item> event) {
+		register(event.getRegistry(), "dock", RegistryObjects.dock_item);
+		register(event.getRegistry(), "tank_1", RegistryObjects.tank_1);
+		register(event.getRegistry(), "tank_2", RegistryObjects.tank_2);
+		register(event.getRegistry(), "tank_3", RegistryObjects.tank_3);
+		register(event.getRegistry(), "tank_4", RegistryObjects.tank_4);
+		register(event.getRegistry(), "tank_5", RegistryObjects.tank_5);
+		register(event.getRegistry(), "tank_6", RegistryObjects.tank_6);
+		register(event.getRegistry(), "tank_7", RegistryObjects.tank_7);
+	}
+
+	private void menus(RegistryEvent.Register<ContainerType<?>> event) {
+		register(event.getRegistry(), "tank_1", RegistryObjects.tank_1_container);
+		register(event.getRegistry(), "tank_2", RegistryObjects.tank_2_container);
+		register(event.getRegistry(), "tank_3", RegistryObjects.tank_3_container);
+		register(event.getRegistry(), "tank_4", RegistryObjects.tank_4_container);
+		register(event.getRegistry(), "tank_5", RegistryObjects.tank_5_container);
+		register(event.getRegistry(), "tank_6", RegistryObjects.tank_6_container);
+		register(event.getRegistry(), "tank_7", RegistryObjects.tank_7_container);
+
+		register(event.getRegistry(), "tank_1_portable", RegistryObjects.tank_1_portable);
+		register(event.getRegistry(), "tank_2_portable", RegistryObjects.tank_2_portable);
+		register(event.getRegistry(), "tank_3_portable", RegistryObjects.tank_3_portable);
+		register(event.getRegistry(), "tank_4_portable", RegistryObjects.tank_4_portable);
+		register(event.getRegistry(), "tank_5_portable", RegistryObjects.tank_5_portable);
+		register(event.getRegistry(), "tank_6_portable", RegistryObjects.tank_6_portable);
+		register(event.getRegistry(), "tank_7_portable", RegistryObjects.tank_7_portable);
+	}
+
+	private void blockentities(RegistryEvent.Register<TileEntityType<?>> event) {
+		register(event.getRegistry(), "dock", RegistryObjects.blockentity);
+	}
+
+	private static <T extends IForgeRegistryEntry<T>> void register(IForgeRegistry<T> registry, ResourceLocation name, T obj) {
+		registry.register(obj.setRegistryName(name));
+	}
+
+	private static <T extends IForgeRegistryEntry<T>> void register(IForgeRegistry<T> registry, String name, T obj) {
+		register(registry, new ResourceLocation(MODID, name), obj);
 	}
 
 	private void setup(final FMLCommonSetupEvent event) {
@@ -57,8 +108,22 @@ public class TankNull {
 	}
 
 	private void doClientStuff(final FMLClientSetupEvent event) {
-		ScreenManager.registerFactory(RegistryObjects.block_container.get(), TileTankNullScreen::new);
-		ScreenManager.registerFactory(RegistryObjects.item_container.get(), ItemStackTankNullScreen::new);
+		ScreenManager.registerFactory(RegistryObjects.tank_1_container, BlockTankNullScreen::new);
+		ScreenManager.registerFactory(RegistryObjects.tank_2_container, BlockTankNullScreen::new);
+		ScreenManager.registerFactory(RegistryObjects.tank_3_container, BlockTankNullScreen::new);
+		ScreenManager.registerFactory(RegistryObjects.tank_4_container, BlockTankNullScreen::new);
+		ScreenManager.registerFactory(RegistryObjects.tank_5_container, BlockTankNullScreen::new);
+		ScreenManager.registerFactory(RegistryObjects.tank_6_container, BlockTankNullScreen::new);
+		ScreenManager.registerFactory(RegistryObjects.tank_7_container, BlockTankNullScreen::new);
+
+		ScreenManager.registerFactory(RegistryObjects.tank_1_portable, ItemStackTankNullScreen::new);
+		ScreenManager.registerFactory(RegistryObjects.tank_2_portable, ItemStackTankNullScreen::new);
+		ScreenManager.registerFactory(RegistryObjects.tank_3_portable, ItemStackTankNullScreen::new);
+		ScreenManager.registerFactory(RegistryObjects.tank_4_portable, ItemStackTankNullScreen::new);
+		ScreenManager.registerFactory(RegistryObjects.tank_5_portable, ItemStackTankNullScreen::new);
+		ScreenManager.registerFactory(RegistryObjects.tank_6_portable, ItemStackTankNullScreen::new);
+		ScreenManager.registerFactory(RegistryObjects.tank_7_portable, ItemStackTankNullScreen::new);
+
 		TankNullClient.MODE = new KeyBinding("key.tanknull.mode", GLFW.GLFW_KEY_I, "key.categories.tanknull");
 		ClientRegistry.registerKeyBinding(TankNullClient.MODE);
 	}
@@ -76,7 +141,7 @@ public class TankNull {
 						for (int y = -4; y < 4; y++)
 							for (int z = -4; z < 4; z++) {
 								mutable.setPos(x + origin.getX(), y + origin.getY(), z + origin.getZ());
-								IFluidState fluidState = world.getFluidState(mutable);
+								FluidState fluidState = world.getFluidState(mutable);
 								if (fluidState.isSource()) {
 									world.setBlockState(mutable, Blocks.AIR.getDefaultState());
 									TankNullItemStackFluidStackHandler.create(stack).fill1000(IFluidHandler.FluidAction.EXECUTE,
