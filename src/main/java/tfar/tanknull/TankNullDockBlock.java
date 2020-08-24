@@ -5,6 +5,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.container.INamedContainerProvider;
+import net.minecraft.item.ItemStack;
 import net.minecraft.state.IntegerProperty;
 import net.minecraft.state.StateContainer;
 import net.minecraft.tileentity.TileEntity;
@@ -18,6 +19,8 @@ import net.minecraftforge.fml.network.NetworkHooks;
 import tfar.tanknull.inventory.FluidHandlerHelper;
 
 import javax.annotation.Nullable;
+
+import static net.minecraftforge.fluids.capability.CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY;
 
 public class TankNullDockBlock extends Block {
 
@@ -33,13 +36,21 @@ public class TankNullDockBlock extends Block {
       final TileEntity tile = world.getTileEntity(pos);
       if (tile instanceof TankNullDockBlockEntity) {
         int blockTier = state.get(TankNullDockBlock.TIER);
-
-        if (player.getHeldItem(hand).getItem() instanceof TankNullItem) {
+        ItemStack stack = player.getHeldItem(hand);
+        if (stack.getItem() instanceof TankNullItem) {
 
           if (blockTier == 0) {
             ((TankNullDockBlockEntity) tile).addTank(player.getHeldItem(hand));
             return ActionResultType.SUCCESS;
           }
+        }
+
+        else if (stack.getCapability(FLUID_HANDLER_ITEM_CAPABILITY).isPresent()) {
+          stack.getCapability(FLUID_HANDLER_ITEM_CAPABILITY).ifPresent(
+                  iFluidHandlerItem -> {
+
+                  }
+          );
         }
 
         if (player.isCrouching() && player.getHeldItem(hand).isEmpty() && blockTier > 0) {

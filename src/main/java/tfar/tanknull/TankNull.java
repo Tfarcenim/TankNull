@@ -56,7 +56,7 @@ public class TankNull {
 		iEventBus.addGenericListener(Block.class, this::blocks);
 		iEventBus.addGenericListener(ContainerType.class, this::menus);
 		iEventBus.addGenericListener(TileEntityType.class, this::blockentities);
-
+		iEventBus.addGenericListener(IRecipeSerializer.class,this::recipes);
 	}
 
 	private void blocks(RegistryEvent.Register<Block> event) {
