@@ -1,12 +1,73 @@
 {
-  "variants": {
-    "tier=0": { "model": "tanknull:block/empty_dock" },
-    "tier=1": { "model": "tanknull:block/dock_1" },
-    "tier=2": { "model": "tanknull:block/dock_2" },
-    "tier=3": { "model": "tanknull:block/dock_3" },
-    "tier=4": { "model": "tanknull:block/dock_4" },
-    "tier=5": { "model": "tanknull:block/dock_5" },
-    "tier=6": { "model": "tanknull:block/dock_6" },
-    "tier=7": { "model": "tanknull:block/dock_7" }
-  }
+  "multipart" :[
+    {
+      "apply": {
+        "model": "tanknull:block/dock",
+        "uvlock": false
+      }
+    },
+    {
+      "when": {
+        "tier": "1"
+      },
+      "apply": {
+        "model": "tanknull:block/tank_1",
+        "uvlock": false
+      }
+    },
+    {
+      "when": {
+        "tier": "2"
+      },
+      "apply": {
+        "model": "tanknull:block/tank_2",
+        "uvlock": false
+      }
+    },
+    {
+      "when": {
+        "tier": "3"
+      },
+      "apply": {
+        "model": "tanknull:block/tank_3",
+        "uvlock": false
+      }
+    },
+    {
+      "when": {
+        "tier": "4"
+      },
+      "apply": {
+        "model": "tanknull:block/tank_4",
+        "uvlock": false
+      }
+    },
+    {
+      "when": {
+        "tier": "5"
+      },
+      "apply": {
+        "model": "tanknull:block/tank_5",
+        "uvlock": false
+      }
+    },
+    {
+      "when": {
+        "tier": "6"
+      },
+      "apply": {
+        "model": "tanknull:block/tank_6",
+        "uvlock": false
+      }
+    },
+    {
+      "when": {
+        "tier": "7"
+      },
+      "apply": {
+        "model": "tanknull:block/tank_7",
+        "uvlock": false
+      }
+    }
+  ]
 }
