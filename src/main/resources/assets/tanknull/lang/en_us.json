@@ -31,6 +31,8 @@
 
   "text.tanknull.mode": "Mode: %s",
 
+  "key.tanknull.mode": "Change Mode",
+
   "key.categories.tanknull": "Tank Null",
 
   "text.tanknull.shift": "Press %s for Info",

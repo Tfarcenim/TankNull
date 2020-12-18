@@ -78,7 +78,7 @@ public class TankNullDockBlockEntity extends TileEntity implements INamedContain
   @Nullable
   @Override
   public Container createMenu(int i, PlayerInventory playerInventory, PlayerEntity playerEntity) {
-    int tier = getBlockState().get(TankNullDockBlock.TIER);
+    int tier = getBlockState().get(DockBlock.TIER);
     switch (tier) {
       case 1:return BlockTankNullMenu.t1s(i,playerInventory,handler);
       case 2:return BlockTankNullMenu.t2s(i,playerInventory,handler);
@@ -124,9 +124,9 @@ public class TankNullDockBlockEntity extends TileEntity implements INamedContain
   }
 
   public void removeTank(){
-    int tier = getBlockState().get(TankNullDockBlock.TIER);
+    int tier = getBlockState().get(DockBlock.TIER);
     CompoundNBT nbt = handler.serializeNBT();
-    world.setBlockState(pos,getBlockState().with(TankNullDockBlock.TIER,0));
+    world.setBlockState(pos,getBlockState().with(DockBlock.TIER,0));
     optional.invalidate();
     ItemStack stack = new ItemStack(Utils.getItem(tier));
     stack.getOrCreateTag().put(Utils.FLUIDINV,nbt);
@@ -137,7 +137,7 @@ public class TankNullDockBlockEntity extends TileEntity implements INamedContain
   public void addTank(ItemStack tank){
     if (tank.getItem() instanceof TankNullItem) {
       int tier = Utils.getStats(tank).ordinal();
-      world.setBlockState(pos,getBlockState().with(TankNullDockBlock.TIER,tier));
+      world.setBlockState(pos,getBlockState().with(DockBlock.TIER,tier));
       handler.setCapacity(Utils.getCapacity(tank)).setSize(Utils.getTanks(tank));
       handler.deserializeNBT(tank.getOrCreateTag().getCompound(Utils.FLUIDINV));
       optional = LazyOptional.of(() -> handler);

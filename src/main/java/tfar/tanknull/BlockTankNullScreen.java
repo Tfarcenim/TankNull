@@ -33,7 +33,7 @@ public class BlockTankNullScreen extends ContainerScreen<BlockTankNullMenu> impl
   public void render(MatrixStack stack,int p_render_1_, int p_render_2_, float p_render_3_) {
     renderBackground(stack);
     super.render(stack,p_render_1_, p_render_2_, p_render_3_);
-    this.func_230459_a_(stack,p_render_1_, p_render_2_);
+    this.renderHoveredTooltip(stack,p_render_1_, p_render_2_);
   }
 
   /**

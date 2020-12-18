@@ -129,7 +129,7 @@ public class TankNull {
 		ScreenManager.registerFactory(RegistryObjects.tank_6_portable, ItemStackTankNullScreen::new);
 		ScreenManager.registerFactory(RegistryObjects.tank_7_portable, ItemStackTankNullScreen::new);
 
-		TankNullClient.MODE = new KeyBinding("key.tanknull.mode", GLFW.GLFW_KEY_I, "key.categories.tanknull");
+		TankNullClient.MODE = new KeyBinding("key.tanknull.mode", GLFW.GLFW_KEY_O, "key.categories.tanknull");
 		ClientRegistry.registerKeyBinding(TankNullClient.MODE);
 	}
 

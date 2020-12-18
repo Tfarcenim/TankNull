@@ -65,7 +65,7 @@ public class TankNullItem extends Item {
 							.append(new TranslationTextComponent(" Alt + Right Click to swap").mergeStyle(TextFormatting.GRAY));
 			tooltip.add(text);
 			tooltip.add(new TranslationTextComponent("text.tanknull.settings",
-							new StringTextComponent(TankNullClient.MODE.getTranslationKey()).mergeStyle(TextFormatting.YELLOW)));
+							TankNullClient.MODE.func_238171_j_().copyRaw().mergeStyle(TextFormatting.YELLOW)));
 			boolean sponge = fluidTag.getBoolean("sponge");
 			if (sponge) {
 				tooltip.add(new StringTextComponent("Sponge"));
@@ -233,7 +233,7 @@ public class TankNullItem extends Item {
 			boolean flag = blockstate.isReplaceable(selectedFluidStack.getFluid());
 			if (blockstate.isAir(worldIn, posIn) || flag || blockstate.getBlock() instanceof ILiquidContainer && ((ILiquidContainer) blockstate.getBlock())
 							.canContainFluid(worldIn, posIn, blockstate, selectedFluidStack.getFluid())) {
-				if (worldIn.func_230315_m_().func_236040_e_() && selectedFluidStack.getFluid().isIn(FluidTags.WATER)) {
+				if (worldIn.getDimensionType().isUltrawarm() && selectedFluidStack.getFluid().isIn(FluidTags.WATER)) {
 					int i = posIn.getX();
 					int j = posIn.getY();
 					int k = posIn.getZ();
@@ -281,7 +281,7 @@ public class TankNullItem extends Item {
 		World world = ctx.getWorld();
 		BlockState state = world.getBlockState(pos);
 		TileEntity blockentity = world.getTileEntity(pos);
-		if (!(state.getBlock() instanceof TankNullDockBlock) && blockentity != null) {
+		if (!(state.getBlock() instanceof DockBlock) && blockentity != null) {
 
 			//blockentity.getCapability()
 

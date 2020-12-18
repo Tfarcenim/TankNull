@@ -17,7 +17,7 @@ import tfar.tanknull.recipe.Serializer2;
 
 public class RegistryObjects {
 
-  public static final Block dock = new TankNullDockBlock(Block.Properties.create(new Material.Builder(MaterialColor.IRON).build()).hardnessAndResistance(1).harvestTool(ToolType.PICKAXE));
+  public static final Block dock = new DockBlock(Block.Properties.create(new Material.Builder(MaterialColor.IRON).build()).hardnessAndResistance(2,1000).harvestTool(ToolType.PICKAXE));
 
   public static final Item dock_item = new BlockItem(dock,new Item.Properties().group(ItemGroup.TOOLS));
 
