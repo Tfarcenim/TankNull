@@ -1,5 +1,6 @@
 package tfar.tanknull.inventory;
 
+import net.minecraft.fluid.Fluid;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
@@ -39,20 +40,20 @@ public class TankNullItemStackFluidStackHandler extends ItemStackFluidStackHandl
     return this;
   }
 
-  public boolean canPickup(FluidStack stack) {
-    return hasRoomForBlockFluid(stack);
+  public boolean hasRoomForFluid(FluidStack toPickup) {
+    return fill(toPickup, FluidAction.SIMULATE) == toPickup.getAmount();
   }
 
-  public boolean hasRoomForBlockFluid(FluidStack toPickup) {
-    return toPickup.getAmount() == fill1000(FluidAction.SIMULATE, toPickup);
+  public boolean hasRoomForFluidBlock(Fluid toPickup) {
+    return hasRoomForFluid(new FluidStack(toPickup,1000));
   }
 
   public FluidStack drain1000(FluidAction action) {
     return drain(selectedTank, 1000, action);
   }
 
-  public int fill1000(FluidAction action, FluidStack toPickup) {
-    return fill(toPickup, action);
+  public int fill1000(FluidAction action, Fluid toPickup) {
+    return fill(new FluidStack(toPickup,1000), action);
   }
 
   public FluidStack getSelectedFluid() {

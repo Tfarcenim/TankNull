@@ -125,7 +125,7 @@ public class TankNullItem extends Item {
 					else if (rayTracedState.getBlock() instanceof FlowingFluidBlock)
 						fluid = (((FlowingFluidBlock) rayTracedState.getBlock()).getFluid());
 					if (fluid != Fluids.EMPTY) {
-						if (handler.hasRoomForBlockFluid(new FluidStack(fluid, 1000))/*todo or isvoid*/) {
+						if (handler.hasRoomForFluid(new FluidStack(fluid, 1000))/*todo or isvoid*/) {
 							((IBucketPickupHandler) rayTracedState.getBlock()).pickupFluid(world, tracedPos, rayTracedState);
 							player.addStat(Stats.ITEM_USED.get(this));
 							SoundEvent soundevent = selectedFluidStack.getFluid().getAttributes().getEmptySound();
@@ -133,7 +133,7 @@ public class TankNullItem extends Item {
 								soundevent = fluid.isIn(FluidTags.LAVA) ? SoundEvents.ITEM_BUCKET_FILL_LAVA : SoundEvents.ITEM_BUCKET_FILL;
 							player.playSound(soundevent, 1.0F, 1.0F);
 
-							return ActionResult.resultConsume(this.fillBucket(fluid, itemstack, handler, player));
+							return ActionResult.resultConsume(this.fillBucketFromBlock(fluid, itemstack, handler, player));
 						}
 					}
 				}
@@ -146,7 +146,9 @@ public class TankNullItem extends Item {
 
 	public ActionResult<ItemStack> empty(World world, PlayerEntity player, Hand hand, ItemStack itemstack, TankNullItemStackFluidStackHandler handler) {
 		FluidStack selectedFluidStack = handler.getFluidInTank(handler.selectedTank);
+		boolean smart = handler.smartPlacing;
 		if (selectedFluidStack.isEmpty()) return ActionResult.resultFail(itemstack);
+
 
 		selectedFluidStack.isEmpty();
 		BlockRayTraceResult raytraceresult = rayTrace(world, player, RayTraceContext.FluidMode.SOURCE_ONLY);
@@ -158,11 +160,12 @@ public class TankNullItem extends Item {
 			return ActionResult.resultFail(itemstack);
 		}
 		BlockPos rayTracePoa = raytraceresult.getPos();
+
 		Direction direction = raytraceresult.getFace();
 		BlockPos placingPosition = rayTracePoa.offset(direction);
 		if (world.isBlockModifiable(player, rayTracePoa) && player.canPlayerEdit(placingPosition, direction, itemstack)) {
 
-			if (this.tryPlaceContainedLiquid(player, world, placingPosition, raytraceresult, selectedFluidStack)) {
+			if (this.tryPlaceContainedLiquid(player, world,smart ? placingPosition : rayTracePoa, raytraceresult, selectedFluidStack)) {
 				this.onLiquidPlaced(world, itemstack, placingPosition);
 				if (player instanceof ServerPlayerEntity) {
 					CriteriaTriggers.PLACED_BLOCK.trigger((ServerPlayerEntity) player, placingPosition, itemstack);
@@ -175,7 +178,6 @@ public class TankNullItem extends Item {
 		}
 		return ActionResult.resultPass(itemstack);
 
-		//BlockState blockstate1 = world.getBlockState(rayTracePoa);
 
 
 
@@ -219,8 +221,8 @@ public class TankNullItem extends Item {
 	public void onLiquidPlaced(World worldIn, ItemStack p_203792_2_, BlockPos pos) {
 	}
 
-	protected ItemStack fillBucket(Fluid fluid, ItemStack emptyBucket, TankNullItemStackFluidStackHandler handler, PlayerEntity player) {
-		handler.fill1000(IFluidHandler.FluidAction.EXECUTE, new FluidStack(fluid, 1000));
+	protected ItemStack fillBucketFromBlock(Fluid fluid, ItemStack emptyBucket, TankNullItemStackFluidStackHandler handler, PlayerEntity player) {
+		handler.fill1000(IFluidHandler.FluidAction.EXECUTE, fluid);
 		return emptyBucket;
 	}
 
@@ -229,10 +231,18 @@ public class TankNullItem extends Item {
 			return false;
 		} else {
 			BlockState blockstate = worldIn.getBlockState(posIn);
+			Block block = blockstate.getBlock();
 			Material material = blockstate.getMaterial();
 			boolean flag = blockstate.isReplaceable(selectedFluidStack.getFluid());
-			if (blockstate.isAir(worldIn, posIn) || flag || blockstate.getBlock() instanceof ILiquidContainer && ((ILiquidContainer) blockstate.getBlock())
-							.canContainFluid(worldIn, posIn, blockstate, selectedFluidStack.getFluid())) {
+
+			boolean flag1 = blockstate.isAir() || flag ||
+					block instanceof ILiquidContainer && ((ILiquidContainer)block).canContainFluid(worldIn, posIn, blockstate, selectedFluidStack.getFluid());
+			if (!flag1) {
+				return result != null && this.tryPlaceContainedLiquid(player, worldIn, result.getPos().offset(result.getFace()), null,selectedFluidStack);
+			}
+
+			if (blockstate.isAir() || flag || blockstate.getBlock() instanceof ILiquidContainer &&
+					((ILiquidContainer) blockstate.getBlock()).canContainFluid(worldIn, posIn, blockstate, selectedFluidStack.getFluid())) {
 				if (worldIn.getDimensionType().isUltrawarm() && selectedFluidStack.getFluid().isIn(FluidTags.WATER)) {
 					int i = posIn.getX();
 					int j = posIn.getY();
