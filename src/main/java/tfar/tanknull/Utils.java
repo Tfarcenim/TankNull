@@ -12,6 +12,7 @@ import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandlerItem;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import tfar.tanknull.inventory.TankNullItemStackFluidStackHandler;
 
 import javax.annotation.Nonnull;
@@ -64,16 +65,7 @@ public class Utils {
 		return ((TankNullItem) block).stats.capacity;
 	}
 
-	public static boolean DEV;
-
-	static {
-		try {
-			Items.class.getField("field_190931_a");
-			DEV = false;
-		} catch (NoSuchFieldException e) {
-			DEV = true;
-		}
-	}
+	public static final boolean DEV = FMLEnvironment.production;
 
 	public static boolean isFill(ItemStack bag, PlayerEntity player) {
 		return TankNullItemStackFluidStackHandler.create(bag).isFill;

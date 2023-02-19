@@ -50,8 +50,8 @@ public class TankNullDockBlockEntity extends TileEntity implements INamedContain
   }
 
   public void loadRestorable(@Nullable CompoundNBT compound) {
-    if (compound != null && compound.contains("fluidinv")) {
-      CompoundNBT tanks = (CompoundNBT) compound.get("fluidinv");
+    if (compound != null && compound.contains(Utils.FLUIDINV)) {
+      CompoundNBT tanks = (CompoundNBT) compound.get(Utils.FLUIDINV);
       handler.deserializeNBT(tanks);
     }
   }
@@ -60,7 +60,7 @@ public class TankNullDockBlockEntity extends TileEntity implements INamedContain
   @Override
   public CompoundNBT write(CompoundNBT compound) {
     CompoundNBT tanks = handler.serializeNBT();
-    compound.put("fluidinv",tanks);
+    compound.put(Utils.FLUIDINV,tanks);
     return super.write(compound);
   }
 
@@ -114,7 +114,7 @@ public class TankNullDockBlockEntity extends TileEntity implements INamedContain
 
   @Override
   public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket packet) {
-    handler.deserializeNBT((CompoundNBT)packet.getNbtCompound().get("fluidinv"));
+    handler.deserializeNBT(packet.getNbtCompound().getCompound(Utils.FLUIDINV));
   }
 
   @Override
