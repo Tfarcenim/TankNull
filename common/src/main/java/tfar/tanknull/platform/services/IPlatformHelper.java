@@ -1,5 +1,8 @@
 package tfar.tanknull.platform.services;
 
+import net.minecraft.network.chat.Component;
+import tfar.tanknull.MLFluidStack;
+
 public interface IPlatformHelper {
 
     /**
@@ -33,4 +36,8 @@ public interface IPlatformHelper {
 
         return isDevelopmentEnvironment() ? "development" : "production";
     }
+
+    Component getDisplayName(MLFluidStack fluidStack);
+    String getTranslationKey(MLFluidStack fluidStack);
+
 }
