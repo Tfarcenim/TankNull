@@ -2,13 +2,11 @@ package tfar.tanknull;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.block.IBucketPickupHandler;
 import net.minecraft.client.gui.ScreenManager;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluid;
-import net.minecraft.fluid.FluidState;
 import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -20,7 +18,6 @@ import net.minecraft.world.World;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
@@ -132,7 +129,9 @@ public class TankNull {
         ScreenManager.registerFactory(RegistryObjects.tank_6_portable, ItemStackTankNullScreen::new);
         ScreenManager.registerFactory(RegistryObjects.tank_7_portable, ItemStackTankNullScreen::new);
 
-        TankNullClient.MODE = new KeyBinding("key.tanknull.mode", GLFW.GLFW_KEY_O, "key.categories.tanknull");
+        TankNullClient.OPEN_SETTINGS = new KeyBinding("key.tanknull.open_settings", GLFW.GLFW_KEY_O, "key.categories.tanknull");
+        TankNullClient.MODE = new KeyBinding("key.tanknull.mode", GLFW.GLFW_KEY_I, "key.categories.tanknull");
+        ClientRegistry.registerKeyBinding(TankNullClient.OPEN_SETTINGS);
         ClientRegistry.registerKeyBinding(TankNullClient.MODE);
     }
 

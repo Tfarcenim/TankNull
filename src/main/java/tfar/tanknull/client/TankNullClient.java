@@ -20,6 +20,7 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fml.common.Mod;
 import tfar.tanknull.TankNull;
 import tfar.tanknull.TankNullItem;
+import tfar.tanknull.Utils;
 import tfar.tanknull.inventory.TankNullItemStackFluidStackHandler;
 import tfar.tanknull.network.C2SMessageScrollTank;
 import tfar.tanknull.network.C2SOpenContainerMessage;
@@ -31,6 +32,7 @@ import static tfar.tanknull.BlockTankNullScreen.getFluidTexture;
 @Mod.EventBusSubscriber(value = Dist.CLIENT, modid = TankNull.MODID)
 public class TankNullClient {
 
+  public static KeyBinding OPEN_SETTINGS;
   public static KeyBinding MODE;
   public static final Minecraft mc = Minecraft.getInstance();
 
@@ -52,8 +54,12 @@ public class TankNullClient {
     if (mc.player == null || !(mc.player.getHeldItemMainhand().getItem() instanceof TankNullItem ||
             mc.player.getHeldItemOffhand().getItem() instanceof TankNullItem))
       return;
-    if (MODE.isPressed()) {
+    if (OPEN_SETTINGS.isPressed()) {
       Messages.INSTANCE.sendToServer(new C2SOpenContainerMessage());
+    }
+
+    if (MODE.isPressed()){
+      Messages.INSTANCE.sendToServer(new C2SToggleFillMessage());
     }
   }
 
@@ -62,9 +68,7 @@ public class TankNullClient {
     if (mc.player == null || !(mc.player.getHeldItemMainhand().getItem() instanceof TankNullItem ||
             mc.player.getHeldItemOffhand().getItem() instanceof TankNullItem) || event.getAction() != 1)
       return;
-    if (Screen.hasAltDown()){
-      Messages.INSTANCE.sendToServer(new C2SToggleFillMessage());
-    }
+
   }
 
   @SubscribeEvent
@@ -85,11 +89,20 @@ public class TankNullClient {
     if(handler.getTanks() == 0)return;
     FluidStack fluidStack = handler.getSelectedFluid();
 
+    final int itemX = xStart - 150;
+    final int itemY = yStart - 30;
     if (!fluidStack.isEmpty()) {
-      final int itemX = xStart - 150;
-      final int itemY = yStart - 25;
       renderSelectedFluid(event.getMatrixStack(),itemX, itemY, 0, player, fluidStack);
     }
+
+    boolean fill = Utils.isFill(bag);
+
+    String mode = fill? "Fill" : "Empty";
+
+    final int stringX = itemX + 8 - mc.fontRenderer.getStringWidth(mode) / 2;
+    final int stringY = itemY + 18;
+    mc.fontRenderer.drawStringWithShadow(event.getMatrixStack(), mode, stringX, stringY, 0xffffff);
+
     mc.getTextureManager().bindTexture(AbstractGui.GUI_ICONS_LOCATION);
   }
 

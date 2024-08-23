@@ -56,16 +56,16 @@ public class TankNullItem extends Item {
 			tooltip.add(new StringTextComponent(stack.getTag().toString()).mergeStyle(TextFormatting.DARK_GRAY));
 		CompoundNBT nbt = stack.getTag();
 		tooltip.add(new TranslationTextComponent("text.tanknull.stacklimit", Utils.getCapacity(this)));
-		if (nbt != null && !nbt.getCompound("fluidinv").isEmpty()) {
-			CompoundNBT fluidTag = nbt.getCompound("fluidinv");
+		if (nbt != null && !nbt.getCompound(Utils.FLUIDINV).isEmpty()) {
+			CompoundNBT fluidTag = nbt.getCompound(Utils.FLUIDINV);
 			ITextComponent text = new TranslationTextComponent("text.tanknull.mode",
 							fluidTag.getBoolean("fill") ?
 											new TranslationTextComponent("text.tanknull.mode.fill").mergeStyle(TextFormatting.AQUA) :
 											new TranslationTextComponent("text.tanknull.mode.empty").mergeStyle(TextFormatting.AQUA))
-							.append(new TranslationTextComponent(" Alt + Right Click to swap").mergeStyle(TextFormatting.GRAY));
+							.append(TankNullClient.MODE.func_238171_j_().copyRaw().mergeStyle(TextFormatting.YELLOW));
 			tooltip.add(text);
 			tooltip.add(new TranslationTextComponent("text.tanknull.settings",
-							TankNullClient.MODE.func_238171_j_().copyRaw().mergeStyle(TextFormatting.YELLOW)));
+							TankNullClient.OPEN_SETTINGS.func_238171_j_().copyRaw().mergeStyle(TextFormatting.YELLOW)));
 			boolean sponge = fluidTag.getBoolean("sponge");
 			if (sponge) {
 				tooltip.add(new StringTextComponent("Sponge"));

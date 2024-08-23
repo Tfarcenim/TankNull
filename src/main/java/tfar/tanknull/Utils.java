@@ -67,7 +67,7 @@ public class Utils {
 
 	public static final boolean DEV = FMLEnvironment.production;
 
-	public static boolean isFill(ItemStack bag, PlayerEntity player) {
+	public static boolean isFill(ItemStack bag) {
 		return TankNullItemStackFluidStackHandler.create(bag).isFill;
 	}
 
