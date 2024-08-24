@@ -6,6 +6,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import tfar.tanknull.DockBlockEntity;
@@ -95,5 +96,9 @@ public interface IPlatformHelper {
     void renderFluidInSlot(GuiGraphics matrices, int x, int y, MLFluidStack fluidStack);
     MLFluidStack extractFluid(ItemStack stack,MLFluidStack target);
     MLFluidStack extractAnyFluid(ItemStack stack, int max, FluidInventory.Action action);
+    MLFluidStack getStoredFluid(ItemStack stack);
+    int simulateFill(ItemStack stack, MLFluidStack fluid);
 
+    void transferContainerToTank(ItemStack container, FluidInventory fluidInventory, int fluid, int tank, Player player);
+    void transferTankToContainer(ItemStack container, FluidInventory fluidInventory, int fluid, int tank, Player player);
 }

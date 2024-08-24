@@ -1,5 +1,6 @@
 package tfar.tanknull;
 
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -12,6 +13,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 import tfar.tanknull.inventory.FluidInventory;
@@ -19,6 +21,7 @@ import tfar.tanknull.menu.AbstractTankMenu;
 import tfar.tanknull.world.TankSavedData;
 
 import javax.annotation.Nonnull;
+import java.util.List;
 
 public class TankItem extends Item {
 
@@ -49,6 +52,18 @@ public class TankItem extends Item {
         }
     }
 
+    @Override
+    public void appendHoverText(ItemStack stack, @Nullable Level $$1, List<Component> tooltip, TooltipFlag $$3) {
+        CompoundTag tag = stack.getTag();
+        if (tag != null) {
+            if (tag.contains(FREQUENCY)) {
+                tooltip.add(Component.translatable("Frequency: "+tag.getInt(FREQUENCY)));
+            } else {
+                tooltip.add(Component.translatable("Frequency: Unbound"));
+            }
+        }
+    }
+
     public MenuProvider createProvider(ItemStack stack) {
         return new PortableTankProvider(stack);
     }
@@ -64,7 +79,7 @@ public class TankItem extends Item {
 
         @Override
         public Component getDisplayName() {
-            return stack.getDisplayName();
+            return stack.getHoverName();
         }
 
         @Nullable

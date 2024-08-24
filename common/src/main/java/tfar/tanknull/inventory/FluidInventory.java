@@ -215,7 +215,7 @@ public class FluidInventory {
         return drain(resource.getAmount(), action);
     }
 
-    MLFluidStack drainSpecific(MLFluidStack resource, Action action,int tank) {
+    public MLFluidStack drainSpecific(MLFluidStack resource, Action action, int tank) {
         MLFluidStack fluid = fluids.get(tank);
         if (resource.isEmpty() || !resource.isFluidEqual(fluid)) {
             return MLFluidStack.EMPTY;
@@ -251,7 +251,7 @@ public class FluidInventory {
         return totalDrained != null ? totalDrained : MLFluidStack.EMPTY;
     }
 
-    MLFluidStack drainSpecific(int maxDrain,Action action,int tank) {
+    public MLFluidStack drainSpecific(int maxDrain,Action action,int tank) {
         int drained = maxDrain;
 
         MLFluidStack fluid = fluids.get(tank);

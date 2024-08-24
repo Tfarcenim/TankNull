@@ -73,6 +73,7 @@ public class TankScreen extends AbstractContainerScreen<AbstractTankMenu> {
             MLFluidStack fluidStack = slot.getFluid();
 
             ItemStack carried = menu.getCarried();
+            MLFluidStack carriedFluid = Services.PLATFORM.getStoredFluid(carried);
 
             ClickAction action = null;
 
@@ -81,6 +82,19 @@ public class TankScreen extends AbstractContainerScreen<AbstractTankMenu> {
 
                 } else if (pButton == GLFW.GLFW_MOUSE_BUTTON_2) {//right click
                     action = ClickAction.DEPOSIT_ONE;
+                }
+            } else {
+                if (pButton == GLFW.GLFW_MOUSE_BUTTON_1) {//left click
+
+                } else if (pButton == GLFW.GLFW_MOUSE_BUTTON_2) {//right click
+                    if (!carried.isEmpty()) {
+                        if (carriedFluid.isEmpty()) {
+                            //pickup half
+                            action = ClickAction.PICKUP_HALF;
+                        } else {
+                            action = ClickAction.DEPOSIT_ONE;
+                        }
+                    }
                 }
             }
             if (action != null) {

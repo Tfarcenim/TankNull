@@ -12,14 +12,18 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
+import net.minecraftforge.fluids.FluidActionResult;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandlerItem;
+import net.minecraftforge.items.wrapper.InvWrapper;
 import org.apache.commons.lang3.tuple.Pair;
 import tfar.tanknull.*;
 import tfar.tanknull.client.StackSizeRenderer;
@@ -185,5 +189,43 @@ public class ForgePlatformHelper implements IPlatformHelper {
             }
         }
         return MLFluidStack.EMPTY;
+    }
+
+    @Override
+    public MLFluidStack getStoredFluid(ItemStack stack) {
+        if (!stack.isEmpty()) {
+            IFluidHandlerItem iFluidHandlerItem = stack.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM).orElse(null);
+            if (iFluidHandlerItem != null) {
+                FluidStack drained = iFluidHandlerItem.drain(Integer.MAX_VALUE,action(FluidInventory.Action.SIMULATE));
+                return convert(drained);
+            }
+        }
+        return MLFluidStack.EMPTY;
+    }
+
+    @Override
+    public int simulateFill(ItemStack stack, MLFluidStack fluid) {
+        IFluidHandlerItem iFluidHandlerItem = stack.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM).orElse(null);
+        if (iFluidHandlerItem != null) {
+            int filled = iFluidHandlerItem.fill(convertToForge(fluid),action(FluidInventory.Action.SIMULATE));
+            return filled;
+        }
+        return 0;
+    }
+
+    @Override
+    public void transferContainerToTank(ItemStack container, FluidInventory fluidInventory, int maxFill, int tank, Player player) {
+        FluidActionResult fluidActionResult = FluidUtil.tryEmptyContainerAndStow(container, (ForgeFluidInventory) fluidInventory, new InvWrapper(player.getInventory()), maxFill, player, true);
+        if (fluidActionResult.isSuccess()) {
+            player.containerMenu.setCarried(fluidActionResult.getResult());
+        }
+    }
+
+    @Override
+    public void transferTankToContainer(ItemStack container, FluidInventory fluidInventory, int maxDrain, int tank, Player player) {
+        FluidActionResult fluidActionResult = FluidUtil.tryFillContainerAndStow(container, (ForgeFluidInventory) fluidInventory, new InvWrapper(player.getInventory()), maxDrain, player, true);
+        if (fluidActionResult.isSuccess()) {
+            player.containerMenu.setCarried(fluidActionResult.getResult());
+        }
     }
 }

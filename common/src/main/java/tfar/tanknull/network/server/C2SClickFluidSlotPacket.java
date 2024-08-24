@@ -93,22 +93,32 @@ public class C2SClickFluidSlotPacket implements C2SModPacket {
             AbstractContainerMenu menu = player.containerMenu;
             if (menu instanceof AbstractTankMenu abstractTankMenu) {
                 FluidInventory fluidInventory = abstractTankMenu.fluidInventory;
+                ItemStack carried = abstractTankMenu.getCarried();
+
                 switch (clickType) {
                     case PICKUP -> {
 
                     }
                     case DEPOSIT_ONE -> {
-                        ItemStack carried = abstractTankMenu.getCarried();
                         MLFluidStack fluidStack = Services.PLATFORM.extractAnyFluid(carried, 1000, FluidInventory.Action.SIMULATE);
                         if (!fluidStack.isEmpty()) {
                             int fill = fluidInventory.fillSpecific(fluidStack, FluidInventory.Action.SIMULATE, slotNum);
                             if (fill == fluidStack.getAmount()) {//everything was filled, safe to transfer
-                                MLFluidStack extract = Services.PLATFORM.extractAnyFluid(carried, 1000, FluidInventory.Action.EXECUTE);
-                                fluidInventory.fillSpecific(extract, FluidInventory.Action.EXECUTE, slotNum);
+                                Services.PLATFORM.transferContainerToTank(carried,fluidInventory,fill,slotNum,player);
                             }
                         }
                     }
                     case DEPOSIT_ALL -> {
+                    }
+                    case PICKUP_HALF -> {
+                        MLFluidStack fluidInSlot = fluidInventory.fluids.get(slotNum);
+                        int drain = fluidInSlot.getAmount() / 2;
+                        int buckets = (int) Math.ceil(drain/1000d);
+                        MLFluidStack drained = fluidInSlot.copyWithAmount(buckets * 1000);
+                        int filled = Services.PLATFORM.simulateFill(carried,drained);
+                        if (filled > 0) {
+                            Services.PLATFORM.transferTankToContainer(carried,fluidInventory,filled,slotNum, player);
+                        }
                     }
                 }
             }
