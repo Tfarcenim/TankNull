@@ -179,6 +179,7 @@ public class FluidInventory {
         if (fluid.isEmpty()) {
             fluid = resource.copyWithAmount(Math.min(capacity, resource.getAmount()));
             fluids.set(tank,fluid);
+            setDirty();
             return fluid.getAmount();
         }
         if (!fluid.isFluidEqual(resource)) {
@@ -193,7 +194,7 @@ public class FluidInventory {
             fluid.setAmount(capacity);
         }
         if (filled > 0) {
-
+            setDirty();
         }
         return filled;
     }
@@ -258,9 +259,10 @@ public class FluidInventory {
         if (fluid.getAmount() < drained) {
             drained = fluid.getAmount();
         }
-        MLFluidStack stack = new MLFluidStack(fluid, drained);
+        MLFluidStack stack = fluid.copyWithAmount(drained);
         if (action.execute() && drained > 0) {
             fluid.shrink(drained);
+            setDirty();
         }
         return stack;
     }
@@ -270,5 +272,4 @@ public class FluidInventory {
             data.setDirty();
         }
     }
-
 }
