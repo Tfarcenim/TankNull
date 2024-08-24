@@ -5,6 +5,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.Nameable;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -38,7 +39,7 @@ public class DockBlockEntity extends BlockEntity implements MenuProvider, Nameab
     @Override
     protected void saveAdditional(CompoundTag tag) {
         super.saveAdditional(tag);
-        tag.put("tank",tank.save(tag));
+        tag.put("tank",tank.save(new CompoundTag()));
     }
 
     @Override
@@ -54,6 +55,34 @@ public class DockBlockEntity extends BlockEntity implements MenuProvider, Nameab
             this.tank = tank.split(1);
             setChanged();
         }
+    }
+
+    public void giveToPlayer(Player player) {
+        ItemStack tank = removeTankWithoutItemSpawn();
+
+        if (!player.addItem(tank)) {
+            ItemEntity entity = new ItemEntity(level, worldPosition.getX(), worldPosition.getY(), worldPosition.getZ(), tank);
+            level.addFreshEntity(entity);
+        }
+    }
+
+    @Override
+    public CompoundTag getUpdateTag() {
+        return saveWithoutMetadata();
+    }
+
+    public void removeTankWithItemSpawn() {
+        ItemStack dankInStack = removeTankWithoutItemSpawn();
+        ItemEntity entity = new ItemEntity(level, worldPosition.getX(), worldPosition.getY(), worldPosition.getZ(), dankInStack);
+        level.addFreshEntity(entity);
+    }
+
+    public ItemStack removeTankWithoutItemSpawn() {
+        level.setBlockAndUpdate(worldPosition, getBlockState().setValue(DockBlock.TIER, 0));
+        ItemStack stack = tank.copy();
+        tank = ItemStack.EMPTY;
+        setChanged();
+        return stack;
     }
 
     public Component getDefaultName() {
@@ -80,6 +109,9 @@ public class DockBlockEntity extends BlockEntity implements MenuProvider, Nameab
     @Nullable
     @Override
     public AbstractContainerMenu createMenu(int i, Inventory inventory, Player player) {
+        if (tank.getItem() instanceof TankItem tankItem) {
+            return tankItem.createProvider(tank).createMenu(i, inventory, player);
+        }
         return null;
     }
 }
