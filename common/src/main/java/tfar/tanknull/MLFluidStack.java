@@ -46,7 +46,7 @@ public class MLFluidStack {
             LOGGER.fatal("Null fluid supplied to MLFluidStack. Did you try and create a stack for an unregistered fluid?");
             throw new IllegalArgumentException("Cannot create a MLFluidStack from a null fluid");
         } else {
-            BuiltInRegistries.FLUID.getKey(fluid);
+            this.fluid = fluid;
         }
         this.amount = amount;
 
@@ -158,6 +158,16 @@ public class MLFluidStack {
         return tag;
     }
 
+    public MLFluidStack copyWithAmount(int amount) {
+        if (this.isEmpty()) {
+            return EMPTY;
+        } else {
+            MLFluidStack stack = this.copy();
+            stack.setAmount(amount);
+            return stack;
+        }
+    }
+
     public void setTag(net.minecraft.nbt.CompoundTag tag) {
         if (fluid == Fluids.EMPTY) throw new IllegalStateException("Can't modify the empty stack.");
         if (immutable) throw new IllegalStateException("Illegal modification detected");
@@ -202,6 +212,7 @@ public class MLFluidStack {
      * @return A copy of this MLFluidStack
      */
     public MLFluidStack copy() {
+        if (isEmpty()) return EMPTY;
         return new MLFluidStack(getFluid(), amount, tag);
     }
 
@@ -212,10 +223,10 @@ public class MLFluidStack {
      * @return true if the Fluids (IDs and NBT Tags) are the same
      */
     public boolean isFluidEqual(@NotNull MLFluidStack other) {
-        return getFluid() == other.getFluid() && isCommonFluidStackTagEqual(other);
+        return getFluid() == other.getFluid() && isTagEqual(other);
     }
 
-    private boolean isCommonFluidStackTagEqual(MLFluidStack other) {
+    private boolean isTagEqual(MLFluidStack other) {
         return tag == null ? other.tag == null : other.tag != null && tag.equals(other.tag);
     }
 
@@ -223,7 +234,7 @@ public class MLFluidStack {
      * Determines if the NBT Tags are equal. Useful if the FluidIDs are known to be equal.
      */
     public static boolean areFluidStackTagsEqual(@NotNull MLFluidStack stack1, @NotNull MLFluidStack stack2) {
-        return stack1.isCommonFluidStackTagEqual(stack2);
+        return stack1.isTagEqual(stack2);
     }
 
     /**

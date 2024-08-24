@@ -13,7 +13,7 @@ public class S2CSetFluidSlotPacket implements S2CModPacket{
     private final int slot;
     private final MLFluidStack stack;
 
-    public S2CSetFluidSlotPacket(int pContainerId, int pStateId, int pSlot, MLFluidStack stack) {
+    public S2CSetFluidSlotPacket(int pStateId, int pContainerId, int pSlot, MLFluidStack stack) {
         this.containerId = pContainerId;
         this.stateId = pStateId;
         this.slot = pSlot;
@@ -36,7 +36,10 @@ public class S2CSetFluidSlotPacket implements S2CModPacket{
     }
 
     @Override
-    public void write(FriendlyByteBuf to) {
-
+    public void write(FriendlyByteBuf buffer) {
+        buffer.writeByte(this.containerId);
+        buffer.writeVarInt(this.stateId);
+        buffer.writeShort(this.slot);
+        stack.writeToPacket(buffer);
     }
 }

@@ -14,6 +14,7 @@ import tfar.tanknull.inventory.FluidInventory;
 import tfar.tanknull.inventory.FluidSlot;
 import tfar.tanknull.inventory.LockedSlot;
 import tfar.tanknull.network.client.S2CInitialSyncFluidInventoryPacket;
+import tfar.tanknull.network.client.S2CSetFluidSlotPacket;
 import tfar.tanknull.platform.Services;
 
 import javax.annotation.Nonnull;
@@ -242,20 +243,30 @@ public class AbstractTankMenu extends AbstractContainerMenu {
             if (!$$3.isFluidStackIdentical($$1)) {
                 MLFluidStack $$4 = $$2.get();
                 this.remoteFluidSlots.set($$0, $$4);
+
+                Services.PLATFORM.sendToClient(new S2CSetFluidSlotPacket(stateId,containerId,$$0,$$1), (ServerPlayer) playerInventory.player);
+
           //      if (this.synchronizer != null) {
           //          this.synchronizer.sendSlotChange(this, $$0, $$4);
          //       }
 
 
 
-            }
+           }
      //   }
     }
 
     @Override
     public void sendAllDataToRemote() {
         super.sendAllDataToRemote();
-        Services.PLATFORM.sendToClient(new S2CInitialSyncFluidInventoryPacket(containerId, incrementStateId(), fluidInventory.fluids), (ServerPlayer) playerInventory.player);
+
+        int $$2 = 0;
+        for(int i = this.fluidSlots.size(); $$2 < i; ++$$2) {
+            this.remoteFluidSlots.set($$2, this.fluidSlots.get($$2).getFluid().copy());
+        }
+
+
+        Services.PLATFORM.sendToClient(new S2CInitialSyncFluidInventoryPacket(incrementStateId(), containerId, fluidInventory.fluids), (ServerPlayer) playerInventory.player);
     }
 
     public void setFluid(int slot, int stateId, MLFluidStack stack) {

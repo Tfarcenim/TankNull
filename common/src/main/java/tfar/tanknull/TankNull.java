@@ -1,12 +1,15 @@
 package tfar.tanknull;
 
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.storage.LevelStorageSource;
 import tfar.tanknull.init.ModBlockEntityTypes;
 import tfar.tanknull.init.ModBlocks;
 import tfar.tanknull.init.ModItems;
@@ -17,6 +20,8 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Items;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
 
 // This class is part of the common project meaning it is shared between all supported loaders. Code written here can only
 // import and access the vanilla codebase, libraries used by vanilla, and optionally third party libraries that provide
@@ -51,6 +56,14 @@ public class TankNull {
         // we have an interface in the common code and use a loader specific implementation to delegate our call to
         // the platform specific approach.
         PacketHandler.registerPackets();
+    }
+
+    public static void onServerStart(MinecraftServer server) {
+        LevelStorageSource.LevelStorageAccess storageSource = server.storageSource;
+        File file = storageSource.getDimensionPath(server.getLevel(Level.OVERWORLD).dimension())
+                .resolve("data/"+ MOD_ID).toFile();
+        file.mkdirs();
+
     }
 
     public static ResourceLocation id(String key) {

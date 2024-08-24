@@ -17,6 +17,7 @@ public class PacketHandler {
         Services.PLATFORM.registerServerPacket(C2SButtonPacket.class, C2SButtonPacket::new);
         Services.PLATFORM.registerServerPacket(C2SSetFrequencyPacket.class, C2SSetFrequencyPacket::new);
         Services.PLATFORM.registerServerPacket(C2SRequestContentsPacket.class, C2SRequestContentsPacket::new);
+        Services.PLATFORM.registerServerPacket(C2SClickFluidSlotPacket.class, C2SClickFluidSlotPacket::new);
 
         ///////server to client
 
@@ -24,6 +25,7 @@ public class PacketHandler {
         Services.PLATFORM.registerClientPacket(S2CSyncSelectedFluidPacket.class, S2CSyncSelectedFluidPacket::new);
         Services.PLATFORM.registerClientPacket(S2CInitialSyncFluidInventoryPacket.class, S2CInitialSyncFluidInventoryPacket::new);
         Services.PLATFORM.registerClientPacket(S2CContentsForDisplayPacket.class, S2CContentsForDisplayPacket::new);
+        Services.PLATFORM.registerClientPacket(S2CSetFluidSlotPacket.class,S2CSetFluidSlotPacket::new);
     }
 
     public static ResourceLocation packet(Class<?> clazz) {

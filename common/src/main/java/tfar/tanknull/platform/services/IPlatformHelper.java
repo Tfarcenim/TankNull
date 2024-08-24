@@ -1,16 +1,12 @@
 package tfar.tanknull.platform.services;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import tfar.tanknull.DockBlockEntity;
 import tfar.tanknull.MLFluidStack;
@@ -97,5 +93,7 @@ public interface IPlatformHelper {
     void sendToServer(C2SModPacket msg);
 
     void renderFluidInSlot(GuiGraphics matrices, int x, int y, MLFluidStack fluidStack);
+    MLFluidStack extractFluid(ItemStack stack,MLFluidStack target);
+    MLFluidStack extractAnyFluid(ItemStack stack, int max, FluidInventory.Action action);
 
 }

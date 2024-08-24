@@ -13,10 +13,13 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
+import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import org.apache.commons.lang3.tuple.Pair;
 import tfar.tanknull.*;
 import tfar.tanknull.client.StackSizeRenderer;
@@ -153,5 +156,34 @@ public class ForgePlatformHelper implements IPlatformHelper {
             }
         }
         return null;
+    }
+
+    public static IFluidHandler.FluidAction action(FluidInventory.Action action) {
+        switch (action){
+            case EXECUTE -> {
+                return IFluidHandler.FluidAction.EXECUTE;
+            }
+            case SIMULATE -> {
+                return IFluidHandler.FluidAction.SIMULATE;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public MLFluidStack extractFluid(ItemStack stack, MLFluidStack target) {
+        return MLFluidStack.EMPTY;
+    }
+
+    @Override
+    public MLFluidStack extractAnyFluid(ItemStack stack, int max, FluidInventory.Action action) {
+        if (!stack.isEmpty()) {
+            IFluidHandlerItem iFluidHandlerItem = stack.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM).orElse(null);
+            if (iFluidHandlerItem != null) {
+                FluidStack drained = iFluidHandlerItem.drain(max,action(action));
+                return convert(drained);
+            }
+        }
+        return MLFluidStack.EMPTY;
     }
 }

@@ -9,3 +9,4 @@ accessible class net/minecraft/client/gui/screens/MenuScreens$ScreenConstructor
 extendable class net/minecraft/world/level/block/entity/BlockEntityType$BlockEntitySupplier
 
 accessible field net/minecraft/world/inventory/AbstractContainerMenu stateId I
+accessible field net/minecraft/server/MinecraftServer storageSource Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;

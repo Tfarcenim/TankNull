@@ -3,6 +3,9 @@ package tfar.tanknull;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.server.ServerStartedEvent;
+import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -28,6 +31,7 @@ public class TankNullForge {
         // project.
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
         bus.addListener(this::register);
+        MinecraftForge.EVENT_BUS.addListener(this::serverStarted);
 
         if (FMLEnvironment.dist.isClient()) {
             bus.addListener(ModClientForge::setup);
@@ -35,6 +39,7 @@ public class TankNullForge {
         // Use Forge to bootstrap the Common mod.
         TankNull.init();
     }
+
     public void register(RegisterEvent event) {
         for (Map.Entry<Registry<?>,List<Pair<ResourceLocation, Supplier<?>>>> entry : registerLater.entrySet()) {
             Registry<?> registry = entry.getKey();
@@ -47,6 +52,10 @@ public class TankNullForge {
 
     public void onInitialize(FMLCommonSetupEvent e) {
         registerLater.clear();
+    }
+
+    public void serverStarted(ServerStartedEvent event) {
+        TankNull.onServerStart(event.getServer());
     }
 
 }

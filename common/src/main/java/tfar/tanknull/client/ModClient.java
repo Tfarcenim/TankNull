@@ -6,6 +6,7 @@ import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import tfar.tanknull.init.ModMenuTypes;
+import tfar.tanknull.network.server.C2SClickFluidSlotPacket;
 
 public class ModClient {
 
@@ -31,4 +32,9 @@ public class ModClient {
 
         //MenuScreens.register(ModMenuTypes.change_frequency, ChangeFrequencyScreen::new);
     }
+
+    public static void handle(C2SClickFluidSlotPacket packet) {
+
+    }
+
 }

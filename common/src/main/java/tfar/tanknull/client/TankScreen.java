@@ -1,17 +1,29 @@
 package tfar.tanknull.client;
 
+import com.google.common.collect.Lists;
+import com.mojang.blaze3d.platform.InputConstants;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import org.lwjgl.glfw.GLFW;
 import tfar.tanknull.MLFluidStack;
 import tfar.tanknull.TankNull;
+import tfar.tanknull.inventory.ClickAction;
 import tfar.tanknull.inventory.FluidSlot;
 import tfar.tanknull.menu.AbstractTankMenu;
+import tfar.tanknull.network.server.C2SClickFluidSlotPacket;
 import tfar.tanknull.platform.Services;
 
 import javax.annotation.Nullable;
+import java.util.List;
 
 public class TankScreen extends AbstractContainerScreen<AbstractTankMenu> {
 
@@ -21,6 +33,9 @@ public class TankScreen extends AbstractContainerScreen<AbstractTankMenu> {
 
     @Nullable
     protected FluidSlot hoveredFluidSlot;
+
+    @Nullable
+    protected FluidSlot lastClickFluidSlot;
 
     public TankScreen(AbstractTankMenu menu, Inventory $$1, Component $$2, ResourceLocation background) {
         super(menu, $$1, $$2);
@@ -38,6 +53,70 @@ public class TankScreen extends AbstractContainerScreen<AbstractTankMenu> {
             guiGraphics.blit(background, i, j + menu.rows * 18 + 17, 0, 126, this.imageWidth, 96);
         } else {
 
+        }
+    }
+
+    /**
+     * Called when a mouse button is clicked within the GUI element.
+     * <p>
+     *
+     * @param pMouseX the X coordinate of the mouse.
+     * @param pMouseY the Y coordinate of the mouse.
+     * @param pButton the button that was clicked.
+     * @return {@code true} if the event is consumed, {@code false} otherwise.
+     */
+    public boolean mouseClicked(double pMouseX, double pMouseY, int pButton) {
+        super.mouseClicked(pMouseX, pMouseY, pButton);
+        InputConstants.Key mouseKey = InputConstants.Type.MOUSE.getOrCreate(pButton);
+        FluidSlot slot = this.findFluidSlot(pMouseX, pMouseY);
+        if (slot != null) {
+            MLFluidStack fluidStack = slot.getFluid();
+
+            ItemStack carried = menu.getCarried();
+
+            ClickAction action = null;
+
+            if (fluidStack.isEmpty()) {
+                if (pButton == GLFW.GLFW_MOUSE_BUTTON_1) {//left click
+
+                } else if (pButton == GLFW.GLFW_MOUSE_BUTTON_2) {//right click
+                    action = ClickAction.DEPOSIT_ONE;
+                }
+            }
+            if (action != null) {
+                handleFluidSlotClick(menu.containerId, slot.index, pButton, action, Minecraft.getInstance().player);
+            }
+        }
+        return true;
+    }
+
+
+    public void handleFluidSlotClick(int pContainerId, int pSlotId, int pMouseButton, ClickAction pClickType, Player player) {
+        AbstractTankMenu abstractcontainermenu = (AbstractTankMenu) player.containerMenu;
+        if (pContainerId != abstractcontainermenu.containerId) {
+         //   LOGGER.warn("Ignoring click in mismatching container. Click in {}, player has {}.", pContainerId, abstractcontainermenu.containerId);
+        } else {
+            NonNullList<FluidSlot> nonnulllist = abstractcontainermenu.fluidSlots;
+            int i = nonnulllist.size();
+            List<MLFluidStack> list = Lists.newArrayListWithCapacity(i);
+
+            for (FluidSlot slot : nonnulllist) {
+                list.add(slot.getFluid().copy());
+            }
+
+          //  abstractcontainermenu.clicked(pSlotId, pMouseButton, pClickType, player);
+            Int2ObjectMap<MLFluidStack> int2objectmap = new Int2ObjectOpenHashMap<>();
+
+            for (int j = 0; j < i; ++j) {
+                MLFluidStack fluidStack = list.get(j);
+                MLFluidStack fluidStack1 = nonnulllist.get(j).getFluid();
+                if (!fluidStack.isFluidStackIdentical(fluidStack1)) {
+                    int2objectmap.put(j, fluidStack1.copy());
+                }
+            }
+
+            Services.PLATFORM.sendToServer(new C2SClickFluidSlotPacket(pContainerId, abstractcontainermenu.getStateId(), pSlotId, pMouseButton, pClickType, abstractcontainermenu.getCarried().copy(), int2objectmap));
+         //   lastClickFluidSlot = slot;
         }
     }
 
@@ -61,6 +140,18 @@ public class TankScreen extends AbstractContainerScreen<AbstractTankMenu> {
         pGuiGraphics.pose().popPose();
     }
 
+    @Nullable
+    private FluidSlot findFluidSlot(double pMouseX, double pMouseY) {
+        for (int i = 0; i < this.menu.fluidSlots.size(); ++i) {
+            FluidSlot slot = this.menu.fluidSlots.get(i);
+            if (this.isHovering(slot, pMouseX, pMouseY)) {
+                return slot;
+            }
+        }
+
+        return null;
+    }
+
     /**
      * Renders the graphical user interface (GUI) element.
      *
@@ -75,7 +166,7 @@ public class TankScreen extends AbstractContainerScreen<AbstractTankMenu> {
         super.render(pGuiGraphics, pMouseX, pMouseY, pPartialTick);
 
         pGuiGraphics.pose().pushPose();
-        pGuiGraphics.pose().translate(leftPos,topPos,0);
+        pGuiGraphics.pose().translate(leftPos, topPos, 0);
         int j2;
         int k2;
         for (int k = 0; k < this.menu.fluidSlots.size(); ++k) {

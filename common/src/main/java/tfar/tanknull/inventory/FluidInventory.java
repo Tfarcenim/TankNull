@@ -120,7 +120,7 @@ public class FluidInventory {
      * @return The maximum fluid amount held by the tank.
      */
     int getTankSize(int tank) {
-        return 0;
+        return capacity;
     }
 
     /**
@@ -177,7 +177,7 @@ public class FluidInventory {
             return Math.min(capacity - fluid.getAmount(), resource.getAmount());
         }
         if (fluid.isEmpty()) {
-            fluid = new MLFluidStack(resource, Math.min(capacity, resource.getAmount()));
+            fluid = resource.copyWithAmount(Math.min(capacity, resource.getAmount()));
             fluids.set(tank,fluid);
             return fluid.getAmount();
         }
