@@ -1,78 +1,82 @@
 package tfar.tanknull.world;
 
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.level.saveddata.SavedData;
-import tfar.dankstorage.inventory.DankInterface;
-import tfar.dankstorage.platform.Services;
-import tfar.dankstorage.utils.DankStats;
+import tfar.tanknull.TankNull;
+import tfar.tanknull.TankStats;
+import tfar.tanknull.inventory.FluidInventory;
+import tfar.tanknull.platform.Services;
 
 public class TankSavedData extends SavedData {
 
     protected final ServerLevel level;
-    CompoundTag storage = defaultTag();
-    DankInterface cache;
+    FluidInventory cache;
+    final int frequency;
+    TankStats stats = TankStats.zero;
+    CompoundTag tag;
 
-    public TankSavedData(ServerLevel level) {
+    public static final int INVALID = -1;
+
+    public TankSavedData(ServerLevel level, int frequency) {
         this.level = level;
+        this.frequency = frequency;
     }
-    
 
     @Override
-    public CompoundTag save(CompoundTag compoundTag, HolderLookup.Provider provider) {
-        compoundTag.put("contents", storage);
+    public CompoundTag save(CompoundTag compoundTag) {
+        compoundTag.putString("Stats",stats.name());
+        compoundTag.put("contents", cache.save(level.registryAccess()));
         return compoundTag;
     }
 
-    public DankInterface createInventory(HolderLookup.Provider provider,int frequency) {
+    public FluidInventory getOrCreateInventory() {
         if (cache == null) {
-            cache = Services.PLATFORM.createInventory(DankStats.zero,frequency);
-            cache.read(provider, storage);
-            cache.setServer(level.getServer());
+            cache = Services.PLATFORM.create(stats,this);
+            cache.load(level.registryAccess(), tag);
         }
         return cache;
     }
 
-    public DankInterface createFreshInventory(DankStats defaults, int frequency) {
-        if (cache == null) {
-            cache = Services.PLATFORM.createInventory(defaults, frequency);
-            cache.setServer(level.getServer());
-        }
-        return cache;
-    }
-
-    public void setStats(DankStats stats, int frequency) {
-        DankInterface dankInventory = createInventory(level.registryAccess(),frequency);
-        dankInventory.setDankStats(stats);
-        write(dankInventory.save(level.registryAccess()));
-    }
-
-
-    public void write(CompoundTag tag) {
-        storage = tag;
+    public void setStats(TankStats stats) {
+        this.stats = stats;
         setDirty();
     }
 
     protected void load(CompoundTag compoundTag) {
-        storage = compoundTag.getCompound("contents");
+        stats = compoundTag.contains("Stats") ? TankStats.valueOf(compoundTag.getString("Stats")) : TankStats.zero;
+        tag = compoundTag.getCompound("contents");
     }
 
-    public static TankSavedData loadStatic(CompoundTag compoundTag, ServerLevel level) {
-        TankSavedData tankSavedData = new TankSavedData(level);
+    public static TankSavedData loadStatic(CompoundTag compoundTag, ServerLevel level,int frequency) {
+        TankSavedData tankSavedData = new TankSavedData(level,frequency);
         tankSavedData.load(compoundTag);
         return tankSavedData;
     }
 
-    public static CompoundTag defaultTag() {
-        CompoundTag tag = new CompoundTag();
-        tag.putString("DankStats",DankStats.zero.name());
-        return tag;
+
+    public static TankSavedData getOrCreate(int id, MinecraftServer server) {
+        TankSavedData tankSavedData = get(id,server);
+        if (tankSavedData != null) {
+            return tankSavedData;
+        }
+
+        ServerLevel overworld = server.overworld();
+        return overworld.getDataStorage()
+                .computeIfAbsent(compoundTag -> loadStatic(compoundTag,overworld,id), () -> new TankSavedData(overworld,id),
+                        TankNull.MOD_ID+"/"+id);
+    }
+
+    public static TankSavedData get(int id, MinecraftServer server) {
+        if (id <= INVALID) throw new RuntimeException("Invalid frequency: "+id);
+        ServerLevel overworld = server.overworld();
+        return overworld.getDataStorage()
+                .get(compoundTag -> loadStatic(compoundTag,overworld,id), TankNull.MOD_ID+"/"+id);
     }
 
     public boolean clear() {
-        storage = defaultTag();
+        tag = new CompoundTag();
         return true;
     }
 }

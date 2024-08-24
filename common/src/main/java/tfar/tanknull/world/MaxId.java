@@ -1,20 +1,15 @@
 package tfar.tanknull.world;
 
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.saveddata.SavedData;
 
 public class MaxId extends SavedData {
+
     private int maxId;
     @Override
-    public CompoundTag save(CompoundTag pCompoundTag,HolderLookup.Provider provider) {
+    public CompoundTag save(CompoundTag pCompoundTag) {
         pCompoundTag.putInt("max_id",maxId);
         return pCompoundTag;
-    }
-
-    public static SavedData.Factory<MaxId> factory(ServerLevel pLevel) {
-        return new SavedData.Factory<>(MaxId::new, (p_294039_, p_324123_) -> loadStatic(p_294039_), null);
     }
 
     public static MaxId loadStatic(CompoundTag compoundTag) {

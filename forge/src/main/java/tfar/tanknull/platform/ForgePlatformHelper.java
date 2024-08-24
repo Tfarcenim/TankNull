@@ -1,13 +1,39 @@
 package tfar.tanknull.platform;
 
+import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.MappedRegistry;
+import net.minecraft.core.Registry;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
-import tfar.tanknull.MLFluidStack;
+import org.apache.commons.lang3.tuple.Pair;
+import tfar.tanknull.*;
+import tfar.tanknull.client.StackSizeRenderer;
 import tfar.tanknull.inventory.FluidInventory;
+import tfar.tanknull.inventory.ForgeFluidInventory;
+import tfar.tanknull.network.client.S2CModPacket;
+import tfar.tanknull.network.server.C2SModPacket;
 import tfar.tanknull.platform.services.IPlatformHelper;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.loading.FMLLoader;
+import tfar.tanknull.world.TankSavedData;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class ForgePlatformHelper implements IPlatformHelper {
 
@@ -38,6 +64,72 @@ public class ForgePlatformHelper implements IPlatformHelper {
     public String getTranslationKey(MLFluidStack fluidStack) {
         return convertToForge(fluidStack).getTranslationKey();
     }
+
+    @Override
+    public FluidInventory create(TankStats stats, TankSavedData data) {
+        return new ForgeFluidInventory(stats,data);
+    }
+
+    @Override
+    public DockBlockEntity create(BlockPos pos, BlockState state) {
+        return new DockBlockEntity(pos, state);
+    }
+
+    @Override
+    public <F> void registerAll(Map<String, ? extends F> map, Registry<F> registry, Class<? extends F> filter) {
+        List<Pair<ResourceLocation, Supplier<?>>> list = TankNullForge.registerLater.computeIfAbsent(registry, k -> new ArrayList<>());
+        for (Map.Entry<String, ? extends F> entry : map.entrySet()) {
+            list.add(Pair.of(TankNull.id(entry.getKey()), entry::getValue));
+        }
+    }
+
+    int i;
+
+    @Override
+    public <MSG extends S2CModPacket> void registerClientPacket(Class<MSG> packetLocation, Function<FriendlyByteBuf, MSG> reader) {
+        PacketHandlerForge.INSTANCE.registerMessage(i++, packetLocation, MSG::write, reader, PacketHandlerForge.wrapS2C());
+    }
+
+    @Override
+    public <MSG extends C2SModPacket> void registerServerPacket(Class<MSG> packetLocation, Function<FriendlyByteBuf, MSG> reader) {
+        PacketHandlerForge.INSTANCE.registerMessage(i++, packetLocation, MSG::write, reader, PacketHandlerForge.wrapC2S());
+    }
+
+
+    @Override
+    public void sendToClient(S2CModPacket msg, ServerPlayer player) {
+        PacketHandlerForge.sendToClient(msg, player);
+    }
+
+    @Override
+    public void sendToServer(C2SModPacket msg) {
+        PacketHandlerForge.sendToServer(msg);
+    }
+
+    @Override
+    public void renderFluidInSlot(GuiGraphics matrices, int x, int y, MLFluidStack stack) {
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShaderTexture(0, InventoryMenu.BLOCK_ATLAS);
+        IClientFluidTypeExtensions renderProperties = IClientFluidTypeExtensions.of(stack.getFluid());
+        FluidStack fluidStack = ForgePlatformHelper.convertToForge(stack);
+        int color = renderProperties.getTintColor(fluidStack);
+        TextureAtlasSprite sprite = FluidSpriteCache.getStillTexture(fluidStack);
+        RenderSystem.setShaderColor((color >> 16 & 0xff) / 255f, (color >> 8 & 0xff) / 255f, (color & 0xff) / 255f, 1);
+        RenderSystem.enableDepthTest();
+
+        matrices.blit(x, y, 0, 16, 16, sprite);
+
+        String amount = stack.getAmount() > 1 ? Utils.formatLargeNumber(stack.getAmount()) : "";
+        StackSizeRenderer.renderSizeLabel(matrices,Minecraft.getInstance().font, x,y,amount);
+    }
+
+    @Override
+    public <F> void unfreeze(Registry<F> registry) {
+        ((MappedRegistry<F>)registry).unfreeze();
+    }
+
+    ////////////////Static helpers
+
 
     public static FluidStack convertToForge(MLFluidStack fluidStack) {
         if (fluidStack.isEmpty()) {

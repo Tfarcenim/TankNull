@@ -5,16 +5,17 @@ import net.minecraftforge.fluids.capability.IFluidHandler;
 import org.jetbrains.annotations.NotNull;
 import tfar.tanknull.TankStats;
 import tfar.tanknull.platform.ForgePlatformHelper;
+import tfar.tanknull.world.TankSavedData;
 
 public class ForgeFluidInventory extends FluidInventory implements IFluidHandler {
 
 
-    public ForgeFluidInventory(int slots,int capacity) {
-        super(slots,capacity);
+    public ForgeFluidInventory(int slots,int capacity,TankSavedData data) {
+        super(slots,capacity,data);
     }
 
-    public ForgeFluidInventory(TankStats stats) {
-        super(stats);
+    public ForgeFluidInventory(TankStats stats, TankSavedData data) {
+        super(stats,data);
     }
 
     ////////////////////////////////////////delegates to API//////////////////////////////////////////

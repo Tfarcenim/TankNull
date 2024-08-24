@@ -74,7 +74,7 @@ public class MLFluidStack {
      * This provides a safe method for retrieving a MLFluidStack - if the Fluid is invalid, the stack
      * will return as null.
      */
-    public static MLFluidStack loadCommonFluidStackFromNBT(net.minecraft.nbt.CompoundTag nbt) {
+    public static MLFluidStack fromNBT(net.minecraft.nbt.CompoundTag nbt) {
         if (nbt == null) {
             return EMPTY;
         }
@@ -241,7 +241,7 @@ public class MLFluidStack {
      * @param other - the MLFluidStack for comparison
      * @return true if the two CommonFluidStacks are exactly the same
      */
-    public boolean isCommonFluidStackIdentical(MLFluidStack other) {
+    public boolean isFluidStackIdentical(MLFluidStack other) {
         return isFluidEqual(other) && amount == other.amount;
     }
 

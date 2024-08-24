@@ -16,7 +16,7 @@
     "environment": "*",
     "entrypoints": {
         "main": [
-          "tfar.tanknull.ExampleMod"
+          "tfar.tanknull.TankNullFabric"
         ]
     },
     "mixins": [

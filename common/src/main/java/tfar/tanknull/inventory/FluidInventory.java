@@ -1,26 +1,74 @@
 package tfar.tanknull.inventory;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import tfar.tanknull.MLFluidStack;
 import tfar.tanknull.TankStats;
+import tfar.tanknull.world.TankSavedData;
 
 import java.util.List;
 
 
 //ifluidhandler adapted to common
-public abstract class FluidInventory {
+public class FluidInventory {
 
-    public List<MLFluidStack> fluids;
+    public NonNullList<MLFluidStack> fluids;
     public final int capacity;
+    @Nullable private final TankSavedData data;
 
-    public FluidInventory(TankStats stats) {
-        this(stats.slots,stats.stacklimit);
+    public FluidInventory(TankStats stats,TankSavedData data) {
+        this(stats.slots,stats.stacklimit,data);
     }
 
-    public FluidInventory(int slots,int capacity) {
+    public FluidInventory(int slots, int capacity, @Nullable TankSavedData data) {
         fluids = NonNullList.withSize(slots, MLFluidStack.EMPTY);
         this.capacity = capacity;
+        this.data = data;
+    }
+
+    public static final FluidInventory EMPTY = empty();
+
+    public static FluidInventory empty() {
+        return new FluidInventory(TankStats.zero,null);
+    }
+
+    public static FluidInventory dummy(TankStats stats) {
+        return new FluidInventory(stats,null);
+    }
+
+    public void load(HolderLookup.Provider provider, CompoundTag tag) {
+        ListTag tagList = tag.getList("Fluids", Tag.TAG_COMPOUND);
+        for (int i = 0; i < tagList.size(); i++) {
+            CompoundTag fluidTags = tagList.getCompound(i);
+            int tank = fluidTags.getInt("Tank");
+            if (tank >= 0 && tank < fluids.size()) {
+                fluids.set(tank, MLFluidStack.fromNBT(fluidTags));
+            }
+        }
+    }
+
+    public CompoundTag save(HolderLookup.Provider provider) {
+        ListTag nbtTagList = new ListTag();
+        for (int i = 0; i < fluids.size(); i++) {
+            if (!fluids.get(i).isEmpty()) {
+                CompoundTag fluidTag = new CompoundTag();
+                fluidTag.putInt("Tank", i);
+                fluids.get(i).writeToNBT(fluidTag);
+                nbtTagList.add(fluidTag);
+            }
+        }
+        CompoundTag nbt = new CompoundTag();
+        nbt.put("Fluids", nbtTagList);
+        return nbt;
+    }
+
+    public void setFluid(int slot, MLFluidStack stack) {
+        fluids.set(slot,stack);
     }
 
     public enum Action {
@@ -40,7 +88,7 @@ public abstract class FluidInventory {
      *
      * @return The number of tanks available
      */
-    int getSlots() {
+    public int getSlots() {
         return fluids.size();
     }
 
@@ -216,4 +264,11 @@ public abstract class FluidInventory {
         }
         return stack;
     }
+
+    void setDirty() {
+        if (data != null) {
+            data.setDirty();
+        }
+    }
+
 }
