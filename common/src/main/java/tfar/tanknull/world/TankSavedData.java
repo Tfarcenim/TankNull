@@ -36,6 +36,9 @@ public class TankSavedData extends SavedData {
             cache = Services.PLATFORM.create(stats,this);
             cache.load(level.registryAccess(), tag);
         }
+        if (cache.fluids.size() != stats.slots) {
+            cache.updateStats(stats);
+        }
         return cache;
     }
 

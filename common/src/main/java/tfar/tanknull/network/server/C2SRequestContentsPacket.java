@@ -4,7 +4,7 @@ import io.netty.buffer.Unpooled;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import tfar.tanknull.inventory.FluidInventory;
-import tfar.tanknull.network.client.S2CContentsForDisplayPacket;
+import tfar.tanknull.network.client.S2CTooltipContentsPacket;
 import tfar.tanknull.platform.Services;
 import tfar.tanknull.world.TankSavedData;
 
@@ -33,7 +33,7 @@ public class C2SRequestContentsPacket implements C2SModPacket {
 
     public void handleServer(ServerPlayer player) {
         FluidInventory dankInventoryForge = TankSavedData.get(frequency,player.server).getOrCreateInventory();
-            Services.PLATFORM.sendToClient(new S2CContentsForDisplayPacket(dankInventoryForge.fluids), player);
+            Services.PLATFORM.sendToClient(new S2CTooltipContentsPacket(dankInventoryForge.fluids), player);
     }
 }
 

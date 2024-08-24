@@ -234,7 +234,7 @@ public class MLFluidStack {
     /**
      * Determines if the NBT Tags are equal. Useful if the FluidIDs are known to be equal.
      */
-    public static boolean areFluidStackTagsEqual(@NotNull MLFluidStack stack1, @NotNull MLFluidStack stack2) {
+    public static boolean areTagsEqual(@NotNull MLFluidStack stack1, @NotNull MLFluidStack stack2) {
         return stack1.isTagEqual(stack2);
     }
 
@@ -253,13 +253,13 @@ public class MLFluidStack {
      * @param other - the MLFluidStack for comparison
      * @return true if the two CommonFluidStacks are exactly the same
      */
-    public boolean isFluidStackIdentical(MLFluidStack other) {
+    boolean isFluidStackIdentical(MLFluidStack other) {
         return isFluidEqual(other) && amount == other.amount;
     }
 
     @Override
     public final int hashCode() {
-        return Objects.hash(fluid,amount);
+        return Objects.hash(fluid,amount,tag);
     }
 
     /**

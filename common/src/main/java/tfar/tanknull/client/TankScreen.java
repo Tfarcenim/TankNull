@@ -28,6 +28,7 @@ import tfar.tanknull.platform.Services;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Objects;
 
 public class TankScreen extends AbstractContainerScreen<AbstractTankMenu> {
 
@@ -130,7 +131,7 @@ public class TankScreen extends AbstractContainerScreen<AbstractTankMenu> {
             for (int j = 0; j < i; ++j) {
                 MLFluidStack fluidStack = list.get(j);
                 MLFluidStack fluidStack1 = nonnulllist.get(j).getFluid();
-                if (!fluidStack.isFluidStackIdentical(fluidStack1)) {
+                if (!Objects.equals(fluidStack,fluidStack1)) {
                     int2objectmap.put(j, fluidStack1.copy());
                 }
             }

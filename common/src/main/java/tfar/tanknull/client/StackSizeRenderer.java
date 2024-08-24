@@ -59,7 +59,7 @@ public class StackSizeRenderer {
 
         var stack = guiGraphics.pose();
         stack.pushPose();
-        // According to ItemRenderer, text is 200 above items.
+        // According to ItemRenderer, text is 200 above fluids.
         stack.translate(0, 0, 200);
         stack.scale(scaleFactor, scaleFactor, scaleFactor);
 

@@ -230,27 +230,25 @@ public class AbstractTankMenu extends AbstractContainerMenu {
         for(int i = 0; i < this.fluidSlots.size(); ++i) {
             MLFluidStack fluid = this.fluidSlots.get(i).getFluid();
             Objects.requireNonNull(fluid);
-            Supplier<MLFluidStack> $$2 = Suppliers.memoize(fluid::copy);
-            //this.triggerSlotListeners(i, fluid, $$2);
-            this.synchronizeFluidSlotToRemote(i, fluid, $$2);
+            Supplier<MLFluidStack> supplier = Suppliers.memoize(fluid::copy);
+            //this.triggerSlotListeners(i, fluid, supplier);
+            this.synchronizeFluidSlotToRemote(i, fluid, supplier);
         }
 
     }
 
-    private void synchronizeFluidSlotToRemote(int $$0, MLFluidStack $$1, Supplier<MLFluidStack> $$2) {
+    private void synchronizeFluidSlotToRemote(int slot, MLFluidStack stack, Supplier<MLFluidStack> $$2) {
        // if (!this.suppressRemoteUpdates) {
-            MLFluidStack $$3 = this.remoteFluidSlots.get($$0);
-            if (!$$3.isFluidStackIdentical($$1)) {
+            MLFluidStack $$3 = this.remoteFluidSlots.get(slot);
+            if (!Objects.equals($$3,stack)) {
                 MLFluidStack $$4 = $$2.get();
-                this.remoteFluidSlots.set($$0, $$4);
+                this.remoteFluidSlots.set(slot, $$4);
 
-                Services.PLATFORM.sendToClient(new S2CSetFluidSlotPacket(stateId,containerId,$$0,$$1), (ServerPlayer) playerInventory.player);
+                Services.PLATFORM.sendToClient(new S2CSetFluidSlotPacket(stateId,containerId,slot,stack), (ServerPlayer) playerInventory.player);
 
           //      if (this.synchronizer != null) {
-          //          this.synchronizer.sendSlotChange(this, $$0, $$4);
+          //          this.synchronizer.sendSlotChange(this, slot, $$4);
          //       }
-
-
 
            }
      //   }

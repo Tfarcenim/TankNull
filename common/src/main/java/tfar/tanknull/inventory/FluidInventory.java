@@ -14,12 +14,15 @@ import tfar.tanknull.TankStats;
 import tfar.tanknull.platform.Services;
 import tfar.tanknull.world.TankSavedData;
 
+import java.util.List;
+
 
 //ifluidhandler adapted to common
 public class FluidInventory {
 
     public NonNullList<MLFluidStack> fluids;
-    public final int capacity;
+    public NonNullList<MLFluidStack> ghostFluids;
+    public int capacity;
     @Nullable private final TankSavedData data;
     protected final Int2ObjectMap<Slot> wrappers = new Int2ObjectOpenHashMap<>();
 
@@ -29,6 +32,7 @@ public class FluidInventory {
 
     public FluidInventory(int slots, int capacity, @Nullable TankSavedData data) {
         fluids = NonNullList.withSize(slots, MLFluidStack.EMPTY);
+        ghostFluids = NonNullList.withSize(slots,MLFluidStack.EMPTY);
         this.capacity = capacity;
         this.data = data;
     }
@@ -57,29 +61,40 @@ public class FluidInventory {
     }
 
     public void load(HolderLookup.Provider provider, CompoundTag tag) {
-        ListTag tagList = tag.getList("Fluids", Tag.TAG_COMPOUND);
-        for (int i = 0; i < tagList.size(); i++) {
-            CompoundTag fluidTags = tagList.getCompound(i);
+        loadList(fluids,tag.getList("Fluids", Tag.TAG_COMPOUND));
+        loadList(ghostFluids,tag.getList("GhostFluids",Tag.TAG_COMPOUND));
+    }
+
+    void loadList(List<MLFluidStack> list,ListTag tag) {
+        for (int i = 0; i < tag.size(); i++) {
+            CompoundTag fluidTags = tag.getCompound(i);
             int tank = fluidTags.getInt("Tank");
-            if (tank >= 0 && tank < fluids.size()) {
-                fluids.set(tank, MLFluidStack.fromNBT(fluidTags));
+            if (tank >= 0 && tank < list.size()) {
+                list.set(tank, MLFluidStack.fromNBT(fluidTags));
             }
         }
     }
 
     public CompoundTag save(HolderLookup.Provider provider) {
+        ListTag nbtTagList = saveList(fluids);
+        ListTag nbtTagListGhost = saveList(ghostFluids);
+        CompoundTag nbt = new CompoundTag();
+        nbt.put("Fluids", nbtTagList);
+        nbt.put("GhostFluids", nbtTagListGhost);
+        return nbt;
+    }
+
+    ListTag saveList(List<MLFluidStack> list) {
         ListTag nbtTagList = new ListTag();
-        for (int i = 0; i < fluids.size(); i++) {
-            if (!fluids.get(i).isEmpty()) {
+        for (int i = 0; i < list.size(); i++) {
+            if (!list.get(i).isEmpty()) {
                 CompoundTag fluidTag = new CompoundTag();
                 fluidTag.putInt("Tank", i);
-                fluids.get(i).writeToNBT(fluidTag);
+                list.get(i).writeToNBT(fluidTag);
                 nbtTagList.add(fluidTag);
             }
         }
-        CompoundTag nbt = new CompoundTag();
-        nbt.put("Fluids", nbtTagList);
-        return nbt;
+        return nbtTagList;
     }
 
     public void setFluid(int slot, MLFluidStack stack) {
@@ -180,38 +195,49 @@ public class FluidInventory {
 
         int capacity = getTankSize(tank);
 
-        MLFluidStack fluid = fluids.get(tank);
+        MLFluidStack tankFluid = fluids.get(tank);
+        MLFluidStack ghost = ghostFluids.get(tank);
 
-        if (action.simulate()) {
-            if (fluid.isEmpty()) {
-                return Math.min(getTankSize(tank), resource.getAmount());
-            }
-            if (!fluid.isFluidEqual(resource)) {
-                return 0;
-            }
-            return Math.min(capacity - fluid.getAmount(), resource.getAmount());
-        }
-        if (fluid.isEmpty()) {
-            fluid = resource.copyWithAmount(Math.min(capacity, resource.getAmount()));
-            fluids.set(tank,fluid);
-            setDirty();
-            return fluid.getAmount();
-        }
-        if (!fluid.isFluidEqual(resource)) {
+        if (!isFluidCompatible(tankFluid,resource,ghost)) {
             return 0;
         }
-        int filled = capacity - fluid.getAmount();
+
+        if (action.simulate()) {
+            if (tankFluid.isEmpty()) {
+                return Math.min(getTankSize(tank), resource.getAmount());
+            }
+            return Math.min(capacity - tankFluid.getAmount(), resource.getAmount());
+        }
+        if (tankFluid.isEmpty()) {
+            tankFluid = resource.copyWithAmount(Math.min(capacity, resource.getAmount()));
+            fluids.set(tank,tankFluid);
+            setDirty();
+            return tankFluid.getAmount();
+        }
+        int filled = capacity - tankFluid.getAmount();
 
         if (resource.getAmount() < filled) {
-            fluid.grow(resource.getAmount());
+            tankFluid.grow(resource.getAmount());
             filled = resource.getAmount();
         } else {
-            fluid.setAmount(capacity);
+            tankFluid.setAmount(capacity);
         }
         if (filled > 0) {
             setDirty();
         }
         return filled;
+    }
+
+    boolean isFluidCompatible(MLFluidStack tankFluid,MLFluidStack incoming,MLFluidStack ghost) {
+        if (!tankFluid.isFluidEqual(incoming) && !tankFluid.isEmpty()) {
+            return false;
+        }
+
+        if (ghost.isEmpty()) {
+            return true;
+        } else {
+            return ghost.isFluidEqual(incoming);
+        }
     }
 
     /**
@@ -280,6 +306,27 @@ public class FluidInventory {
             setDirty();
         }
         return stack;
+    }
+
+    public void updateStats(TankStats stats) {
+        capacity = stats.stacklimit;
+
+        NonNullList<MLFluidStack> nonNullList = NonNullList.withSize(stats.slots,MLFluidStack.EMPTY);
+        for (int i = 0; i < fluids.size(); i++) {
+            MLFluidStack fluidStack = fluids.get(i);
+            nonNullList.set(i,fluidStack);
+        }
+
+        NonNullList<MLFluidStack> nonNullListGhost = NonNullList.withSize(stats.slots,MLFluidStack.EMPTY);
+        for (int i = 0; i < ghostFluids.size(); i++) {
+            MLFluidStack fluidStack = ghostFluids.get(i);
+            nonNullListGhost.set(i,fluidStack);
+        }
+
+        fluids = nonNullList;
+        ghostFluids = nonNullListGhost;
+
+        setDirty();
     }
 
     void setDirty() {

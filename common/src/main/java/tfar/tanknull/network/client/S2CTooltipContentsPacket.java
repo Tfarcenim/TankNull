@@ -7,14 +7,14 @@ import tfar.tanknull.world.ClientData;
 
 import java.util.List;
 
-public class S2CContentsForDisplayPacket implements S2CModPacket {
+public class S2CTooltipContentsPacket implements S2CModPacket {
     private final List<MLFluidStack> stacks;
 
-    public S2CContentsForDisplayPacket(NonNullList<MLFluidStack> stacks) {
+    public S2CTooltipContentsPacket(NonNullList<MLFluidStack> stacks) {
         this.stacks = stacks;
     }
 
-    public S2CContentsForDisplayPacket(FriendlyByteBuf buf) {
+    public S2CTooltipContentsPacket(FriendlyByteBuf buf) {
         stacks = buf.readList(MLFluidStack::readFromPacket);
     }
 
