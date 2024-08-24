@@ -15,7 +15,7 @@ public class TankSavedData extends SavedData {
     FluidInventory cache;
     final int frequency;
     TankStats stats = TankStats.zero;
-    CompoundTag tag;
+    CompoundTag tag = new CompoundTag();
 
     public static final int INVALID = -1;
 

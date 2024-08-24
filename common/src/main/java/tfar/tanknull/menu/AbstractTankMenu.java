@@ -74,7 +74,7 @@ public class AbstractTankMenu extends AbstractContainerMenu {
     }
 
     protected void addPlayerSlots(Inventory playerinventory, int locked) {
-        int yStart = 32 + 18 * rows;
+        int yStart = 31 + 18 * rows;
         for (int row = 0; row < 3; ++row) {
             for (int col = 0; col < 9; ++col) {
                 int x = 8 + col * 18;

@@ -7,6 +7,7 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.registries.RegisterEvent;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -27,6 +28,10 @@ public class TankNullForge {
         // project.
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
         bus.addListener(this::register);
+
+        if (FMLEnvironment.dist.isClient()) {
+            bus.addListener(ModClientForge::setup);
+        }
         // Use Forge to bootstrap the Common mod.
         TankNull.init();
     }

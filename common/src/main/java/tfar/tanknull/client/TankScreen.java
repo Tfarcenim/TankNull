@@ -42,8 +42,8 @@ public class TankScreen extends AbstractContainerScreen<AbstractTankMenu> {
     }
 
     private void renderFluidSlot(GuiGraphics pGuiGraphics, FluidSlot pSlot) {
-        int i = pSlot.x;
-        int j = pSlot.y;
+        int x = pSlot.x;
+        int y = pSlot.y;
         MLFluidStack stack = pSlot.getFluid();
         boolean flag = false;
 
@@ -51,10 +51,12 @@ public class TankScreen extends AbstractContainerScreen<AbstractTankMenu> {
         pGuiGraphics.pose().translate(0.0F, 0.0F, 100.0F);
 
         if (flag) {
-            pGuiGraphics.fill(i, j, i + 16, j + 16, 0x80ffffff);
+            pGuiGraphics.fill(x, y, x + 16, y + 16, 0x80ffffff);
         }
 
-        Services.PLATFORM.renderFluidInSlot(pGuiGraphics, i, j,stack);
+        if (!stack.isEmpty()) {
+            Services.PLATFORM.renderFluidInSlot(pGuiGraphics, x, y, stack);
+        }
 
         pGuiGraphics.pose().popPose();
     }
@@ -72,6 +74,8 @@ public class TankScreen extends AbstractContainerScreen<AbstractTankMenu> {
         this.renderBackground(pGuiGraphics);
         super.render(pGuiGraphics, pMouseX, pMouseY, pPartialTick);
 
+        pGuiGraphics.pose().pushPose();
+        pGuiGraphics.pose().translate(leftPos,topPos,0);
         int j2;
         int k2;
         for (int k = 0; k < this.menu.fluidSlots.size(); ++k) {
@@ -86,6 +90,7 @@ public class TankScreen extends AbstractContainerScreen<AbstractTankMenu> {
             }
         }
 
+        pGuiGraphics.pose().popPose();
 
         this.renderTooltip(pGuiGraphics, pMouseX, pMouseY);
     }

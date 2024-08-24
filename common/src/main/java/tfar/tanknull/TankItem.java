@@ -74,6 +74,8 @@ public class TankItem extends Item {
             MinecraftServer server = player.getServer();
             if (getFrequency(stack) == TankSavedData.INVALID) {
                 assignNextFreeId(server,stack);
+                TankSavedData tankSavedData = TankSavedData.getOrCreate(getFrequency(stack),server);
+                tankSavedData.setStats(stats);
             }
 
             TankSavedData tankSavedData = TankSavedData.getOrCreate(getFrequency(stack),server);
@@ -129,11 +131,11 @@ public class TankItem extends Item {
     }
 
 
-    static void assignNextFreeId(MinecraftServer server,ItemStack stack) {
+    void assignNextFreeId(MinecraftServer server,ItemStack stack) {
         int id = 0;
         while (true) {
             TankSavedData tankSavedData = TankSavedData.get(id,server);
-            if (tankSavedData != null) {
+            if (tankSavedData == null) {
                 stack.getOrCreateTag().putInt(FREQUENCY,id);
                 return;
             }

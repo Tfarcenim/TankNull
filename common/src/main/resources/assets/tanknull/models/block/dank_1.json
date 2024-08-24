@@ -1,0 +1,6 @@
+{
+  "parent": "tanknull:block/core",
+  "textures": {
+    "1": "tanknull:block/dank_1"
+  }
+}
