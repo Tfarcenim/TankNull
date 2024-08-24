@@ -1,10 +1,11 @@
 package tfar.tanknull.platform.services;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -93,7 +94,6 @@ public interface IPlatformHelper {
     void sendToClient(S2CModPacket msg, ServerPlayer player);
     void sendToServer(C2SModPacket msg);
 
-    void renderFluidInSlot(GuiGraphics matrices, int x, int y, MLFluidStack fluidStack);
     MLFluidStack extractFluid(ItemStack stack,MLFluidStack target);
     MLFluidStack extractAnyFluid(ItemStack stack, int max, FluidInventory.Action action);
     MLFluidStack getStoredFluid(ItemStack stack);
@@ -101,4 +101,8 @@ public interface IPlatformHelper {
 
     void transferContainerToTank(ItemStack container, FluidInventory fluidInventory, int fluid, int tank, Player player);
     void transferTankToContainer(ItemStack container, FluidInventory fluidInventory, int fluid, int tank, Player player);
+
+    TextureAtlasSprite getSprite(MLFluidStack stack);
+    int getTint(MLFluidStack stack);
+
 }

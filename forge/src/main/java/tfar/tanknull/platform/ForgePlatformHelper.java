@@ -1,9 +1,5 @@
 package tfar.tanknull.platform;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.MappedRegistry;
@@ -13,7 +9,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
@@ -26,7 +21,7 @@ import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import net.minecraftforge.items.wrapper.InvWrapper;
 import org.apache.commons.lang3.tuple.Pair;
 import tfar.tanknull.*;
-import tfar.tanknull.client.StackSizeRenderer;
+import tfar.tanknull.client.FluidSpriteCache;
 import tfar.tanknull.inventory.FluidInventory;
 import tfar.tanknull.inventory.ForgeFluidInventory;
 import tfar.tanknull.network.client.S2CModPacket;
@@ -41,6 +36,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
+
+import static tfar.tanknull.client.FluidSpriteCache.SPRITE_CACHE;
 
 public class ForgePlatformHelper implements IPlatformHelper {
 
@@ -111,23 +108,6 @@ public class ForgePlatformHelper implements IPlatformHelper {
     @Override
     public void sendToServer(C2SModPacket msg) {
         PacketHandlerForge.sendToServer(msg);
-    }
-
-    @Override
-    public void renderFluidInSlot(GuiGraphics matrices, int x, int y, MLFluidStack stack) {
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderTexture(0, InventoryMenu.BLOCK_ATLAS);
-        IClientFluidTypeExtensions renderProperties = IClientFluidTypeExtensions.of(stack.getFluid());
-        FluidStack fluidStack = ForgePlatformHelper.convertToForge(stack);
-        int color = renderProperties.getTintColor(fluidStack);
-        TextureAtlasSprite sprite = FluidSpriteCache.getStillTexture(fluidStack);
-        RenderSystem.setShaderColor((color >> 16 & 0xff) / 255f, (color >> 8 & 0xff) / 255f, (color & 0xff) / 255f, 1);
-        RenderSystem.enableDepthTest();
-
-        matrices.blit(x, y, 0, 16, 16, sprite);
-
-        String amount = stack.getAmount() > 1 ? Utils.formatLargeNumber(stack.getAmount()) : "";
-        StackSizeRenderer.renderSizeLabel(matrices,Minecraft.getInstance().font, x,y,amount);
     }
 
     @Override
@@ -227,5 +207,21 @@ public class ForgePlatformHelper implements IPlatformHelper {
         if (fluidActionResult.isSuccess()) {
             player.containerMenu.setCarried(fluidActionResult.getResult());
         }
+    }
+
+    public ResourceLocation getSpriteLocation(MLFluidStack stack) {
+        FluidStack forgeStack = convertToForge(stack);
+        return IClientFluidTypeExtensions.of(stack.getFluid()).getStillTexture(forgeStack);
+    }
+
+    @Override
+    public TextureAtlasSprite getSprite(MLFluidStack stack) {
+        return SPRITE_CACHE.getUnchecked(getSpriteLocation(stack));
+    }
+
+    @Override
+    public int getTint(MLFluidStack stack) {
+        FluidStack forgeStack = convertToForge(stack);
+        return IClientFluidTypeExtensions.of(stack.getFluid()).getTintColor(forgeStack);
     }
 }

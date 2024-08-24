@@ -2,20 +2,25 @@ package tfar.tanknull.client;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
 import org.lwjgl.glfw.GLFW;
 import tfar.tanknull.MLFluidStack;
 import tfar.tanknull.TankNull;
+import tfar.tanknull.Utils;
 import tfar.tanknull.inventory.ClickAction;
 import tfar.tanknull.inventory.FluidSlot;
 import tfar.tanknull.menu.AbstractTankMenu;
@@ -148,7 +153,17 @@ public class TankScreen extends AbstractContainerScreen<AbstractTankMenu> {
         }
 
         if (!stack.isEmpty()) {
-            Services.PLATFORM.renderFluidInSlot(pGuiGraphics, x, y, stack);
+            RenderSystem.setShader(GameRenderer::getPositionTexShader);
+            RenderSystem.setShaderTexture(0, InventoryMenu.BLOCK_ATLAS);
+            int color = Services.PLATFORM.getTint(stack);
+            TextureAtlasSprite sprite = FluidSpriteCache.getStillTexture(stack);
+            RenderSystem.setShaderColor((color >> 16 & 0xff) / 255f, (color >> 8 & 0xff) / 255f, (color & 0xff) / 255f, 1);
+            RenderSystem.enableDepthTest();
+
+            pGuiGraphics.blit(x, y, 0, 16, 16, sprite);
+
+            String amount = stack.getAmount() > 1 ? Utils.formatLargeNumber(stack.getAmount()) : "";
+            StackSizeRenderer.renderSizeLabel(pGuiGraphics,Minecraft.getInstance().font, x,y,amount);
         }
 
         pGuiGraphics.pose().popPose();

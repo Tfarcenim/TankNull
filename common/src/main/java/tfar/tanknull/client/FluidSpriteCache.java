@@ -1,26 +1,20 @@
-package tfar.tanknull;
+package tfar.tanknull.client;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.ResourceLocation;
+import tfar.tanknull.MLFluidStack;
+import tfar.tanknull.platform.Services;
 
 public class FluidSpriteCache {
-
-    private static final LoadingCache<ResourceLocation, TextureAtlasSprite> SPRITE_CACHE = buildCache();
+    public static final LoadingCache<ResourceLocation, TextureAtlasSprite> SPRITE_CACHE = buildCache();
 
     public static TextureAtlasSprite getStillTexture(MLFluidStack fluid) {
-        return FluidRenderHandlerRegistry.INSTANCE.get(fluid.getFluid())
-                .getFluidSprites(null,null,null)[0];
-    }
-
-    public static TextureAtlasSprite getFlowingTexture(MLFluidStack fluid) {
-        return FluidRenderHandlerRegistry.INSTANCE.get(fluid.getFluid())
-                .getFluidSprites(null,null,null)[1];
+        return Services.PLATFORM.getSprite(fluid);
     }
 
     public static void invalidateSpriteCache() {
@@ -33,5 +27,4 @@ public class FluidSpriteCache {
                 .maximumSize(100)
                 .build(CacheLoader.from(key -> Minecraft.getInstance().getTextureAtlas(TextureAtlas.LOCATION_BLOCKS).apply(key)));
     }
-
 }
