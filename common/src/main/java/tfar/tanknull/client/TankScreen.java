@@ -14,7 +14,6 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
 import org.lwjgl.glfw.GLFW;
@@ -75,22 +74,28 @@ public class TankScreen extends AbstractContainerScreen<AbstractTankMenu> {
         InputConstants.Key mouseKey = InputConstants.Type.MOUSE.getOrCreate(pButton);
         FluidSlot slot = this.findFluidSlot(pMouseX, pMouseY);
         if (slot != null) {
-            MLFluidStack fluidStack = slot.getFluid();
+            MLFluidStack tankFluid = slot.getFluid();
 
             ItemStack carried = menu.getCarried();
             MLFluidStack carriedFluid = Services.PLATFORM.getStoredFluid(carried);
 
             ClickAction action = null;
 
-            if (fluidStack.isEmpty()) {
-                if (pButton == GLFW.GLFW_MOUSE_BUTTON_1) {//left click
-
-                } else if (pButton == GLFW.GLFW_MOUSE_BUTTON_2) {//right click
-                    action = ClickAction.DEPOSIT_ONE;
+            if (tankFluid.isEmpty()) {
+                if (!carriedFluid.isEmpty()) {
+                    if (pButton == GLFW.GLFW_MOUSE_BUTTON_1) {//left click
+                        action = ClickAction.DEPOSIT_ALL;
+                    } else if (pButton == GLFW.GLFW_MOUSE_BUTTON_2) {//right click
+                        action = ClickAction.DEPOSIT_ONE;
+                    }
                 }
             } else {
                 if (pButton == GLFW.GLFW_MOUSE_BUTTON_1) {//left click
-
+                    if (carriedFluid.isEmpty()) {
+                        action = ClickAction.PICKUP_ALL;
+                    } else {
+                        action = ClickAction.DEPOSIT_ALL;
+                    }
                 } else if (pButton == GLFW.GLFW_MOUSE_BUTTON_2) {//right click
                     if (!carried.isEmpty()) {
                         if (carriedFluid.isEmpty()) {
@@ -103,19 +108,15 @@ public class TankScreen extends AbstractContainerScreen<AbstractTankMenu> {
                 }
             }
             if (action != null) {
-                handleFluidSlotClick(menu.containerId, slot.index, pButton, action, Minecraft.getInstance().player);
+                handleFluidSlotClick(slot.index, pButton, action);
             }
         }
         return true;
     }
 
 
-    public void handleFluidSlotClick(int pContainerId, int pSlotId, int pMouseButton, ClickAction pClickType, Player player) {
-        AbstractTankMenu abstractcontainermenu = (AbstractTankMenu) player.containerMenu;
-        if (pContainerId != abstractcontainermenu.containerId) {
-         //   LOGGER.warn("Ignoring click in mismatching container. Click in {}, player has {}.", pContainerId, abstractcontainermenu.containerId);
-        } else {
-            NonNullList<FluidSlot> nonnulllist = abstractcontainermenu.fluidSlots;
+    public void handleFluidSlotClick(int pSlotId, int pMouseButton, ClickAction pClickType) {
+            NonNullList<FluidSlot> nonnulllist = menu.fluidSlots;
             int i = nonnulllist.size();
             List<MLFluidStack> list = Lists.newArrayListWithCapacity(i);
 
@@ -134,23 +135,16 @@ public class TankScreen extends AbstractContainerScreen<AbstractTankMenu> {
                 }
             }
 
-            Services.PLATFORM.sendToServer(new C2SClickFluidSlotPacket(pContainerId, abstractcontainermenu.getStateId(), pSlotId, pMouseButton, pClickType, abstractcontainermenu.getCarried().copy(), int2objectmap));
+            Services.PLATFORM.sendToServer(new C2SClickFluidSlotPacket(menu.containerId, menu.getStateId(), pSlotId, pMouseButton, pClickType, int2objectmap));
          //   lastClickFluidSlot = slot;
-        }
     }
 
     private void renderFluidSlot(GuiGraphics pGuiGraphics, FluidSlot pSlot) {
         int x = pSlot.x;
         int y = pSlot.y;
         MLFluidStack stack = pSlot.getFluid();
-        boolean flag = false;
 
         pGuiGraphics.pose().pushPose();
-        pGuiGraphics.pose().translate(0.0F, 0.0F, 100.0F);
-
-        if (flag) {
-            pGuiGraphics.fill(x, y, x + 16, y + 16, 0x80ffffff);
-        }
 
         if (!stack.isEmpty()) {
             RenderSystem.setShader(GameRenderer::getPositionTexShader);
@@ -162,6 +156,7 @@ public class TankScreen extends AbstractContainerScreen<AbstractTankMenu> {
 
             pGuiGraphics.blit(x, y, 0, 16, 16, sprite);
 
+            RenderSystem.setShaderColor(1,1,1,1);
             String amount = stack.getAmount() > 1 ? Utils.formatLargeNumber(stack.getAmount()) : "";
             StackSizeRenderer.renderSizeLabel(pGuiGraphics,Minecraft.getInstance().font, x,y,amount);
         }

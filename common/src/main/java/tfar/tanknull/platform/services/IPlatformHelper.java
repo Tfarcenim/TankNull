@@ -5,7 +5,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -99,10 +98,11 @@ public interface IPlatformHelper {
     MLFluidStack getStoredFluid(ItemStack stack);
     int simulateFill(ItemStack stack, MLFluidStack fluid);
 
-    void transferContainerToTank(ItemStack container, FluidInventory fluidInventory, int fluid, int tank, Player player);
-    void transferTankToContainer(ItemStack container, FluidInventory fluidInventory, int fluid, int tank, Player player);
+    void transferContainerToTank(ItemStack container, FluidInventory fluidInventory, int fluid, int tank, Player player,boolean simulate);
+    void transferTankToContainer(ItemStack container, FluidInventory fluidInventory, int fluid, int tank, Player player,boolean simulate);
 
     TextureAtlasSprite getSprite(MLFluidStack stack);
     int getTint(MLFluidStack stack);
+    FluidInventory.Slot createWrapper(FluidInventory inventory, int tank);
 
 }

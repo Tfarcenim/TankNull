@@ -24,16 +24,14 @@ public class C2SClickFluidSlotPacket implements C2SModPacket {
     private final int slotNum;
     private final int buttonNum;
     private final ClickAction clickType;
-    private final ItemStack carriedItem;
     private final Int2ObjectMap<MLFluidStack> changedSlots;
 
-    public C2SClickFluidSlotPacket(int containerID, int $$1, int slotNum, int $$3, ClickAction $$4, ItemStack $$5, Int2ObjectMap<MLFluidStack> $$6) {
+    public C2SClickFluidSlotPacket(int containerID, int $$1, int slotNum, int $$3, ClickAction $$4, Int2ObjectMap<MLFluidStack> $$6) {
         this.containerId = containerID;
         this.stateId = $$1;
         this.slotNum = slotNum;
         this.buttonNum = $$3;
         this.clickType = $$4;
-        this.carriedItem = $$5;
         this.changedSlots = Int2ObjectMaps.unmodifiable($$6);
     }
 
@@ -43,9 +41,8 @@ public class C2SClickFluidSlotPacket implements C2SModPacket {
         this.slotNum = buf.readShort();
         this.buttonNum = buf.readByte();
         this.clickType = buf.readEnum(ClickAction.class);
-        IntFunction<Int2ObjectOpenHashMap<MLFluidStack>> $$1 = FriendlyByteBuf.limitValue(Int2ObjectOpenHashMap::new, 128);
+        IntFunction<Int2ObjectOpenHashMap<MLFluidStack>> $$1 = FriendlyByteBuf.limitValue(Int2ObjectOpenHashMap::new, MAX_SLOT_COUNT);
         this.changedSlots = Int2ObjectMaps.unmodifiable(buf.readMap($$1, $$0x -> Integer.valueOf($$0x.readShort()), MLFluidStack::readFromPacket));
-        this.carriedItem = buf.readItem();
     }
 
     public void write(FriendlyByteBuf $$0) {
@@ -55,7 +52,6 @@ public class C2SClickFluidSlotPacket implements C2SModPacket {
         $$0.writeByte(this.buttonNum);
         $$0.writeEnum(this.clickType);
         $$0.writeMap(this.changedSlots, FriendlyByteBuf::writeShort, (buf, stack) -> stack.writeToPacket(buf));
-        $$0.writeItem(this.carriedItem);
     }
 
     public int getContainerId() {
@@ -68,10 +64,6 @@ public class C2SClickFluidSlotPacket implements C2SModPacket {
 
     public int getButtonNum() {
         return this.buttonNum;
-    }
-
-    public ItemStack getCarriedItem() {
-        return this.carriedItem;
     }
 
     public Int2ObjectMap<MLFluidStack> getChangedSlots() {
@@ -96,19 +88,30 @@ public class C2SClickFluidSlotPacket implements C2SModPacket {
                 ItemStack carried = abstractTankMenu.getCarried();
 
                 switch (clickType) {
-                    case PICKUP -> {
-
+                    case PICKUP_ALL -> {
+                        MLFluidStack fluidInSlot = fluidInventory.fluids.get(slotNum);
+                        int filled = Services.PLATFORM.simulateFill(carried,fluidInSlot);
+                        if (filled > 0) {
+                            Services.PLATFORM.transferTankToContainer(carried,fluidInventory,filled,slotNum, player, false);
+                        }
                     }
                     case DEPOSIT_ONE -> {
                         MLFluidStack fluidStack = Services.PLATFORM.extractAnyFluid(carried, 1000, FluidInventory.Action.SIMULATE);
                         if (!fluidStack.isEmpty()) {
                             int fill = fluidInventory.fillSpecific(fluidStack, FluidInventory.Action.SIMULATE, slotNum);
                             if (fill == fluidStack.getAmount()) {//everything was filled, safe to transfer
-                                Services.PLATFORM.transferContainerToTank(carried,fluidInventory,fill,slotNum,player);
+                                Services.PLATFORM.transferContainerToTank(carried,fluidInventory,fill,slotNum,player, false);
                             }
                         }
                     }
                     case DEPOSIT_ALL -> {
+                        MLFluidStack fluidStack = Services.PLATFORM.extractAnyFluid(carried, Integer.MAX_VALUE, FluidInventory.Action.SIMULATE);
+                        if (!fluidStack.isEmpty()) {
+                            int fill = fluidInventory.fillSpecific(fluidStack, FluidInventory.Action.SIMULATE, slotNum);
+                            if (fill == fluidStack.getAmount()) {//everything was filled, safe to transfer
+                                Services.PLATFORM.transferContainerToTank(carried,fluidInventory,fill,slotNum,player, false);
+                            }
+                        }
                     }
                     case PICKUP_HALF -> {
                         MLFluidStack fluidInSlot = fluidInventory.fluids.get(slotNum);
@@ -117,7 +120,7 @@ public class C2SClickFluidSlotPacket implements C2SModPacket {
                         MLFluidStack drained = fluidInSlot.copyWithAmount(buckets * 1000);
                         int filled = Services.PLATFORM.simulateFill(carried,drained);
                         if (filled > 0) {
-                            Services.PLATFORM.transferTankToContainer(carried,fluidInventory,filled,slotNum, player);
+                            Services.PLATFORM.transferTankToContainer(carried,fluidInventory,filled,slotNum, player, false);
                         }
                     }
                 }

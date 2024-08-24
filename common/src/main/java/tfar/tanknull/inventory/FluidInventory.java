@@ -1,5 +1,7 @@
 package tfar.tanknull.inventory;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
@@ -9,9 +11,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import tfar.tanknull.MLFluidStack;
 import tfar.tanknull.TankStats;
+import tfar.tanknull.platform.Services;
 import tfar.tanknull.world.TankSavedData;
-
-import java.util.List;
 
 
 //ifluidhandler adapted to common
@@ -20,6 +21,7 @@ public class FluidInventory {
     public NonNullList<MLFluidStack> fluids;
     public final int capacity;
     @Nullable private final TankSavedData data;
+    protected final Int2ObjectMap<Slot> wrappers = new Int2ObjectOpenHashMap<>();
 
     public FluidInventory(TankStats stats,TankSavedData data) {
         this(stats.slots,stats.stacklimit,data);
@@ -29,6 +31,19 @@ public class FluidInventory {
         fluids = NonNullList.withSize(slots, MLFluidStack.EMPTY);
         this.capacity = capacity;
         this.data = data;
+    }
+
+    public Slot getWrapper(int slot) {
+        return wrappers.computeIfAbsent(slot,value -> Services.PLATFORM.createWrapper(this,value));
+    }
+
+    public class Slot {
+
+        final int slot;
+        Slot(int slot) {
+            this.slot = slot;
+        }
+
     }
 
     public static final FluidInventory EMPTY = empty();

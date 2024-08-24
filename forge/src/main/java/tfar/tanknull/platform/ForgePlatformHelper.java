@@ -21,7 +21,6 @@ import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import net.minecraftforge.items.wrapper.InvWrapper;
 import org.apache.commons.lang3.tuple.Pair;
 import tfar.tanknull.*;
-import tfar.tanknull.client.FluidSpriteCache;
 import tfar.tanknull.inventory.FluidInventory;
 import tfar.tanknull.inventory.ForgeFluidInventory;
 import tfar.tanknull.network.client.S2CModPacket;
@@ -194,16 +193,16 @@ public class ForgePlatformHelper implements IPlatformHelper {
     }
 
     @Override
-    public void transferContainerToTank(ItemStack container, FluidInventory fluidInventory, int maxFill, int tank, Player player) {
-        FluidActionResult fluidActionResult = FluidUtil.tryEmptyContainerAndStow(container, (ForgeFluidInventory) fluidInventory, new InvWrapper(player.getInventory()), maxFill, player, true);
+    public void transferContainerToTank(ItemStack container, FluidInventory fluidInventory, int maxFill, int tank, Player player, boolean simulate) {
+        FluidActionResult fluidActionResult = FluidUtil.tryEmptyContainerAndStow(container, (ForgeFluidInventory.ForgeSlot) fluidInventory.getWrapper(tank), new InvWrapper(player.getInventory()), maxFill, player, !simulate);
         if (fluidActionResult.isSuccess()) {
             player.containerMenu.setCarried(fluidActionResult.getResult());
         }
     }
 
     @Override
-    public void transferTankToContainer(ItemStack container, FluidInventory fluidInventory, int maxDrain, int tank, Player player) {
-        FluidActionResult fluidActionResult = FluidUtil.tryFillContainerAndStow(container, (ForgeFluidInventory) fluidInventory, new InvWrapper(player.getInventory()), maxDrain, player, true);
+    public void transferTankToContainer(ItemStack container, FluidInventory fluidInventory, int maxDrain, int tank, Player player, boolean simulate) {
+        FluidActionResult fluidActionResult = FluidUtil.tryFillContainerAndStow(container,(ForgeFluidInventory.ForgeSlot) fluidInventory.getWrapper(tank), new InvWrapper(player.getInventory()), maxDrain, player, !simulate);
         if (fluidActionResult.isSuccess()) {
             player.containerMenu.setCarried(fluidActionResult.getResult());
         }
@@ -223,5 +222,10 @@ public class ForgePlatformHelper implements IPlatformHelper {
     public int getTint(MLFluidStack stack) {
         FluidStack forgeStack = convertToForge(stack);
         return IClientFluidTypeExtensions.of(stack.getFluid()).getTintColor(forgeStack);
+    }
+
+    @Override
+    public FluidInventory.Slot createWrapper(FluidInventory inventory, int tank) {
+        return ((ForgeFluidInventory)inventory).makeWrapper(tank);
     }
 }

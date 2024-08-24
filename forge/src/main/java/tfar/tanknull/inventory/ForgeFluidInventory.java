@@ -18,6 +18,51 @@ public class ForgeFluidInventory extends FluidInventory implements IFluidHandler
         super(stats,data);
     }
 
+    public ForgeSlot makeWrapper(int tank) {
+        return new ForgeSlot(tank);
+    }
+
+    public class ForgeSlot extends Slot implements IFluidHandler {
+        ForgeSlot(int slot) {
+            super(slot);
+        }
+
+        @Override
+        public int getTanks() {
+            return 1;
+        }
+
+        @Override
+        public @NotNull FluidStack getFluidInTank(int tank) {
+            return ForgeFluidInventory.this.getFluidInTank(slot);
+        }
+
+        @Override
+        public int getTankCapacity(int tank) {
+            return capacity;
+        }
+
+        @Override
+        public boolean isFluidValid(int tank, @NotNull FluidStack stack) {
+            return ForgeFluidInventory.this.isFluidValid(slot,stack);
+        }
+
+        @Override
+        public int fill(FluidStack resource, FluidAction action) {
+            return ForgeFluidInventory.this.fillSpecific(ForgePlatformHelper.convert(resource),ForgePlatformHelper.action(action),slot);
+        }
+
+        @Override
+        public @NotNull FluidStack drain(FluidStack resource, FluidAction action) {
+            return ForgePlatformHelper.convertToForge(ForgeFluidInventory.this.drainSpecific(ForgePlatformHelper.convert(resource),ForgePlatformHelper.action(action),slot));
+        }
+
+        @Override
+        public @NotNull FluidStack drain(int maxDrain, FluidAction action) {
+            return ForgePlatformHelper.convertToForge(ForgeFluidInventory.this.drainSpecific(maxDrain,ForgePlatformHelper.action(action),slot));
+        }
+    }
+
     ////////////////////////////////////////delegates to API//////////////////////////////////////////
 
     @Override
