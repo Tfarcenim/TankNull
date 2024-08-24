@@ -54,12 +54,12 @@ public class ForgeFluidInventory extends FluidInventory implements IFluidHandler
 
         @Override
         public @NotNull FluidStack drain(FluidStack resource, FluidAction action) {
-            return ForgePlatformHelper.convertToForge(ForgeFluidInventory.this.drainSpecific(ForgePlatformHelper.convert(resource),ForgePlatformHelper.action(action),slot));
+            return ForgePlatformHelper.convert(ForgeFluidInventory.this.drainSpecific(ForgePlatformHelper.convert(resource),ForgePlatformHelper.action(action),slot));
         }
 
         @Override
         public @NotNull FluidStack drain(int maxDrain, FluidAction action) {
-            return ForgePlatformHelper.convertToForge(ForgeFluidInventory.this.drainSpecific(maxDrain,ForgePlatformHelper.action(action),slot));
+            return ForgePlatformHelper.convert(ForgeFluidInventory.this.drainSpecific(maxDrain,ForgePlatformHelper.action(action),slot));
         }
     }
 
@@ -77,12 +77,12 @@ public class ForgeFluidInventory extends FluidInventory implements IFluidHandler
 
     @Override
     public @NotNull FluidStack drain(FluidStack resource, IFluidHandler.FluidAction action) {
-        return ForgePlatformHelper.convertToForge(drain(ForgePlatformHelper.convert(resource),ForgePlatformHelper.action(action)));
+        return ForgePlatformHelper.convert(drain(ForgePlatformHelper.convert(resource),ForgePlatformHelper.action(action)));
     }
 
     @Override
     public @NotNull FluidStack drain(int maxDrain, IFluidHandler.FluidAction action) {
-        return ForgePlatformHelper.convertToForge(drain(maxDrain,ForgePlatformHelper.action(action)));
+        return ForgePlatformHelper.convert(drain(maxDrain,ForgePlatformHelper.action(action)));
     }
 
     @Override
@@ -97,7 +97,7 @@ public class ForgeFluidInventory extends FluidInventory implements IFluidHandler
 
     @Override
     public @NotNull FluidStack getFluidInTank(int tank) {
-        return ForgePlatformHelper.convertToForge(getFluid(tank));
+        return ForgePlatformHelper.convert(getFluid(tank));
     }
 
 }

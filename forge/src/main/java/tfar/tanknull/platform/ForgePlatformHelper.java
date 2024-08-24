@@ -60,22 +60,22 @@ public class ForgePlatformHelper implements IPlatformHelper {
 
     @Override
     public Component getDisplayName(MLFluidStack fluidStack) {
-        return convertToForge(fluidStack).getDisplayName();
+        return convert(fluidStack).getDisplayName();
     }
 
     @Override
     public String getTranslationKey(MLFluidStack fluidStack) {
-        return convertToForge(fluidStack).getTranslationKey();
+        return convert(fluidStack).getTranslationKey();
     }
 
     @Override
     public FluidInventory create(TankStats stats, TankSavedData data) {
-        return new ForgeFluidInventory(stats,data);
+        return new ForgeFluidInventory(stats, data);
     }
 
     @Override
     public DockBlockEntity create(BlockPos pos, BlockState state) {
-        return new DockBlockEntity(pos, state);
+        return new DockBlockEntityForge(pos, state);
     }
 
     @Override
@@ -111,46 +111,37 @@ public class ForgePlatformHelper implements IPlatformHelper {
 
     @Override
     public <F> void unfreeze(Registry<F> registry) {
-        ((MappedRegistry<F>)registry).unfreeze();
+        ((MappedRegistry<F>) registry).unfreeze();
     }
 
     ////////////////Static helpers
 
-
-    public static FluidStack convertToForge(MLFluidStack fluidStack) {
+    public static FluidStack convert(MLFluidStack fluidStack) {
         if (fluidStack.isEmpty()) {
             return FluidStack.EMPTY;
-        } return new FluidStack(fluidStack.getFluid(),fluidStack.getAmount(),fluidStack.getTag());
+        }
+        return new FluidStack(fluidStack.getFluid(), fluidStack.getAmount(), fluidStack.getTag());
     }
 
     public static MLFluidStack convert(FluidStack fluidStack) {
         if (fluidStack.isEmpty()) {
             return MLFluidStack.EMPTY;
-        } return new MLFluidStack(fluidStack.getFluid(),fluidStack.getAmount(),fluidStack.getTag());
+        }
+        return new MLFluidStack(fluidStack.getFluid(), fluidStack.getAmount(), fluidStack.getTag());
     }
 
     public static FluidInventory.Action action(IFluidHandler.FluidAction action) {
-        switch (action){
-            case EXECUTE -> {
-                return FluidInventory.Action.EXECUTE;
-            }
-            case SIMULATE -> {
-                return FluidInventory.Action.SIMULATE;
-            }
-        }
-        return null;
+        return switch (action) {
+            case EXECUTE -> FluidInventory.Action.EXECUTE;
+            case SIMULATE -> FluidInventory.Action.SIMULATE;
+        };
     }
 
     public static IFluidHandler.FluidAction action(FluidInventory.Action action) {
-        switch (action){
-            case EXECUTE -> {
-                return IFluidHandler.FluidAction.EXECUTE;
-            }
-            case SIMULATE -> {
-                return IFluidHandler.FluidAction.SIMULATE;
-            }
-        }
-        return null;
+        return switch (action) {
+            case EXECUTE -> IFluidHandler.FluidAction.EXECUTE;
+            case SIMULATE -> IFluidHandler.FluidAction.SIMULATE;
+        };
     }
 
     @Override
@@ -163,7 +154,7 @@ public class ForgePlatformHelper implements IPlatformHelper {
         if (!stack.isEmpty()) {
             IFluidHandlerItem iFluidHandlerItem = stack.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM).orElse(null);
             if (iFluidHandlerItem != null) {
-                FluidStack drained = iFluidHandlerItem.drain(max,action(action));
+                FluidStack drained = iFluidHandlerItem.drain(max, action(action));
                 return convert(drained);
             }
         }
@@ -175,7 +166,7 @@ public class ForgePlatformHelper implements IPlatformHelper {
         if (!stack.isEmpty()) {
             IFluidHandlerItem iFluidHandlerItem = stack.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM).orElse(null);
             if (iFluidHandlerItem != null) {
-                FluidStack drained = iFluidHandlerItem.drain(Integer.MAX_VALUE,action(FluidInventory.Action.SIMULATE));
+                FluidStack drained = iFluidHandlerItem.drain(Integer.MAX_VALUE, action(FluidInventory.Action.SIMULATE));
                 return convert(drained);
             }
         }
@@ -186,7 +177,7 @@ public class ForgePlatformHelper implements IPlatformHelper {
     public int simulateFill(ItemStack stack, MLFluidStack fluid) {
         IFluidHandlerItem iFluidHandlerItem = stack.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM).orElse(null);
         if (iFluidHandlerItem != null) {
-            int filled = iFluidHandlerItem.fill(convertToForge(fluid),action(FluidInventory.Action.SIMULATE));
+            int filled = iFluidHandlerItem.fill(convert(fluid), action(FluidInventory.Action.SIMULATE));
             return filled;
         }
         return 0;
@@ -202,14 +193,14 @@ public class ForgePlatformHelper implements IPlatformHelper {
 
     @Override
     public void transferTankToContainer(ItemStack container, FluidInventory fluidInventory, int maxDrain, int tank, Player player, boolean simulate) {
-        FluidActionResult fluidActionResult = FluidUtil.tryFillContainerAndStow(container,(ForgeFluidInventory.ForgeSlot) fluidInventory.getWrapper(tank), new InvWrapper(player.getInventory()), maxDrain, player, !simulate);
+        FluidActionResult fluidActionResult = FluidUtil.tryFillContainerAndStow(container, (ForgeFluidInventory.ForgeSlot) fluidInventory.getWrapper(tank), new InvWrapper(player.getInventory()), maxDrain, player, !simulate);
         if (fluidActionResult.isSuccess()) {
             player.containerMenu.setCarried(fluidActionResult.getResult());
         }
     }
 
     public ResourceLocation getSpriteLocation(MLFluidStack stack) {
-        FluidStack forgeStack = convertToForge(stack);
+        FluidStack forgeStack = convert(stack);
         return IClientFluidTypeExtensions.of(stack.getFluid()).getStillTexture(forgeStack);
     }
 
@@ -220,12 +211,12 @@ public class ForgePlatformHelper implements IPlatformHelper {
 
     @Override
     public int getTint(MLFluidStack stack) {
-        FluidStack forgeStack = convertToForge(stack);
+        FluidStack forgeStack = convert(stack);
         return IClientFluidTypeExtensions.of(stack.getFluid()).getTintColor(forgeStack);
     }
 
     @Override
     public FluidInventory.Slot createWrapper(FluidInventory inventory, int tank) {
-        return ((ForgeFluidInventory)inventory).makeWrapper(tank);
+        return ((ForgeFluidInventory) inventory).makeWrapper(tank);
     }
 }

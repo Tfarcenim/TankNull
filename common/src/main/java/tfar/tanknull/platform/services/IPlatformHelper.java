@@ -61,7 +61,6 @@ public interface IPlatformHelper {
     String getTranslationKey(MLFluidStack fluidStack);
 
     FluidInventory create(TankStats stats, TankSavedData data);
-    DockBlockEntity create(BlockPos pos, BlockState state);
 
     default  <F> void registerAll(Class<?> clazz, Registry<F> registry, Class<? extends F> filter) {
         Map<String,F> map = new HashMap<>();
@@ -104,5 +103,8 @@ public interface IPlatformHelper {
     TextureAtlasSprite getSprite(MLFluidStack stack);
     int getTint(MLFluidStack stack);
     FluidInventory.Slot createWrapper(FluidInventory inventory, int tank);
+    default DockBlockEntity create(BlockPos pos,BlockState state) {
+        return new DockBlockEntity(pos,state);
+    }
 
 }

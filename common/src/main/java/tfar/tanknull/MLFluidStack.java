@@ -15,6 +15,7 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import tfar.tanknull.platform.Services;
 
+import java.util.Objects;
 import java.util.Optional;
 
 //copied from forge and adapted for common
@@ -258,11 +259,7 @@ public class MLFluidStack {
 
     @Override
     public final int hashCode() {
-        int code = 1;
-        code = 31 * code + getFluid().hashCode();
-        if (tag != null)
-            code = 31 * code + tag.hashCode();
-        return code;
+        return Objects.hash(fluid,amount);
     }
 
     /**
@@ -272,10 +269,10 @@ public class MLFluidStack {
      */
     @Override
     public final boolean equals(Object o) {
-        if (!(o instanceof MLFluidStack)) {
+        if (!(o instanceof MLFluidStack other)) {
             return false;
         }
-        return isFluidEqual((MLFluidStack) o);
+        return isFluidStackIdentical(other);
     }
 
 }
