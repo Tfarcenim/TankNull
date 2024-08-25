@@ -4,7 +4,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
 import tfar.tanknull.MLFluidStack;
 import tfar.tanknull.client.ModClient;
-import tfar.tanknull.menu.AbstractTankMenu;
+import tfar.tanknull.menu.TankMenu;
 
 public class S2CSetFluidSlotPacket implements S2CModPacket{
 
@@ -33,8 +33,8 @@ public class S2CSetFluidSlotPacket implements S2CModPacket{
     @Override
     public void handleClient() {
         Player player = ModClient.getLocalPlayer();
-        if (containerId == player.containerMenu.containerId && player.containerMenu instanceof AbstractTankMenu abstractTankMenu) {
-            abstractTankMenu.setFluid(slot, stateId, stack,ghost);
+        if (containerId == player.containerMenu.containerId && player.containerMenu instanceof TankMenu tankMenu) {
+            tankMenu.setFluid(slot, stateId, stack,ghost);
         }
     }
 

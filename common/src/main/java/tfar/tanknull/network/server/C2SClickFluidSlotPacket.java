@@ -10,7 +10,7 @@ import net.minecraft.world.item.ItemStack;
 import tfar.tanknull.MLFluidStack;
 import tfar.tanknull.inventory.ClickAction;
 import tfar.tanknull.inventory.FluidInventory;
-import tfar.tanknull.menu.AbstractTankMenu;
+import tfar.tanknull.menu.TankMenu;
 import tfar.tanknull.network.PacketHandler;
 import tfar.tanknull.platform.Services;
 
@@ -84,9 +84,9 @@ public class C2SClickFluidSlotPacket implements C2SModPacket {
         try {
 
             AbstractContainerMenu menu = player.containerMenu;
-            if (menu instanceof AbstractTankMenu abstractTankMenu) {
-                FluidInventory fluidInventory = abstractTankMenu.fluidInventory;
-                ItemStack carried = abstractTankMenu.getCarried();
+            if (menu instanceof TankMenu tankMenu) {
+                FluidInventory fluidInventory = tankMenu.fluidInventory;
+                ItemStack carried = tankMenu.getCarried();
                 MLFluidStack fluidInSlot = fluidInventory.fluids.get(slotNum);
 
                 switch (clickType) {

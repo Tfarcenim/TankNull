@@ -2,11 +2,16 @@ package tfar.tanknull.menu;
 
 import com.google.common.base.Suppliers;
 import net.minecraft.core.NonNullList;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Container;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Nullable;
 import tfar.tanknull.MLFluidStack;
 import tfar.tanknull.TankStats;
 import tfar.tanknull.init.ModMenuTypes;
@@ -23,7 +28,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-public class AbstractTankMenu extends AbstractContainerMenu {
+public class TankMenu extends AbstractContainerMenu {
 
     public final Inventory playerInventory;
     public final int rows;
@@ -33,6 +38,8 @@ public class AbstractTankMenu extends AbstractContainerMenu {
     public final NonNullList<FluidSlot> fluidSlots = NonNullList.create();
     private final NonNullList<MLFluidStack> remoteFluidSlots = NonNullList.create();
     private final NonNullList<MLFluidStack> remoteGhostFluidSlots = NonNullList.create();
+
+    private final Container holder = new SimpleContainer(1);
 
     public void initializeFluids(int stateID, List<MLFluidStack> stacks, List<MLFluidStack> ghostStacks) {
         for(int i = 0; i < stacks.size(); ++i) {
@@ -44,16 +51,17 @@ public class AbstractTankMenu extends AbstractContainerMenu {
     }
 
     public enum ButtonAction {
-        LOCK_FREQUENCY, SORT;
+        LOCK_FREQUENCY, SORT,OPEN_CONFIG;
         static final ButtonAction[] VALUES = values();
     }
 
 
-    public AbstractTankMenu(MenuType<?> type, int windowId, Inventory playerInventory, FluidInventory fluidInventory) {
+    public TankMenu(MenuType<?> type, int windowId, Inventory playerInventory, FluidInventory fluidInventory,ItemStack stack) {
         super(type, windowId);
         this.playerInventory = playerInventory;
         this.fluidInventory = fluidInventory;
         this.rows = fluidInventory.getSlots()/9;
+        holder.setItem(0,stack);
         addPlayerSlots(playerInventory,-1);
         addTankSlots();
     }
@@ -68,6 +76,14 @@ public class AbstractTankMenu extends AbstractContainerMenu {
     }
 
     protected void addTankSlots() {
+
+        addSlot(new LockedSlot(playerInventory,0,-100,-100){
+            @Override
+            public boolean isActive() {
+                return false;
+            }
+        });
+
         int slotIndex = 0;
         for (int row = 0; row < rows; ++row) {
             for (int col = 0; col < 9; ++col) {
@@ -106,10 +122,31 @@ public class AbstractTankMenu extends AbstractContainerMenu {
         if (player instanceof ServerPlayer serverPlayer) {
             switch (buttonAction) {
              //   case LOCK_FREQUENCY -> fluidInventory.toggleFrequencyLock();
-               case SORT -> fluidInventory.sort(SortingType.DESCENDING.comparator);
+               case SORT -> fluidInventory.sort();
+                case OPEN_CONFIG -> player.openMenu(new ConfigMenuProvider(holder.getItem(0)));
             }
         }
         return true;
+    }
+
+    public class ConfigMenuProvider implements MenuProvider {
+
+        private final ItemStack stack;
+
+        ConfigMenuProvider(ItemStack stack) {
+
+            this.stack = stack;
+        }
+        @Override
+        public Component getDisplayName() {
+            return Component.literal("Tank Configs");
+        }
+
+        @Nullable
+        @Override
+        public AbstractContainerMenu createMenu(int i, Inventory inventory, Player player) {
+            return new TankConfigMenu(i,inventory,stack,fluidInventory);
+        }
     }
 
     @Nonnull
@@ -278,60 +315,60 @@ public class AbstractTankMenu extends AbstractContainerMenu {
     
     //////////////////////////////////////////////////////////////////////
 
-    public static AbstractTankMenu t1(int id, Inventory inv) {
-        return t1s(id, inv,  FluidInventory.dummy(TankStats.one));
+    public static TankMenu t1(int id, Inventory inv) {
+        return t1s(id, inv,  FluidInventory.dummy(TankStats.one), ItemStack.EMPTY);
     }
 
-    public static AbstractTankMenu t2(int id, Inventory inv) {
-        return t2s(id, inv,  FluidInventory.dummy(TankStats.two));
+    public static TankMenu t2(int id, Inventory inv) {
+        return t2s(id, inv,  FluidInventory.dummy(TankStats.two), ItemStack.EMPTY);
     }
 
-    public static AbstractTankMenu t3(int id, Inventory inv) {
-        return t3s(id, inv,  FluidInventory.dummy(TankStats.three));
+    public static TankMenu t3(int id, Inventory inv) {
+        return t3s(id, inv,  FluidInventory.dummy(TankStats.three), ItemStack.EMPTY);
     }
 
-    public static AbstractTankMenu t4(int id, Inventory inv) {
-        return t4s( id, inv,  FluidInventory.dummy(TankStats.four));
+    public static TankMenu t4(int id, Inventory inv) {
+        return t4s( id, inv,  FluidInventory.dummy(TankStats.four), ItemStack.EMPTY);
     }
 
-    public static AbstractTankMenu t5(int id, Inventory inv) {
-        return t5s( id, inv,  FluidInventory.dummy(TankStats.five));
+    public static TankMenu t5(int id, Inventory inv) {
+        return t5s( id, inv,  FluidInventory.dummy(TankStats.five),  ItemStack.EMPTY);
     }
 
-    public static AbstractTankMenu t6(int id, Inventory inv) {
-        return t6s(id, inv,  FluidInventory.dummy(TankStats.six));
+    public static TankMenu t6(int id, Inventory inv) {
+        return t6s(id, inv,  FluidInventory.dummy(TankStats.six),  ItemStack.EMPTY);
     }
 
-    public static AbstractTankMenu t7(int id, Inventory inv) {
-        return t7s(id, inv, FluidInventory.dummy(TankStats.seven));
+    public static TankMenu t7(int id, Inventory inv) {
+        return t7s(id, inv, FluidInventory.dummy(TankStats.seven), ItemStack.EMPTY);
     }
 
-    public static AbstractTankMenu t1s(int id, Inventory inv, FluidInventory FluidInventory) {
-        return new AbstractTankMenu(ModMenuTypes.TANK_1, id, inv, FluidInventory);
+    public static TankMenu t1s(int id, Inventory inv, FluidInventory fluidInventory, ItemStack stack) {
+        return new TankMenu(ModMenuTypes.TANK_1, id, inv, fluidInventory, stack);
     }
 
-    public static AbstractTankMenu t2s(int id, Inventory inv, FluidInventory FluidInventory) {
-        return new AbstractTankMenu(ModMenuTypes.TANK_2, id, inv, FluidInventory);
+    public static TankMenu t2s(int id, Inventory inv, FluidInventory fluidInventory, ItemStack stack) {
+        return new TankMenu(ModMenuTypes.TANK_2, id, inv, fluidInventory, stack);
     }
 
-    public static AbstractTankMenu t3s(int id, Inventory inv, FluidInventory FluidInventory) {
-        return new AbstractTankMenu(ModMenuTypes.TANK_3, id, inv, FluidInventory);
+    public static TankMenu t3s(int id, Inventory inv, FluidInventory fluidInventory, ItemStack stack) {
+        return new TankMenu(ModMenuTypes.TANK_3, id, inv, fluidInventory, stack);
     }
 
-    public static AbstractTankMenu t4s(int id, Inventory inv, FluidInventory FluidInventory) {
-        return new AbstractTankMenu(ModMenuTypes.TANK_4, id, inv, FluidInventory);
+    public static TankMenu t4s(int id, Inventory inv, FluidInventory fluidInventory, ItemStack stack) {
+        return new TankMenu(ModMenuTypes.TANK_4, id, inv, fluidInventory, stack);
     }
 
-    public static AbstractTankMenu t5s(int id, Inventory inv, FluidInventory FluidInventory) {
-        return new AbstractTankMenu(ModMenuTypes.TANK_5, id, inv, FluidInventory);
+    public static TankMenu t5s(int id, Inventory inv, FluidInventory fluidInventory, ItemStack stack) {
+        return new TankMenu(ModMenuTypes.TANK_5, id, inv, fluidInventory, stack);
     }
 
-    public static AbstractTankMenu t6s(int id, Inventory inv, FluidInventory FluidInventory) {
-        return new AbstractTankMenu(ModMenuTypes.TANK_6, id, inv, FluidInventory);
+    public static TankMenu t6s(int id, Inventory inv, FluidInventory fluidInventory, ItemStack stack) {
+        return new TankMenu(ModMenuTypes.TANK_6, id, inv, fluidInventory, stack);
     }
 
-    public static AbstractTankMenu t7s(int id, Inventory inv, FluidInventory FluidInventory) {
-        return new AbstractTankMenu(ModMenuTypes.TANK_7, id, inv, FluidInventory);
+    public static TankMenu t7s(int id, Inventory inv, FluidInventory fluidInventory, ItemStack stack) {
+        return new TankMenu(ModMenuTypes.TANK_7, id, inv, fluidInventory, stack);
     }
     
 }

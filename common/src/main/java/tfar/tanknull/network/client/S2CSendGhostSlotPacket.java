@@ -4,7 +4,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
 import tfar.tanknull.MLFluidStack;
 import tfar.tanknull.client.ModClient;
-import tfar.tanknull.menu.AbstractTankMenu;
+import tfar.tanknull.menu.TankMenu;
 
 public class S2CSendGhostSlotPacket implements S2CModPacket {
 
@@ -34,7 +34,7 @@ public class S2CSendGhostSlotPacket implements S2CModPacket {
     @Override
     public void handleClient() {
         Player player = ModClient.getLocalPlayer();
-        if (player != null && player.containerMenu instanceof AbstractTankMenu dankMenu && windowId == player.containerMenu.containerId) {
+        if (player != null && player.containerMenu instanceof TankMenu dankMenu && windowId == player.containerMenu.containerId) {
          //   dankMenu.dankInventory.setGhostItem(slot,stack.getItem());
         }
     }

@@ -1,7 +1,6 @@
 package tfar.tanknull;
 
 import net.minecraft.Util;
-import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -19,10 +18,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
+import tfar.tanknull.init.ModDataComponentTypes;
 import tfar.tanknull.inventory.FluidInventory;
 import tfar.tanknull.inventory.FluidListTooltip;
-import tfar.tanknull.inventory.StackListTooltip;
-import tfar.tanknull.menu.AbstractTankMenu;
+import tfar.tanknull.menu.TankMenu;
 import tfar.tanknull.network.server.C2SRequestContentsPacket;
 import tfar.tanknull.world.ClientData;
 import tfar.tanknull.world.TankSavedData;
@@ -32,9 +31,6 @@ import java.util.List;
 import java.util.Optional;
 
 public class TankItem extends Item {
-
-    public static final String FREQUENCY = "tanknull:frequency";
-    public static final String SELECTED = "tanknull:selected";
 
     public final TankStats stats;
 
@@ -65,8 +61,8 @@ public class TankItem extends Item {
     public void appendHoverText(ItemStack stack, @Nullable Level $$1, List<Component> tooltip, TooltipFlag $$3) {
         CompoundTag tag = stack.getTag();
         if (tag != null) {
-            if (tag.contains(FREQUENCY)) {
-                tooltip.add(Component.translatable("Frequency: "+tag.getInt(FREQUENCY)));
+            if (tag.contains(ModDataComponentTypes.FREQUENCY)) {
+                tooltip.add(Component.translatable("Frequency: "+tag.getInt(ModDataComponentTypes.FREQUENCY)));
             } else {
                 tooltip.add(Component.translatable("Frequency: Unbound"));
             }
@@ -128,25 +124,25 @@ public class TankItem extends Item {
                 case zero -> {
                 }
                 case one -> {
-                    return AbstractTankMenu.t1s(i,inventory,fluidInventory);
+                    return TankMenu.t1s(i,inventory,fluidInventory,stack);
                 }
                 case two -> {
-                    return AbstractTankMenu.t2s(i,inventory,fluidInventory);
+                    return TankMenu.t2s(i,inventory,fluidInventory,stack);
                 }
                 case three -> {
-                    return AbstractTankMenu.t3s(i,inventory,fluidInventory);
+                    return TankMenu.t3s(i,inventory,fluidInventory,stack);
                 }
                 case four -> {
-                    return AbstractTankMenu.t4s(i,inventory,fluidInventory);
+                    return TankMenu.t4s(i,inventory,fluidInventory,stack);
                 }
                 case five -> {
-                    return AbstractTankMenu.t5s(i,inventory,fluidInventory);
+                    return TankMenu.t5s(i,inventory,fluidInventory,stack);
                 }
                 case six -> {
-                    return AbstractTankMenu.t6s(i,inventory,fluidInventory);
+                    return TankMenu.t6s(i,inventory,fluidInventory,stack);
                 }
                 case seven -> {
-                    return AbstractTankMenu.t7s(i,inventory,fluidInventory);
+                    return TankMenu.t7s(i,inventory,fluidInventory,stack);
                 }
             }
             return null;
@@ -156,28 +152,35 @@ public class TankItem extends Item {
     ////////////////////////////////////////////////////////////////
 
     public static int getFrequency(ItemStack bag) {
-        return bag.hasTag() && bag.getTag().contains(FREQUENCY) ? bag.getTag().getInt(FREQUENCY) : TankSavedData.INVALID;
+        return bag.hasTag() && bag.getTag().contains(ModDataComponentTypes.FREQUENCY) ? bag.getTag().getInt(ModDataComponentTypes.FREQUENCY) : TankSavedData.INVALID;
     }
 
     public static void setFrequency(ItemStack bag,int frequency) {
-        bag.getOrCreateTag().putInt(FREQUENCY,frequency);
+        bag.getOrCreateTag().putInt(ModDataComponentTypes.FREQUENCY,frequency);
     }
 
     public static int getSelectedSlot(ItemStack bag) {
-        return bag.hasTag() && bag.getTag().contains(SELECTED) ? bag.getTag().getInt(SELECTED) : TankSavedData.INVALID;
+        return bag.hasTag() && bag.getTag().contains(ModDataComponentTypes.SELECTED) ? bag.getTag().getInt(ModDataComponentTypes.SELECTED) : TankSavedData.INVALID;
     }
 
+
     public static void setSelectedSlot(ItemStack bag,int frequency) {
-        bag.getOrCreateTag().putInt(SELECTED,frequency);
+        bag.getOrCreateTag().putInt(ModDataComponentTypes.SELECTED,frequency);
+    }
+
+    public static FluidInventory getInventoryFrom(ItemStack bag,MinecraftServer server) {
+        int frequency = getFrequency(bag);
+        if (frequency < 0) return null;
+        return TankSavedData.get(frequency,server).getOrCreateInventory();
     }
 
 
     public static UseType getUseType(ItemStack bag) {
-        return bag.hasTag() && bag.getTag().contains("use_type") ? UseType.valueOf(bag.getTag().getString("use_type")) : UseType.bag;
+        return bag.hasTag() && bag.getTag().contains(ModDataComponentTypes.USE_TYPE) ? UseType.valueOf(bag.getTag().getString(ModDataComponentTypes.USE_TYPE)) : UseType.bag;
     }
 
     public static void setUseType(ItemStack bag,UseType useType) {
-        bag.getOrCreateTag().putString("use_type",useType.name());
+        bag.getOrCreateTag().putString(ModDataComponentTypes.USE_TYPE,useType.name());
     }
 
 
@@ -186,7 +189,7 @@ public class TankItem extends Item {
         while (true) {
             TankSavedData tankSavedData = TankSavedData.get(id,server);
             if (tankSavedData == null) {
-                stack.getOrCreateTag().putInt(FREQUENCY,id);
+                stack.getOrCreateTag().putInt(ModDataComponentTypes.FREQUENCY,id);
                 return;
             }
             id++;

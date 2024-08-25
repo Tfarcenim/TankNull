@@ -5,7 +5,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
 import tfar.tanknull.MLFluidStack;
 import tfar.tanknull.client.ModClient;
-import tfar.tanknull.menu.AbstractTankMenu;
+import tfar.tanknull.menu.TankMenu;
 import tfar.tanknull.network.PacketHandler;
 
 import java.util.List;
@@ -35,8 +35,8 @@ public class S2CInitialSyncFluidInventoryPacket implements S2CModPacket {
     @Override
     public void handleClient() {
         Player player = ModClient.getLocalPlayer();
-        if (player != null && player.containerMenu instanceof AbstractTankMenu abstractTankMenu && containerID == player.containerMenu.containerId) {
-            abstractTankMenu.initializeFluids(stateID, stacks,ghostStacks);
+        if (player != null && player.containerMenu instanceof TankMenu tankMenu && containerID == player.containerMenu.containerId) {
+            tankMenu.initializeFluids(stateID, stacks,ghostStacks);
         }
     }
 

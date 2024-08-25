@@ -7,7 +7,7 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.inventory.ContainerData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import tfar.tanknull.MLFluidStack;
@@ -19,13 +19,15 @@ import java.util.*;
 
 
 //ifluidhandler adapted to common
-public class FluidInventory {
+public class FluidInventory implements ContainerData {
 
     public NonNullList<MLFluidStack> fluids;
     public NonNullList<MLFluidStack> ghostFluids;
     public int capacity;
     @Nullable private final TankSavedData data;
     protected final Int2ObjectMap<Slot> wrappers = new Int2ObjectOpenHashMap<>();
+
+    protected SortingType sortingType = SortingType.descending;
 
     public FluidInventory(TankStats stats,TankSavedData data) {
         this(stats.slots,stats.stacklimit,data);
@@ -57,7 +59,7 @@ public class FluidInventory {
         }
     }
 
-    public void sort(Comparator<MLFluidStack> sorter) {
+    public void sort() {
         List<MLFluidStack> gathered = new ArrayList<>();
 
         Set<MLFluidStack> lockedItems = new HashSet<>();
@@ -80,7 +82,7 @@ public class FluidInventory {
             }
         }
 
-        gathered.sort(sorter);
+        gathered.sort(sortingType.comparator);
 
         for (int i = 0; i < getSlots(); i++) {
             fluids.set(i, MLFluidStack.EMPTY);
@@ -132,6 +134,15 @@ public class FluidInventory {
         }
     }
 
+    public void setSortingType(SortingType sortingType) {
+        this.sortingType = sortingType;
+        setDirty();
+    }
+
+    public SortingType getSortingType() {
+        return sortingType;
+    }
+
     static boolean anyMatch(MLFluidStack stack, Set<MLFluidStack> stacks) {
         for (MLFluidStack stack1 : stacks) {
             if (stack1.isFluidEqual(stack)) {
@@ -139,6 +150,26 @@ public class FluidInventory {
             }
         }
         return false;
+    }
+
+    @Override
+    public int get(int i) {
+        return switch (i) {
+            case 0 -> sortingType.ordinal();
+            default -> 0;
+        };
+    }
+
+    @Override
+    public void set(int i, int i1) {
+        switch (i) {
+            case 0 -> sortingType = SortingType.values()[i1];
+        }
+    }
+
+    @Override
+    public int getCount() {
+        return 1;
     }
 
     public class Slot {
@@ -163,6 +194,7 @@ public class FluidInventory {
     public void load(HolderLookup.Provider provider, CompoundTag tag) {
         loadList(fluids,tag.getList("Fluids", Tag.TAG_COMPOUND));
         loadList(ghostFluids,tag.getList("GhostFluids",Tag.TAG_COMPOUND));
+        sortingType = tag.contains("SortingType") ? SortingType.valueOf(tag.getString("SortingType")) : SortingType.descending;
     }
 
     void loadList(List<MLFluidStack> list,ListTag tag) {
@@ -176,11 +208,10 @@ public class FluidInventory {
     }
 
     public CompoundTag save(HolderLookup.Provider provider) {
-        ListTag nbtTagList = saveList(fluids);
-        ListTag nbtTagListGhost = saveList(ghostFluids);
         CompoundTag nbt = new CompoundTag();
-        nbt.put("Fluids", nbtTagList);
-        nbt.put("GhostFluids", nbtTagListGhost);
+        nbt.put("Fluids",  saveList(fluids));
+        nbt.put("GhostFluids",  saveList(ghostFluids));
+        nbt.putString("SortingType",sortingType.name());
         return nbt;
     }
 

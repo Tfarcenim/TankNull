@@ -6,11 +6,11 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
@@ -19,7 +19,7 @@ import tfar.tanknull.MLFluidStack;
 import tfar.tanknull.TankNull;
 import tfar.tanknull.inventory.ClickAction;
 import tfar.tanknull.inventory.FluidSlot;
-import tfar.tanknull.menu.AbstractTankMenu;
+import tfar.tanknull.menu.TankMenu;
 import tfar.tanknull.network.server.C2SClickFluidSlotPacket;
 import tfar.tanknull.platform.Services;
 
@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-public class TankScreen extends AbstractContainerScreen<AbstractTankMenu> {
+public class TankScreen extends AbstractContainerScreen<TankMenu> {
 
     static final ResourceLocation main_background = new ResourceLocation("textures/gui/container/generic_54.png");
     static final ResourceLocation background7 = TankNull.id("textures/container/gui/dank7.png");
@@ -37,7 +37,7 @@ public class TankScreen extends AbstractContainerScreen<AbstractTankMenu> {
     @Nullable
     protected FluidSlot hoveredFluidSlot;
 
-    public TankScreen(AbstractTankMenu menu, Inventory $$1, Component $$2, ResourceLocation background) {
+    public TankScreen(TankMenu menu, Inventory $$1, Component $$2, ResourceLocation background) {
         super(menu, $$1, $$2);
         this.background = background;
         this.imageHeight = 114 + menu.rows * 18;
@@ -62,10 +62,19 @@ public class TankScreen extends AbstractContainerScreen<AbstractTankMenu> {
     protected void init() {
         super.init();
         int j = (this.height - this.imageHeight) / 2;
-        this.addRenderableWidget(new Button(leftPos + 143, topPos + 4, 26, 12, Component.literal("Sort"), b -> sendButtonToServer(AbstractTankMenu.ButtonAction.SORT),DEFAULT_NARRATION){});
+
+        this.addRenderableWidget(new Button(leftPos + 130, topPos + 4, 26, 12, Component.literal("Sort"), b -> sendButtonToServer(TankMenu.ButtonAction.SORT), DEFAULT_NARRATION) {
+        });
+
+
+        Tooltip tooltip = Tooltip.create(Component.literal("Tank Config"));
+        this.addRenderableWidget(Button.builder(Component.literal("\uD83D\uDD27"), b -> sendButtonToServer(TankMenu.ButtonAction.OPEN_CONFIG))
+                .pos(leftPos + 157, topPos + 4)
+                .size(12, 12)
+                .tooltip(tooltip).build());
     }
 
-    private void sendButtonToServer(AbstractTankMenu.ButtonAction action) {
+    private void sendButtonToServer(TankMenu.ButtonAction action) {
         this.minecraft.gameMode.handleInventoryButtonClick(this.menu.containerId, action.ordinal());
     }
 
@@ -131,26 +140,26 @@ public class TankScreen extends AbstractContainerScreen<AbstractTankMenu> {
 
 
     public void handleFluidSlotClick(int pSlotId, int pMouseButton, ClickAction pClickType) {
-            NonNullList<FluidSlot> nonnulllist = menu.fluidSlots;
-            int i = nonnulllist.size();
-            List<MLFluidStack> list = Lists.newArrayListWithCapacity(i);
+        NonNullList<FluidSlot> nonnulllist = menu.fluidSlots;
+        int i = nonnulllist.size();
+        List<MLFluidStack> list = Lists.newArrayListWithCapacity(i);
 
-            for (FluidSlot slot : nonnulllist) {
-                list.add(slot.getFluid().copy());
+        for (FluidSlot slot : nonnulllist) {
+            list.add(slot.getFluid().copy());
+        }
+
+        Int2ObjectMap<MLFluidStack> int2objectmap = new Int2ObjectOpenHashMap<>();
+
+        for (int j = 0; j < i; ++j) {
+            MLFluidStack fluidStack = list.get(j);
+            MLFluidStack fluidStack1 = nonnulllist.get(j).getFluid();
+            if (!Objects.equals(fluidStack, fluidStack1)) {
+                int2objectmap.put(j, fluidStack1.copy());
             }
+        }
 
-            Int2ObjectMap<MLFluidStack> int2objectmap = new Int2ObjectOpenHashMap<>();
-
-            for (int j = 0; j < i; ++j) {
-                MLFluidStack fluidStack = list.get(j);
-                MLFluidStack fluidStack1 = nonnulllist.get(j).getFluid();
-                if (!Objects.equals(fluidStack,fluidStack1)) {
-                    int2objectmap.put(j, fluidStack1.copy());
-                }
-            }
-
-            Services.PLATFORM.sendToServer(new C2SClickFluidSlotPacket(menu.containerId, menu.getStateId(), pSlotId, pMouseButton, pClickType, int2objectmap));
-         //   lastClickFluidSlot = slot;
+        Services.PLATFORM.sendToServer(new C2SClickFluidSlotPacket(menu.containerId, menu.getStateId(), pSlotId, pMouseButton, pClickType, int2objectmap));
+        //   lastClickFluidSlot = slot;
     }
 
     private void renderFluidSlot(GuiGraphics pGuiGraphics, FluidSlot pSlot) {
@@ -161,20 +170,20 @@ public class TankScreen extends AbstractContainerScreen<AbstractTankMenu> {
         pGuiGraphics.pose().pushPose();
 
         if (!stack.isEmpty()) {
-            ModClient.renderFluidInGui(pGuiGraphics,x,y,stack);
+            ModClient.renderFluidInGui(pGuiGraphics, x, y, stack);
         }
 
         if (!ghost.isEmpty()) {
             if (stack.isEmpty()) {
-                ModClient.renderFluidInGui(pGuiGraphics,x,y,ghost,"Lock");
+                ModClient.renderFluidInGui(pGuiGraphics, x, y, ghost, "Lock");
             }
 
             int outlineColor = 0xffff0000;
 
-            pGuiGraphics.hLine(x-1,x+16,y-1,outlineColor);
-            pGuiGraphics.hLine(x-1,x+16,y+16,outlineColor);
-            pGuiGraphics.vLine(x-1,y-1,y+16,outlineColor);
-            pGuiGraphics.vLine(x+16,y-1,y+16,outlineColor);
+            pGuiGraphics.hLine(x - 1, x + 16, y - 1, outlineColor);
+            pGuiGraphics.hLine(x - 1, x + 16, y + 16, outlineColor);
+            pGuiGraphics.vLine(x - 1, y - 1, y + 16, outlineColor);
+            pGuiGraphics.vLine(x + 16, y - 1, y + 16, outlineColor);
         }
 
         pGuiGraphics.pose().popPose();
@@ -229,31 +238,31 @@ public class TankScreen extends AbstractContainerScreen<AbstractTankMenu> {
     }
 
     ///////////////////////////////////////////////
-    public static TankScreen t1(AbstractTankMenu container, Inventory playerinventory, Component component) {
+    public static TankScreen t1(TankMenu container, Inventory playerinventory, Component component) {
         return new TankScreen(container, playerinventory, component, main_background);
     }
 
-    public static TankScreen t2(AbstractTankMenu container, Inventory playerinventory, Component component) {
+    public static TankScreen t2(TankMenu container, Inventory playerinventory, Component component) {
         return new TankScreen(container, playerinventory, component, main_background);
     }
 
-    public static TankScreen t3(AbstractTankMenu container, Inventory playerinventory, Component component) {
+    public static TankScreen t3(TankMenu container, Inventory playerinventory, Component component) {
         return new TankScreen(container, playerinventory, component, main_background);
     }
 
-    public static TankScreen t4(AbstractTankMenu container, Inventory playerinventory, Component component) {
+    public static TankScreen t4(TankMenu container, Inventory playerinventory, Component component) {
         return new TankScreen(container, playerinventory, component, main_background);
     }
 
-    public static TankScreen t5(AbstractTankMenu container, Inventory playerinventory, Component component) {
+    public static TankScreen t5(TankMenu container, Inventory playerinventory, Component component) {
         return new TankScreen(container, playerinventory, component, main_background);
     }
 
-    public static TankScreen t6(AbstractTankMenu container, Inventory playerinventory, Component component) {
+    public static TankScreen t6(TankMenu container, Inventory playerinventory, Component component) {
         return new TankScreen(container, playerinventory, component, main_background);
     }
 
-    public static TankScreen t7(AbstractTankMenu container, Inventory playerinventory, Component component) {
+    public static TankScreen t7(TankMenu container, Inventory playerinventory, Component component) {
         return new TankScreen(container, playerinventory, component, background7);
     }
 

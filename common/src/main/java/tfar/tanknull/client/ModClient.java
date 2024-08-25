@@ -40,7 +40,7 @@ public class ModClient {
         MenuScreens.register(ModMenuTypes.TANK_6, TankScreen::t6);
         MenuScreens.register(ModMenuTypes.TANK_7, TankScreen::t7);
 
-        //MenuScreens.register(ModMenuTypes.change_frequency, ChangeFrequencyScreen::new);
+        MenuScreens.register(ModMenuTypes.CONFIG, TankConfigScreen::new);
     }
 
     public static void renderFluidInGui(GuiGraphics matrices, int x, int y, MLFluidStack stack) {

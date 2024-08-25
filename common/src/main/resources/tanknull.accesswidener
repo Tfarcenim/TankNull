@@ -10,3 +10,7 @@ extendable class net/minecraft/world/level/block/entity/BlockEntityType$BlockEnt
 
 accessible field net/minecraft/world/inventory/AbstractContainerMenu stateId I
 accessible field net/minecraft/server/MinecraftServer storageSource Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;
+
+extendable method net/minecraft/client/gui/components/Tooltip <init> (Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/Component;)V
+accessible field net/minecraft/client/gui/components/Tooltip cachedTooltip Ljava/util/List;
+accessible field net/minecraft/client/gui/components/Tooltip message Lnet/minecraft/network/chat/Component;
