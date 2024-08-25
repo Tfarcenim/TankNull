@@ -12,12 +12,14 @@ public class S2CSetFluidSlotPacket implements S2CModPacket{
     private final int stateId;
     private final int slot;
     private final MLFluidStack stack;
+    private final MLFluidStack ghost;
 
-    public S2CSetFluidSlotPacket(int pStateId, int pContainerId, int pSlot, MLFluidStack stack) {
+    public S2CSetFluidSlotPacket(int pStateId, int pContainerId, int pSlot, MLFluidStack stack, MLFluidStack ghost) {
         this.containerId = pContainerId;
         this.stateId = pStateId;
         this.slot = pSlot;
         this.stack = stack;
+        this.ghost = ghost;
     }
 
     public S2CSetFluidSlotPacket(FriendlyByteBuf pBuffer) {
@@ -25,13 +27,14 @@ public class S2CSetFluidSlotPacket implements S2CModPacket{
         this.stateId = pBuffer.readVarInt();
         this.slot = pBuffer.readShort();
         this.stack = MLFluidStack.readFromPacket(pBuffer);
+        this.ghost = MLFluidStack.readFromPacket(pBuffer);
     }
 
     @Override
     public void handleClient() {
         Player player = ModClient.getLocalPlayer();
         if (containerId == player.containerMenu.containerId && player.containerMenu instanceof AbstractTankMenu abstractTankMenu) {
-            abstractTankMenu.setFluid(slot, stateId, stack);
+            abstractTankMenu.setFluid(slot, stateId, stack,ghost);
         }
     }
 
@@ -41,5 +44,6 @@ public class S2CSetFluidSlotPacket implements S2CModPacket{
         buffer.writeVarInt(this.stateId);
         buffer.writeShort(this.slot);
         stack.writeToPacket(buffer);
+        ghost.writeToPacket(buffer);
     }
 }

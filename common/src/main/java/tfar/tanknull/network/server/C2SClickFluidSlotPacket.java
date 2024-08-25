@@ -11,6 +11,7 @@ import tfar.tanknull.MLFluidStack;
 import tfar.tanknull.inventory.ClickAction;
 import tfar.tanknull.inventory.FluidInventory;
 import tfar.tanknull.menu.AbstractTankMenu;
+import tfar.tanknull.network.PacketHandler;
 import tfar.tanknull.platform.Services;
 
 import java.util.function.IntFunction;
@@ -42,7 +43,7 @@ public class C2SClickFluidSlotPacket implements C2SModPacket {
         this.buttonNum = buf.readByte();
         this.clickType = buf.readEnum(ClickAction.class);
         IntFunction<Int2ObjectOpenHashMap<MLFluidStack>> $$1 = FriendlyByteBuf.limitValue(Int2ObjectOpenHashMap::new, MAX_SLOT_COUNT);
-        this.changedSlots = Int2ObjectMaps.unmodifiable(buf.readMap($$1, $$0x -> Integer.valueOf($$0x.readShort()), MLFluidStack::readFromPacket));
+        this.changedSlots = Int2ObjectMaps.unmodifiable(buf.readMap($$1, $$0x -> Integer.valueOf($$0x.readShort()), PacketHandler.FLUID_READER));
     }
 
     public void write(FriendlyByteBuf $$0) {
@@ -51,7 +52,7 @@ public class C2SClickFluidSlotPacket implements C2SModPacket {
         $$0.writeShort(this.slotNum);
         $$0.writeByte(this.buttonNum);
         $$0.writeEnum(this.clickType);
-        $$0.writeMap(this.changedSlots, FriendlyByteBuf::writeShort, (buf, stack) -> stack.writeToPacket(buf));
+        $$0.writeMap(this.changedSlots, FriendlyByteBuf::writeShort, PacketHandler.FLUID_WRITER);
     }
 
     public int getContainerId() {
@@ -86,10 +87,10 @@ public class C2SClickFluidSlotPacket implements C2SModPacket {
             if (menu instanceof AbstractTankMenu abstractTankMenu) {
                 FluidInventory fluidInventory = abstractTankMenu.fluidInventory;
                 ItemStack carried = abstractTankMenu.getCarried();
+                MLFluidStack fluidInSlot = fluidInventory.fluids.get(slotNum);
 
                 switch (clickType) {
                     case PICKUP_ALL -> {
-                        MLFluidStack fluidInSlot = fluidInventory.fluids.get(slotNum);
                         int filled = Services.PLATFORM.simulateFill(carried,fluidInSlot);
                         if (filled > 0) {
                             Services.PLATFORM.transferTankToContainer(carried,fluidInventory,filled,slotNum, player, false);
@@ -114,7 +115,6 @@ public class C2SClickFluidSlotPacket implements C2SModPacket {
                         }
                     }
                     case PICKUP_HALF -> {
-                        MLFluidStack fluidInSlot = fluidInventory.fluids.get(slotNum);
                         int drain = fluidInSlot.getAmount() / 2;
                         int buckets = (int) Math.ceil(drain/1000d);
                         MLFluidStack drained = fluidInSlot.copyWithAmount(buckets * 1000);
@@ -122,6 +122,18 @@ public class C2SClickFluidSlotPacket implements C2SModPacket {
                         if (filled > 0) {
                             Services.PLATFORM.transferTankToContainer(carried,fluidInventory,filled,slotNum, player, false);
                         }
+                    }
+                    case LOCK_SLOT -> {
+                        if (!fluidInSlot.isEmpty()) {
+                            if (fluidInventory.ghostFluids.get(slotNum).isEmpty()) {
+                                fluidInventory.ghostFluids.set(slotNum, fluidInSlot.copyWithAmount(1000));
+                            } else {
+                                fluidInventory.ghostFluids.set(slotNum,MLFluidStack.EMPTY);
+                            }
+                        } else {
+                            fluidInventory.ghostFluids.set(slotNum, MLFluidStack.EMPTY);
+                        }
+                        fluidInventory.setDirty();
                     }
                 }
             }

@@ -1,14 +1,20 @@
 package tfar.tanknull.network;
 
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
+import tfar.tanknull.MLFluidStack;
 import tfar.tanknull.TankNull;
 import tfar.tanknull.network.client.*;
 import tfar.tanknull.network.server.*;
 import tfar.tanknull.platform.Services;
 
 import java.util.Locale;
+import java.util.function.Function;
 
 public class PacketHandler {
+
+    public static final FriendlyByteBuf.Writer<MLFluidStack> FLUID_WRITER = (buf, stack) -> stack.writeToPacket(buf);
+    public static final FriendlyByteBuf.Reader<MLFluidStack> FLUID_READER = MLFluidStack::readFromPacket;
 
     public static void registerPackets() {
 

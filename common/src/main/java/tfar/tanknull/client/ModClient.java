@@ -43,6 +43,24 @@ public class ModClient {
         //MenuScreens.register(ModMenuTypes.change_frequency, ChangeFrequencyScreen::new);
     }
 
+    public static void renderFluidInGui(GuiGraphics matrices, int x, int y, MLFluidStack stack) {
+        String amount = stack.getAmount() > 1 ? Utils.formatLargeNumber(stack.getAmount()) : "";
+        renderFluidInGui(matrices,x,y,stack,amount);
+    }
+
+    public static void renderFluidInGui(GuiGraphics matrices, int x, int y, MLFluidStack stack,String text) {
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShaderTexture(0, InventoryMenu.BLOCK_ATLAS);
+        int color = Services.PLATFORM.getTint(stack);
+        TextureAtlasSprite sprite = FluidSpriteCache.getStillTexture(stack);
+        RenderSystem.setShaderColor((color >> 16 & 0xff) / 255f, (color >> 8 & 0xff) / 255f, (color & 0xff) / 255f, 1);
+        RenderSystem.enableDepthTest();
+        matrices.blit(x, y, 0, 16, 16, sprite);
+        RenderSystem.setShaderColor(1,1,1,1);
+        StackSizeRenderer.renderSizeLabel(matrices,Minecraft.getInstance().font, x,y,text);
+        RenderSystem.disableBlend();
+    }
+
     public static void renderFluidTooltip(GuiGraphics matrices, int x, int y, MLFluidStack fluidStack) {
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderTexture(0, InventoryMenu.BLOCK_ATLAS);

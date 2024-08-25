@@ -3,6 +3,7 @@ package tfar.tanknull.network.client;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.FriendlyByteBuf;
 import tfar.tanknull.MLFluidStack;
+import tfar.tanknull.network.PacketHandler;
 import tfar.tanknull.world.ClientData;
 
 import java.util.List;
@@ -15,7 +16,7 @@ public class S2CTooltipContentsPacket implements S2CModPacket {
     }
 
     public S2CTooltipContentsPacket(FriendlyByteBuf buf) {
-        stacks = buf.readList(MLFluidStack::readFromPacket);
+        stacks = buf.readList(PacketHandler.FLUID_READER);
     }
 
     @Override
@@ -25,6 +26,6 @@ public class S2CTooltipContentsPacket implements S2CModPacket {
 
     @Override
     public void write(FriendlyByteBuf buf) {
-        buf.writeCollection(stacks,(buf1, stack) -> stack.writeToPacket(buf1));
+        buf.writeCollection(stacks,PacketHandler.FLUID_WRITER);
     }
 }

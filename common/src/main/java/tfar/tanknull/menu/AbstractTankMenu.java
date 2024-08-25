@@ -18,6 +18,7 @@ import tfar.tanknull.network.client.S2CSetFluidSlotPacket;
 import tfar.tanknull.platform.Services;
 
 import javax.annotation.Nonnull;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
 
@@ -30,12 +31,14 @@ public class AbstractTankMenu extends AbstractContainerMenu {
     private final NonNullList<MLFluidStack> lastFluidSlots = NonNullList.create();
     public final NonNullList<FluidSlot> fluidSlots = NonNullList.create();
     private final NonNullList<MLFluidStack> remoteFluidSlots = NonNullList.create();
+    private final NonNullList<MLFluidStack> remoteGhostFluidSlots = NonNullList.create();
 
-    public void initializeFluids(int stateID, NonNullList<MLFluidStack> stacks) {
+    public void initializeFluids(int stateID, List<MLFluidStack> stacks, List<MLFluidStack> ghostStacks) {
         for(int i = 0; i < stacks.size(); ++i) {
-            this.getFluidSlot(i).set(stacks.get(i));
+            FluidSlot fluidSlot = getFluidSlot(i);
+            fluidSlot.setFluid(stacks.get(i));
+            fluidSlot.setGhost(ghostStacks.get(i));
         }
-
         this.stateId = stateID;
     }
 
@@ -54,12 +57,13 @@ public class AbstractTankMenu extends AbstractContainerMenu {
         addTankSlots();
     }
 
-    protected FluidSlot addFluidSlot(FluidSlot $$0) {
-        $$0.index = this.fluidSlots.size();
-        this.fluidSlots.add($$0);
+    protected FluidSlot addFluidSlot(FluidSlot slot) {
+        slot.index = this.fluidSlots.size();
+        this.fluidSlots.add(slot);
         this.lastFluidSlots.add(MLFluidStack.EMPTY);
         this.remoteFluidSlots.add(MLFluidStack.EMPTY);
-        return $$0;
+        remoteGhostFluidSlots.add(MLFluidStack.EMPTY);
+        return slot;
     }
 
     protected void addTankSlots() {
@@ -214,40 +218,33 @@ public class AbstractTankMenu extends AbstractContainerMenu {
         return didSomething;
     }
 
-    public boolean isDankSlot(Slot slot) {
-        return slot.getClass().getName().endsWith("DankSlot");
-    }
-
     @Override
     public void broadcastChanges() {
         super.broadcastChanges();
         //the remote inventory needs to know about locked slots
-        for (int i = 0; i < fluidInventory.getSlots(); i++) {
-       //     Services.PLATFORM.sendToClient(new S2CSendGhostSlotPacket(containerId,i, fluidInventory.getGhostItem(i)), (ServerPlayer)
-        //            playerInventory.player);
-        }
-
         for(int i = 0; i < this.fluidSlots.size(); ++i) {
             MLFluidStack fluid = this.fluidSlots.get(i).getFluid();
-            Objects.requireNonNull(fluid);
+            MLFluidStack ghost = this.fluidSlots.get(i).getGhost();
             Supplier<MLFluidStack> supplier = Suppliers.memoize(fluid::copy);
+            Supplier<MLFluidStack> ghostSupplier = Suppliers.memoize(ghost::copy);
             //this.triggerSlotListeners(i, fluid, supplier);
-            this.synchronizeFluidSlotToRemote(i, fluid, supplier);
+            this.synchronizeFluidSlotToRemote(i, fluid,ghost, supplier,ghostSupplier);
         }
-
     }
 
-    private void synchronizeFluidSlotToRemote(int slot, MLFluidStack stack, Supplier<MLFluidStack> $$2) {
+    private void synchronizeFluidSlotToRemote(int slot, MLFluidStack stack, MLFluidStack ghost, Supplier<MLFluidStack> supplier,Supplier<MLFluidStack> ghostSupplier) {
        // if (!this.suppressRemoteUpdates) {
-            MLFluidStack $$3 = this.remoteFluidSlots.get(slot);
-            if (!Objects.equals($$3,stack)) {
-                MLFluidStack $$4 = $$2.get();
-                this.remoteFluidSlots.set(slot, $$4);
-
-                Services.PLATFORM.sendToClient(new S2CSetFluidSlotPacket(stateId,containerId,slot,stack), (ServerPlayer) playerInventory.player);
+            MLFluidStack remoteFluid = this.remoteFluidSlots.get(slot);
+            MLFluidStack remoteGhostFluid = this.remoteGhostFluidSlots.get(slot);
+            if (!Objects.equals(remoteFluid,stack) || !Objects.equals(remoteGhostFluid,ghost)) {
+                MLFluidStack copy = supplier.get();
+                MLFluidStack ghostCopy = ghostSupplier.get();
+                this.remoteFluidSlots.set(slot, copy);
+                this.remoteGhostFluidSlots.set(slot, ghostCopy);
+                Services.PLATFORM.sendToClient(new S2CSetFluidSlotPacket(stateId,containerId,slot,stack,ghostCopy), (ServerPlayer) playerInventory.player);
 
           //      if (this.synchronizer != null) {
-          //          this.synchronizer.sendSlotChange(this, slot, $$4);
+          //          this.synchronizer.sendSlotChange(this, slot, copy);
          //       }
 
            }
@@ -258,22 +255,24 @@ public class AbstractTankMenu extends AbstractContainerMenu {
     public void sendAllDataToRemote() {
         super.sendAllDataToRemote();
 
-        int $$2 = 0;
-        for(int i = this.fluidSlots.size(); $$2 < i; ++$$2) {
-            this.remoteFluidSlots.set($$2, this.fluidSlots.get($$2).getFluid().copy());
+        for(int i = 0; i < this.fluidSlots.size(); i++) {
+            FluidSlot fluidSlot = fluidSlots.get(i);
+            this.remoteFluidSlots.set(i, fluidSlot.getFluid().copy());
+            this.remoteGhostFluidSlots.set(i,fluidSlot.getGhost().copy());
         }
 
 
-        Services.PLATFORM.sendToClient(new S2CInitialSyncFluidInventoryPacket(incrementStateId(), containerId, fluidInventory.fluids), (ServerPlayer) playerInventory.player);
+        Services.PLATFORM.sendToClient(new S2CInitialSyncFluidInventoryPacket(incrementStateId(), containerId, fluidInventory.fluids,fluidInventory.ghostFluids), (ServerPlayer) playerInventory.player);
     }
 
-    public void setFluid(int slot, int stateId, MLFluidStack stack) {
-        this.getFluidSlot(slot).set(stack);
+    public void setFluid(int slot, int stateId, MLFluidStack stack, MLFluidStack ghost) {
+        this.getFluidSlot(slot).setFluid(stack);
+        this.getFluidSlot(slot).setGhost(ghost);
         this.stateId = stateId;
     }
 
-    public FluidSlot getFluidSlot(int $$0) {
-        return this.fluidSlots.get($$0);
+    public FluidSlot getFluidSlot(int slot) {
+        return this.fluidSlots.get(slot);
     }
     
     //////////////////////////////////////////////////////////////////////

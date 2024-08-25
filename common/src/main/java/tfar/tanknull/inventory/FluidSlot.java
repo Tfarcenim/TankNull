@@ -1,6 +1,5 @@
 package tfar.tanknull.inventory;
 
-import net.minecraft.world.item.ItemStack;
 import tfar.tanknull.MLFluidStack;
 
 public class FluidSlot {
@@ -25,13 +24,22 @@ public class FluidSlot {
         return inventory.fluids.get(slot);
     }
 
+    public MLFluidStack getGhost() {
+        return inventory.ghostFluids.get(slot);
+    }
+
     public boolean hasFluid() {
         return !getFluid().isEmpty();
     }
 
 
-    public void set(MLFluidStack pStack) {
-        this.inventory.setFluid(this.slot, pStack);
+    public void setFluid(MLFluidStack pStack) {
+        this.inventory.fluids.set(this.slot, pStack);
+        this.setChanged();
+    }
+
+    public void setGhost(MLFluidStack pStack) {
+        this.inventory.ghostFluids.set(this.slot, pStack);
         this.setChanged();
     }
 

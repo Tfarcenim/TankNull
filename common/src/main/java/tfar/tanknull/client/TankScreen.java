@@ -7,6 +7,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -82,28 +83,34 @@ public class TankScreen extends AbstractContainerScreen<AbstractTankMenu> {
 
             ClickAction action = null;
 
-            if (tankFluid.isEmpty()) {
-                if (!carriedFluid.isEmpty()) {
-                    if (pButton == GLFW.GLFW_MOUSE_BUTTON_1) {//left click
-                        action = ClickAction.DEPOSIT_ALL;
-                    } else if (pButton == GLFW.GLFW_MOUSE_BUTTON_2) {//right click
-                        action = ClickAction.DEPOSIT_ONE;
-                    }
-                }
-            } else {
-                if (pButton == GLFW.GLFW_MOUSE_BUTTON_1) {//left click
-                    if (carriedFluid.isEmpty()) {
-                        action = ClickAction.PICKUP_ALL;
-                    } else {
-                        action = ClickAction.DEPOSIT_ALL;
-                    }
-                } else if (pButton == GLFW.GLFW_MOUSE_BUTTON_2) {//right click
-                    if (!carried.isEmpty()) {
-                        if (carriedFluid.isEmpty()) {
-                            //pickup half
-                            action = ClickAction.PICKUP_HALF;
-                        } else {
+            if (Screen.hasAltDown()) {
+                action = ClickAction.LOCK_SLOT;
+            }
+
+            if (action == null) {
+                if (tankFluid.isEmpty()) {
+                    if (!carriedFluid.isEmpty()) {
+                        if (pButton == GLFW.GLFW_MOUSE_BUTTON_1) {//left click
+                            action = ClickAction.DEPOSIT_ALL;
+                        } else if (pButton == GLFW.GLFW_MOUSE_BUTTON_2) {//right click
                             action = ClickAction.DEPOSIT_ONE;
+                        }
+                    }
+                } else {
+                    if (pButton == GLFW.GLFW_MOUSE_BUTTON_1) {//left click
+                        if (carriedFluid.isEmpty()) {
+                            action = ClickAction.PICKUP_ALL;
+                        } else {
+                            action = ClickAction.DEPOSIT_ALL;
+                        }
+                    } else if (pButton == GLFW.GLFW_MOUSE_BUTTON_2) {//right click
+                        if (!carried.isEmpty()) {
+                            if (carriedFluid.isEmpty()) {
+                                //pickup half
+                                action = ClickAction.PICKUP_HALF;
+                            } else {
+                                action = ClickAction.DEPOSIT_ONE;
+                            }
                         }
                     }
                 }
@@ -144,22 +151,23 @@ public class TankScreen extends AbstractContainerScreen<AbstractTankMenu> {
         int x = pSlot.x;
         int y = pSlot.y;
         MLFluidStack stack = pSlot.getFluid();
-
+        MLFluidStack ghost = pSlot.getGhost();
         pGuiGraphics.pose().pushPose();
 
         if (!stack.isEmpty()) {
-            RenderSystem.setShader(GameRenderer::getPositionTexShader);
-            RenderSystem.setShaderTexture(0, InventoryMenu.BLOCK_ATLAS);
-            int color = Services.PLATFORM.getTint(stack);
-            TextureAtlasSprite sprite = FluidSpriteCache.getStillTexture(stack);
-            RenderSystem.setShaderColor((color >> 16 & 0xff) / 255f, (color >> 8 & 0xff) / 255f, (color & 0xff) / 255f, 1);
-            RenderSystem.enableDepthTest();
+            ModClient.renderFluidInGui(pGuiGraphics,x,y,stack);
+        }
 
-            pGuiGraphics.blit(x, y, 0, 16, 16, sprite);
+        if (!ghost.isEmpty()) {
+            if (stack.isEmpty()) {
+                ModClient.renderFluidInGui(pGuiGraphics,x,y,ghost,"Lock");
+            }
+            pGuiGraphics.hLine(x-1,x+16,y-1,0xffff0000);
 
-            RenderSystem.setShaderColor(1,1,1,1);
-            String amount = stack.getAmount() > 1 ? Utils.formatLargeNumber(stack.getAmount()) : "";
-            StackSizeRenderer.renderSizeLabel(pGuiGraphics,Minecraft.getInstance().font, x,y,amount);
+            pGuiGraphics.hLine(x-1,x+16,y+16,0xffff0000);
+
+            pGuiGraphics.vLine(x-1,y-1,y+16,0xffff0000);
+            pGuiGraphics.vLine(x+16,y-1,y+16,0xffff0000);
         }
 
         pGuiGraphics.pose().popPose();
@@ -192,16 +200,14 @@ public class TankScreen extends AbstractContainerScreen<AbstractTankMenu> {
 
         pGuiGraphics.pose().pushPose();
         pGuiGraphics.pose().translate(leftPos, topPos, 0);
-        int j2;
-        int k2;
         for (int k = 0; k < this.menu.fluidSlots.size(); ++k) {
             FluidSlot slot = this.menu.fluidSlots.get(k);
             this.renderFluidSlot(pGuiGraphics, slot);
 
             if (this.isHovering(slot, pMouseX, pMouseY)) {
                 this.hoveredFluidSlot = slot;
-                j2 = slot.x;
-                k2 = slot.y;
+                int j2 = slot.x;
+                int k2 = slot.y;
                 renderSlotHighlight(pGuiGraphics, j2, k2, 0);
             }
         }

@@ -329,7 +329,7 @@ public class FluidInventory {
         setDirty();
     }
 
-    void setDirty() {
+    public void setDirty() {
         if (data != null) {
             data.setDirty();
         }
