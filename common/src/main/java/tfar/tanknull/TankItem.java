@@ -47,7 +47,7 @@ public class TankItem extends Item {
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack bag = player.getItemInHand(hand);
 
-        if (getUseType(bag) == UseMode.bag) {
+        if (getUseMode(bag) == UseMode.bag) {
             if (!level.isClientSide) {
                 player.openMenu(createProvider(bag));
             }
@@ -73,7 +73,7 @@ public class TankItem extends Item {
         }
 
        // tooltip.add(CommonUtils.translatable("text.dankstorage.changeusetype", DankKeybinds.CONSTRUCTION.getTranslatedKeyMessage().copy().withStyle(ChatFormatting.YELLOW)).withStyle(ChatFormatting.GRAY));
-        UseMode useMode = getUseType(stack);
+        UseMode useMode = getUseMode(stack);
         tooltip.add(Component.translatable("tooltip.tanknull.tank.current_use_mode", Component.translatable(
                        "tooltip.tanknull.tank.use_mode." + useMode.name().toLowerCase(Locale.ROOT))
                         .withStyle(ChatFormatting.YELLOW))
@@ -199,7 +199,7 @@ public class TankItem extends Item {
     }
 
 
-    public static UseMode getUseType(ItemStack bag) {
+    public static UseMode getUseMode(ItemStack bag) {
         return bag.hasTag() && bag.getTag().contains(ModDataComponentTypes.USE_MODE) ? UseMode.valueOf(bag.getTag().getString(ModDataComponentTypes.USE_MODE)) : UseMode.bag;
     }
 
@@ -228,7 +228,7 @@ public class TankItem extends Item {
         }
 
         if (stack != null) {
-            UseMode useMode = getUseType(stack);
+            UseMode useMode = getUseMode(stack);
             setUseMode(stack,Utils.cycle(useMode));
         }
     }

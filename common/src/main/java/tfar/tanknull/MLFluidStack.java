@@ -227,6 +227,10 @@ public class MLFluidStack {
         return getFluid() == other.getFluid() && isTagEqual(other);
     }
 
+    public static boolean areFluidsEqual(MLFluidStack stack1,MLFluidStack stack2) {
+        return stack1.isFluidEqual(stack2);
+    }
+
     private boolean isTagEqual(MLFluidStack other) {
         return tag == null ? other.tag == null : other.tag != null && tag.equals(other.tag);
     }

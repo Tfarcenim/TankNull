@@ -26,8 +26,9 @@ public class FluidInventory implements ContainerData {
     public int capacity;
     @Nullable private final TankSavedData data;
     protected final Int2ObjectMap<Slot> wrappers = new Int2ObjectOpenHashMap<>();
-
     protected SortingType sortingType = SortingType.descending;
+    protected boolean autoSort;
+    protected boolean contentsChanged;
 
     public FluidInventory(TankStats stats,TankSavedData data) {
         this(stats.slots,stats.stacklimit,data);
@@ -46,7 +47,7 @@ public class FluidInventory implements ContainerData {
 
    static void merge(List<MLFluidStack> stacks, MLFluidStack toMerge) {
         for (MLFluidStack stack : stacks) {
-            if (Objects.equals(stack, toMerge)) {
+            if (MLFluidStack.areFluidsEqual(stack, toMerge)) {
                 int grow = Math.min(Integer.MAX_VALUE - stack.getAmount(), toMerge.getAmount());
                 if (grow > 0) {
                     stack.grow(grow);
@@ -59,11 +60,18 @@ public class FluidInventory implements ContainerData {
         }
     }
 
+    public void setAutoSort(boolean autoSort) {
+        this.autoSort = autoSort;
+        setDirty();
+    }
+
+    public void toggleAutoSort() {
+        setAutoSort(!autoSort);
+    }
+
     public void sort() {
         List<MLFluidStack> gathered = new ArrayList<>();
-
         Set<MLFluidStack> lockedItems = new HashSet<>();
-
 
         for (int i = 0; i < fluids.size(); i++) {
             MLFluidStack stack = fluids.get(i);
@@ -74,6 +82,7 @@ public class FluidInventory implements ContainerData {
                 for (MLFluidStack stack1 : lockedItems) {
                     if (Objects.equals(stack1, stack)) {
                         unique = false;
+                        break;
                     }
                 }
                 if (unique && !ghost.isEmpty()) {
@@ -88,11 +97,7 @@ public class FluidInventory implements ContainerData {
             fluids.set(i, MLFluidStack.EMPTY);
             ghostFluids.set(i, MLFluidStack.EMPTY);
         }
-
-
-
         //split up the gathered and add them to the slot
-
         int slotId = 0;
 
         for (int i = 0; i < gathered.size(); i++) {
@@ -156,20 +161,22 @@ public class FluidInventory implements ContainerData {
     public int get(int i) {
         return switch (i) {
             case 0 -> sortingType.ordinal();
+            case 1 -> autoSort ? 1 : 0;
             default -> 0;
         };
     }
 
     @Override
-    public void set(int i, int i1) {
+    public void set(int i, int value) {
         switch (i) {
-            case 0 -> sortingType = SortingType.values()[i1];
+            case 0 -> sortingType = SortingType.values()[value];
+            case 1 -> autoSort = value != 0;
         }
     }
 
     @Override
     public int getCount() {
-        return 1;
+        return 2;
     }
 
     public class Slot {
@@ -195,6 +202,7 @@ public class FluidInventory implements ContainerData {
         loadList(fluids,tag.getList("Fluids", Tag.TAG_COMPOUND));
         loadList(ghostFluids,tag.getList("GhostFluids",Tag.TAG_COMPOUND));
         sortingType = tag.contains("SortingType") ? SortingType.valueOf(tag.getString("SortingType")) : SortingType.descending;
+        autoSort = tag.getBoolean("AutoSort");
     }
 
     void loadList(List<MLFluidStack> list,ListTag tag) {
@@ -212,6 +220,7 @@ public class FluidInventory implements ContainerData {
         nbt.put("Fluids",  saveList(fluids));
         nbt.put("GhostFluids",  saveList(ghostFluids));
         nbt.putString("SortingType",sortingType.name());
+        nbt.putBoolean("AutoSort",autoSort);
         return nbt;
     }
 
@@ -226,10 +235,6 @@ public class FluidInventory implements ContainerData {
             }
         }
         return nbtTagList;
-    }
-
-    public void setFluid(int slot, MLFluidStack stack) {
-        fluids.set(slot,stack);
     }
 
     public enum Action {
@@ -342,6 +347,7 @@ public class FluidInventory implements ContainerData {
         if (tankFluid.isEmpty()) {
             tankFluid = resource.copyWithAmount(Math.min(capacity, resource.getAmount()));
             fluids.set(tank,tankFluid);
+            contentsChanged = true;
             setDirty();
             return tankFluid.getAmount();
         }
@@ -354,6 +360,7 @@ public class FluidInventory implements ContainerData {
             tankFluid.setAmount(capacity);
         }
         if (filled > 0) {
+            contentsChanged = true;
             setDirty();
         }
         return filled;
@@ -434,6 +441,7 @@ public class FluidInventory implements ContainerData {
         MLFluidStack stack = fluid.copyWithAmount(drained);
         if (action.execute() && drained > 0) {
             fluid.shrink(drained);
+            contentsChanged = true;
             setDirty();
         }
         return stack;
@@ -461,6 +469,12 @@ public class FluidInventory implements ContainerData {
     }
 
     public void setDirty() {
+        if (contentsChanged) {
+            if (autoSort) {
+                sort();
+            }
+            contentsChanged = false;
+        }
         if (data != null) {
             data.setDirty();
         }

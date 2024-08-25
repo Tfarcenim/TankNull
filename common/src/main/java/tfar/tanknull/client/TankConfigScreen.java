@@ -3,6 +3,7 @@ package tfar.tanknull.client;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
@@ -29,14 +30,22 @@ public class TankConfigScreen extends AbstractContainerScreen<TankConfigMenu> {
                 return Component.translatable("tanknull.sorting_type."+menu.getSortingType());
             }
         };
+        this.addRenderableWidget(button);
+
+        Button autoSort = new Button(leftPos + 9, topPos + 44, 90, 16,Component.empty(), b -> sendButtonToServer(TankConfigMenu.ButtonAction.TOGGLE_AUTO_SORT), Supplier::get) {
+            @Override
+            public Component getMessage() {
+                return Component.translatable("tanknull.auto_sort").append(" ")
+                        .append(menu.autoSort() ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF);
+            }
+        };
+        this.addRenderableWidget(autoSort);
+
+
 
         Button xButton = new Button(leftPos + 235,topPos + 4, 12, 12,Component.literal("x"), b -> {
             sendButtonToServer(TankConfigMenu.ButtonAction.CLOSE);
-        }, Supplier::get) {
-
-        };
-
-        this.addRenderableWidget(button);
+        }, Supplier::get) {};
         addRenderableWidget(xButton);
     }
 

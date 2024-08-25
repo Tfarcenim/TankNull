@@ -44,6 +44,9 @@ public class ModLangProvider extends LanguageProvider {
         addTranslatableComponent(TextComponents.SORT,"Sort");
         addTranslatableComponent(TextComponents.FREQUENCY,"Frequency:");
         add(ModKeybinds.CATEGORY,"TankNull");
+
+        add("tanknull.auto_sort","Auto Sort:");
+
         add("tooltip.tanknull.tankitem.stacklimit","Fluid Limit: %smB");
         add("tooltip.tanknull.tank.current_use_mode","Current Use Mode: %s");
 

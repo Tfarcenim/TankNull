@@ -21,7 +21,7 @@ public class TankConfigMenu extends AbstractContainerMenu {
     private final ContainerData data;
 
     public TankConfigMenu(int id, Inventory inventory) {
-        this(id,inventory,ItemStack.EMPTY,new SimpleContainerData(1));
+        this(id,inventory,ItemStack.EMPTY,new SimpleContainerData(2));
     }
 
     public TankConfigMenu(int id, Inventory inventory, ItemStack bag,ContainerData data) {
@@ -47,8 +47,13 @@ public class TankConfigMenu extends AbstractContainerMenu {
         return SortingType.values()[data.get(0)];
     }
 
+    public boolean autoSort() {
+        return data.get(1) != 0;
+    }
+
     public enum ButtonAction {
         CHANGE_SORT_TYPE,
+        TOGGLE_AUTO_SORT,
         CLOSE;
         static final ButtonAction[] VALUES = values();
     }
@@ -73,6 +78,12 @@ public class TankConfigMenu extends AbstractContainerMenu {
                     FluidInventory fluidInventory = TankItem.getInventoryFrom(getTank(), serverPlayer.server);
                     if (fluidInventory != null) {
                         fluidInventory.setSortingType(Utils.cycle(fluidInventory.getSortingType()));
+                    }
+                }
+                case TOGGLE_AUTO_SORT -> {
+                    FluidInventory fluidInventory = TankItem.getInventoryFrom(getTank(), serverPlayer.server);
+                    if (fluidInventory != null) {
+                        fluidInventory.toggleAutoSort();
                     }
                 }
                 case CLOSE -> {
