@@ -1,5 +1,6 @@
 package tfar.tanknull;
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -61,8 +62,10 @@ public class TankItem extends Item {
     public void appendHoverText(ItemStack stack, @Nullable Level $$1, List<Component> tooltip, TooltipFlag $$3) {
         CompoundTag tag = stack.getTag();
         if (tag != null) {
+
             if (tag.contains(ModDataComponentTypes.FREQUENCY)) {
-                tooltip.add(Component.translatable("Frequency: "+tag.getInt(ModDataComponentTypes.FREQUENCY)));
+                tooltip.add(TextComponents.FREQUENCY.copy().append(Component.literal(" "+tag.getInt(ModDataComponentTypes.FREQUENCY))
+                        .withStyle(ChatFormatting.AQUA)));
             } else {
                 tooltip.add(Component.translatable("Frequency: Unbound"));
             }

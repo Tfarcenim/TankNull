@@ -2,6 +2,7 @@ package tfar.tanknull.client;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.MouseHandler;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
@@ -18,6 +19,14 @@ import tfar.tanknull.init.ModMenuTypes;
 import tfar.tanknull.platform.Services;
 
 public class ModClient {
+
+    public static double lastMouseX;
+    public static double lastMouseY;
+
+    public static void saveLastPos(MouseHandler mouseHandler) {
+        lastMouseX = mouseHandler.xpos();
+        lastMouseY = mouseHandler.ypos();
+    }
 
     public static ClientTooltipComponent tooltipImage(TooltipComponent data) {
         if (data instanceof FluidListTooltip) {

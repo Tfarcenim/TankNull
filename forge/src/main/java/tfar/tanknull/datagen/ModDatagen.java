@@ -26,6 +26,7 @@ public class ModDatagen {
             generator.addProvider(true,new ModRecipeProvider(packOutput));
         }
         if (e.includeClient()) {
+            generator.addProvider(true,new ModLangProvider(packOutput));
         }
     }
 }

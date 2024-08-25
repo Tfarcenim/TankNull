@@ -17,6 +17,7 @@ import net.minecraft.world.item.ItemStack;
 import org.lwjgl.glfw.GLFW;
 import tfar.tanknull.MLFluidStack;
 import tfar.tanknull.TankNull;
+import tfar.tanknull.TextComponents;
 import tfar.tanknull.inventory.ClickAction;
 import tfar.tanknull.inventory.FluidSlot;
 import tfar.tanknull.menu.TankMenu;
@@ -63,12 +64,14 @@ public class TankScreen extends AbstractContainerScreen<TankMenu> {
         super.init();
         int j = (this.height - this.imageHeight) / 2;
 
-        this.addRenderableWidget(new Button(leftPos + 130, topPos + 4, 26, 12, Component.literal("Sort"), b -> sendButtonToServer(TankMenu.ButtonAction.SORT), DEFAULT_NARRATION) {
+        this.addRenderableWidget(new Button(leftPos + 130, topPos + 4, 26, 12, TextComponents.SORT, b -> sendButtonToServer(TankMenu.ButtonAction.SORT), DEFAULT_NARRATION) {
         });
 
 
-        Tooltip tooltip = Tooltip.create(Component.literal("Tank Config"));
-        this.addRenderableWidget(Button.builder(Component.literal("\uD83D\uDD27"), b -> sendButtonToServer(TankMenu.ButtonAction.OPEN_CONFIG))
+        Tooltip tooltip = Tooltip.create(TextComponents.OPEN_CONFIG);
+        this.addRenderableWidget(Button.builder(Component.literal("\uD83D\uDD27"), b -> {
+                    sendButtonToServer(TankMenu.ButtonAction.OPEN_CONFIG);
+                })
                 .pos(leftPos + 157, topPos + 4)
                 .size(12, 12)
                 .tooltip(tooltip).build());

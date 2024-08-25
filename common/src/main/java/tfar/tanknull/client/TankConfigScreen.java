@@ -2,17 +2,17 @@ package tfar.tanknull.client;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import tfar.tanknull.menu.TankConfigMenu;
 
+import java.util.function.Supplier;
+
 public class TankConfigScreen extends AbstractContainerScreen<TankConfigMenu> {
 
     private static final ResourceLocation DEMO_BACKGROUND_LOCATION = new ResourceLocation("textures/gui/demo_background.png");
-
 
     public TankConfigScreen(TankConfigMenu $$0, Inventory $$1, Component $$2) {
         super($$0, $$1, $$2);
@@ -22,15 +22,22 @@ public class TankConfigScreen extends AbstractContainerScreen<TankConfigMenu> {
     @Override
     protected void init() {
         super.init();
-        DynamicTooltip tooltip = DynamicTooltip.dynamic(() -> Component.translatable("tanknull.sorting_type."+menu.getSortingType()));
 
-        this.addRenderableWidget(Button.builder(Component.literal("Sort: "), b -> {
-            sendButtonToServer(TankConfigMenu.ButtonAction.CHANGE_SORT_TYPE);
-            tooltip.dirty = true;
-        })
-                .pos(leftPos + 8, topPos + 24)
-                .size( 90, 16)
-                .tooltip(tooltip).build());
+        Button button = new Button(leftPos + 9, topPos + 24, 90, 16,Component.empty(), b -> sendButtonToServer(TankConfigMenu.ButtonAction.CHANGE_SORT_TYPE), Supplier::get) {
+            @Override
+            public Component getMessage() {
+                return Component.translatable("tanknull.sorting_type."+menu.getSortingType());
+            }
+        };
+
+        Button xButton = new Button(leftPos + 235,topPos + 4, 12, 12,Component.literal("x"), b -> {
+            sendButtonToServer(TankConfigMenu.ButtonAction.CLOSE);
+        }, Supplier::get) {
+
+        };
+
+        this.addRenderableWidget(button);
+        addRenderableWidget(xButton);
     }
 
     private void sendButtonToServer(TankConfigMenu.ButtonAction action) {

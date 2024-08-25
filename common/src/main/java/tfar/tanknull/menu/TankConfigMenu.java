@@ -60,7 +60,7 @@ public class TankConfigMenu extends AbstractContainerMenu {
 
     @Override
     public boolean stillValid(Player player) {
-        return true;
+        return getTank().getItem() instanceof TankItem;
     }
 
     @Override
@@ -75,7 +75,11 @@ public class TankConfigMenu extends AbstractContainerMenu {
                         fluidInventory.setSortingType(Utils.cycle(fluidInventory.getSortingType()));
                     }
                 }
-                case CLOSE -> {}//toggleFreqLock();
+                case CLOSE -> {
+                    if (getTank().getItem() instanceof TankItem tankItem) {
+                        player.openMenu(tankItem.createProvider(getTank()));
+                    }
+                }//toggleFreqLock();
               //  case SORT -> dankInventory.sort();
               //  case COMPRESS -> dankInventory.compress(serverPlayer);
              //   case TOGGLE_TAG -> CommonUtils.toggleTagMode(serverPlayer);
