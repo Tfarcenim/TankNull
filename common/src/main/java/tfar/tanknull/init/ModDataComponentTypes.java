@@ -4,5 +4,5 @@ public class ModDataComponentTypes {
     public static final String FREQUENCY = "tanknull:frequency";
     public static final String SELECTED = "tanknull:selected";
     public static final String UPGRADE = "tanknull:upgrade";
-    public static final String USE_TYPE = "tanknull:use_type";
+    public static final String USE_MODE = "tanknull:use_mode";
 }

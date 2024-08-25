@@ -37,6 +37,7 @@ public class TankNullForge {
         if (FMLEnvironment.dist.isClient()) {
             bus.addListener(ModClientForge::setup);
             bus.addListener(ModClientForge::clientTooltip);
+            bus.addListener(ModClientForge::keybinds);
         }
         // Use Forge to bootstrap the Common mod.
         TankNull.init();

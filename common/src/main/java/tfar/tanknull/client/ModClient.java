@@ -16,6 +16,8 @@ import tfar.tanknull.Utils;
 import tfar.tanknull.inventory.FluidListTooltip;
 import tfar.tanknull.inventory.StackListTooltip;
 import tfar.tanknull.init.ModMenuTypes;
+import tfar.tanknull.network.server.C2SButtonPacket;
+import tfar.tanknull.network.server.KeybindAction;
 import tfar.tanknull.platform.Services;
 
 public class ModClient {
@@ -26,6 +28,12 @@ public class ModClient {
     public static void saveLastPos(MouseHandler mouseHandler) {
         lastMouseX = mouseHandler.xpos();
         lastMouseY = mouseHandler.ypos();
+    }
+
+    public static void keyPressed() {
+        if (ModKeybinds.CYCLE_USE_MODE.consumeClick()) {
+            C2SButtonPacket.send(KeybindAction.TOGGLE_USE_MODE);
+        }
     }
 
     public static ClientTooltipComponent tooltipImage(TooltipComponent data) {
@@ -66,7 +74,7 @@ public class ModClient {
         RenderSystem.enableDepthTest();
         matrices.blit(x, y, 0, 16, 16, sprite);
         RenderSystem.setShaderColor(1,1,1,1);
-        StackSizeRenderer.renderSizeLabel(matrices,Minecraft.getInstance().font, x,y,text);
+        StackSizeRenderer.renderSizeLabel(matrices,Minecraft.getInstance().font, x,y,text,200);
         RenderSystem.disableBlend();
     }
 
@@ -78,14 +86,12 @@ public class ModClient {
         RenderSystem.setShaderColor((color >> 16 & 0xff) / 255f, (color >> 8 & 0xff) / 255f, (color & 0xff) / 255f, 1);
 
         RenderSystem.enableDepthTest();
-
         matrices.blit(x, y, 400, 16, 16, sprite);
-
         RenderSystem.setShaderColor(1,1,1, 1);
-
+        RenderSystem.disableDepthTest();
 
         String amount = fluidStack.getAmount() > 1 ? Utils.formatLargeNumber(fluidStack.getAmount()) : "";
-        StackSizeRenderer.renderSizeLabel(matrices,Minecraft.getInstance().font, x,y,amount);
+        StackSizeRenderer.renderSizeLabel(matrices,Minecraft.getInstance().font, x,y,amount,700);
     }
 
 }

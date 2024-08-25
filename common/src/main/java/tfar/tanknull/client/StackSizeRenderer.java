@@ -49,18 +49,18 @@ public class StackSizeRenderer {
     }
 
     public static void renderSizeLabel(GuiGraphics guiGraphics, Font fontRenderer, float xPos, float yPos,
-            String text) {
-        renderSizeLabel(guiGraphics, fontRenderer, xPos, yPos, text, false);
+            String text,int z) {
+        renderSizeLabel(guiGraphics, fontRenderer, xPos, yPos, text, false,z);
     }
 
     public static void renderSizeLabel(GuiGraphics guiGraphics, Font fontRenderer, float xPos, float yPos, String text,
-            boolean largeFonts) {
+            boolean largeFonts,int z) {
         final float scaleFactor = largeFonts ? 0.85f : 0.5f;
 
         var stack = guiGraphics.pose();
         stack.pushPose();
         // According to ItemRenderer, text is 200 above fluids.
-        stack.translate(0, 0, 200);
+        stack.translate(0, 0, z);
         stack.scale(scaleFactor, scaleFactor, scaleFactor);
 
         renderSizeLabel(stack.last().pose(), fontRenderer, xPos, yPos, text, largeFonts);

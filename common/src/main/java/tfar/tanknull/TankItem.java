@@ -29,6 +29,7 @@ import tfar.tanknull.world.TankSavedData;
 
 import javax.annotation.Nonnull;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 public class TankItem extends Item {
@@ -46,7 +47,7 @@ public class TankItem extends Item {
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack bag = player.getItemInHand(hand);
 
-        if (getUseType(bag) == UseType.bag) {
+        if (getUseType(bag) == UseMode.bag) {
             if (!level.isClientSide) {
                 player.openMenu(createProvider(bag));
             }
@@ -70,6 +71,15 @@ public class TankItem extends Item {
                 tooltip.add(Component.translatable("Frequency: Unbound"));
             }
         }
+
+       // tooltip.add(CommonUtils.translatable("text.dankstorage.changeusetype", DankKeybinds.CONSTRUCTION.getTranslatedKeyMessage().copy().withStyle(ChatFormatting.YELLOW)).withStyle(ChatFormatting.GRAY));
+        UseMode useMode = getUseType(stack);
+        tooltip.add(Component.translatable("tooltip.tanknull.tank.current_use_mode", Component.translatable(
+                       "tooltip.tanknull.tank.use_mode." + useMode.name().toLowerCase(Locale.ROOT))
+                        .withStyle(ChatFormatting.YELLOW))
+                .withStyle(ChatFormatting.GRAY));
+        tooltip.add(Component.translatable("tooltip.tanknull.tankitem.stacklimit", Component.literal(stats.stacklimit + "").withStyle(ChatFormatting.GREEN)).withStyle(ChatFormatting.GRAY));
+
     }
 
     static long lastRequest;
@@ -189,12 +199,12 @@ public class TankItem extends Item {
     }
 
 
-    public static UseType getUseType(ItemStack bag) {
-        return bag.hasTag() && bag.getTag().contains(ModDataComponentTypes.USE_TYPE) ? UseType.valueOf(bag.getTag().getString(ModDataComponentTypes.USE_TYPE)) : UseType.bag;
+    public static UseMode getUseType(ItemStack bag) {
+        return bag.hasTag() && bag.getTag().contains(ModDataComponentTypes.USE_MODE) ? UseMode.valueOf(bag.getTag().getString(ModDataComponentTypes.USE_MODE)) : UseMode.bag;
     }
 
-    public static void setUseType(ItemStack bag,UseType useType) {
-        bag.getOrCreateTag().putString(ModDataComponentTypes.USE_TYPE,useType.name());
+    public static void setUseMode(ItemStack bag, UseMode useMode) {
+        bag.getOrCreateTag().putString(ModDataComponentTypes.USE_MODE, useMode.name());
     }
 
 
@@ -211,15 +221,15 @@ public class TankItem extends Item {
     }
 
 
-    public static void toggleUseType(ServerPlayer player) {
+    public static void toggleUseMode(ServerPlayer player) {
         ItemStack stack = null;
         if (player.getMainHandItem().getItem() instanceof TankItem) {
             stack = player.getMainHandItem();
         }
 
         if (stack != null) {
-            UseType useType = getUseType(stack);
-            setUseType(stack,Utils.cycle(useType));
+            UseMode useMode = getUseType(stack);
+            setUseMode(stack,Utils.cycle(useMode));
         }
     }
 }

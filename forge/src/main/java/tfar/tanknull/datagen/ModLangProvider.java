@@ -1,5 +1,6 @@
 package tfar.tanknull.datagen;
 
+import net.minecraft.client.KeyMapping;
 import net.minecraft.data.PackOutput;
 import net.minecraft.network.chat.ComponentContents;
 import net.minecraft.network.chat.MutableComponent;
@@ -12,6 +13,8 @@ import net.minecraftforge.common.data.LanguageProvider;
 import org.codehaus.plexus.util.StringUtils;
 import tfar.tanknull.TankNull;
 import tfar.tanknull.TextComponents;
+import tfar.tanknull.UseMode;
+import tfar.tanknull.client.ModKeybinds;
 import tfar.tanknull.init.ModBlocks;
 import tfar.tanknull.init.ModItems;
 import tfar.tanknull.inventory.SortingType;
@@ -36,15 +39,31 @@ public class ModLangProvider extends LanguageProvider {
         addDefaultBlock(() -> ModBlocks.DOCK);
 
         addSortingTypes();
+        addUseModes();
         addTranslatableComponent(TextComponents.OPEN_CONFIG,"Open Tank Config");
         addTranslatableComponent(TextComponents.SORT,"Sort");
         addTranslatableComponent(TextComponents.FREQUENCY,"Frequency:");
+        add(ModKeybinds.CATEGORY,"TankNull");
+        add("tooltip.tanknull.tankitem.stacklimit","Fluid Limit: %smB");
+        add("tooltip.tanknull.tank.current_use_mode","Current Use Mode: %s");
+
+        addKeybind(ModKeybinds.CYCLE_USE_MODE,"Cycle Use Mode");
     }
 
     protected void addSortingTypes() {
         for (SortingType sortingType : SortingType.values()) {
             add("tanknull.sorting_type."+ sortingType,"Sort: "+StringUtils.capitalise(sortingType.name()));
         }
+    }
+
+    void addUseModes() {
+        for (UseMode useMode : UseMode.values()) {
+            add("tooltip.tanknull.tank.use_mode." + useMode, useMode.name());
+        }
+    }
+
+    protected void addKeybind(KeyMapping keyMapping,String value) {
+        add(keyMapping.getName(),value);
     }
 
     protected void addDefaultItem(Supplier<? extends Item> supplier) {

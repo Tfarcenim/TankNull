@@ -1,5 +1,5 @@
 package tfar.tanknull;
 
-public enum UseType {
+public enum UseMode {
     bag,bucket_fill,bucket_empty
 }
