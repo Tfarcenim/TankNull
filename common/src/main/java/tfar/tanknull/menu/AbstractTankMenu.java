@@ -13,6 +13,7 @@ import tfar.tanknull.init.ModMenuTypes;
 import tfar.tanknull.inventory.FluidInventory;
 import tfar.tanknull.inventory.FluidSlot;
 import tfar.tanknull.inventory.LockedSlot;
+import tfar.tanknull.inventory.SortingType;
 import tfar.tanknull.network.client.S2CInitialSyncFluidInventoryPacket;
 import tfar.tanknull.network.client.S2CSetFluidSlotPacket;
 import tfar.tanknull.platform.Services;
@@ -105,7 +106,7 @@ public class AbstractTankMenu extends AbstractContainerMenu {
         if (player instanceof ServerPlayer serverPlayer) {
             switch (buttonAction) {
              //   case LOCK_FREQUENCY -> fluidInventory.toggleFrequencyLock();
-               // case SORT -> fluidInventory.sort();
+               case SORT -> fluidInventory.sort(SortingType.DESCENDING.comparator);
             }
         }
         return true;

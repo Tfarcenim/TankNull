@@ -7,6 +7,7 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import tfar.tanknull.MLFluidStack;
@@ -14,7 +15,7 @@ import tfar.tanknull.TankStats;
 import tfar.tanknull.platform.Services;
 import tfar.tanknull.world.TankSavedData;
 
-import java.util.List;
+import java.util.*;
 
 
 //ifluidhandler adapted to common
@@ -39,6 +40,105 @@ public class FluidInventory {
 
     public Slot getWrapper(int slot) {
         return wrappers.computeIfAbsent(slot,value -> Services.PLATFORM.createWrapper(this,value));
+    }
+
+   static void merge(List<MLFluidStack> stacks, MLFluidStack toMerge) {
+        for (MLFluidStack stack : stacks) {
+            if (Objects.equals(stack, toMerge)) {
+                int grow = Math.min(Integer.MAX_VALUE - stack.getAmount(), toMerge.getAmount());
+                if (grow > 0) {
+                    stack.grow(grow);
+                    toMerge.shrink(grow);
+                }
+            }
+        }
+        if (!toMerge.isEmpty()) {
+            stacks.add(toMerge);
+        }
+    }
+
+    public void sort(Comparator<MLFluidStack> sorter) {
+        List<MLFluidStack> gathered = new ArrayList<>();
+
+        Set<MLFluidStack> lockedItems = new HashSet<>();
+
+
+        for (int i = 0; i < fluids.size(); i++) {
+            MLFluidStack stack = fluids.get(i);
+            MLFluidStack ghost = ghostFluids.get(i);
+            if (!stack.isEmpty()) {
+                merge(gathered, stack.copy());
+                boolean unique = true;
+                for (MLFluidStack stack1 : lockedItems) {
+                    if (Objects.equals(stack1, stack)) {
+                        unique = false;
+                    }
+                }
+                if (unique && !ghost.isEmpty()) {
+                    lockedItems.add(stack.copyWithAmount(1000));
+                }
+            }
+        }
+
+        gathered.sort(sorter);
+
+        for (int i = 0; i < getSlots(); i++) {
+            fluids.set(i, MLFluidStack.EMPTY);
+            ghostFluids.set(i, MLFluidStack.EMPTY);
+        }
+
+
+
+        //split up the gathered and add them to the slot
+
+        int slotId = 0;
+
+        for (int i = 0; i < gathered.size(); i++) {
+            MLFluidStack stack = gathered.get(i);
+            int count = stack.getAmount();
+
+            int tankSize = getTankSize(i);
+
+            if (count > tankSize) {
+                int fullStacks = count / tankSize;
+                int partialStack = count - fullStacks * tankSize;
+
+                for (int j = 0; j < fullStacks; j++) {
+                    fluids.set(slotId, stack.copyWithAmount(tankSize));
+
+                    if (anyMatch(stack,lockedItems)) {
+                        ghostFluids.set(slotId,stack);
+                    }
+
+                    slotId++;
+                }
+                if (partialStack > 0) {
+                    fluids.set(slotId, stack.copyWithAmount(partialStack));
+
+                    if (anyMatch(stack,lockedItems)) {
+                        ghostFluids.set(slotId,stack);
+                    }
+
+                    slotId++;
+                }
+            } else {
+                fluids.set(slotId, stack);
+                if (anyMatch(stack,lockedItems)) {
+                    ghostFluids.set(slotId,stack);
+                }
+
+                slotId++;
+            }
+        }
+    }
+
+    static boolean anyMatch(MLFluidStack stack, Set<MLFluidStack> stacks) {
+        for (MLFluidStack stack1 : stacks) {
+            if (stack1.isFluidEqual(stack)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public class Slot {

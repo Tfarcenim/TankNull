@@ -2,25 +2,21 @@ package tfar.tanknull.client;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
 import org.lwjgl.glfw.GLFW;
 import tfar.tanknull.MLFluidStack;
 import tfar.tanknull.TankNull;
-import tfar.tanknull.Utils;
 import tfar.tanknull.inventory.ClickAction;
 import tfar.tanknull.inventory.FluidSlot;
 import tfar.tanknull.menu.AbstractTankMenu;
@@ -30,6 +26,7 @@ import tfar.tanknull.platform.Services;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Supplier;
 
 public class TankScreen extends AbstractContainerScreen<AbstractTankMenu> {
 
@@ -39,9 +36,6 @@ public class TankScreen extends AbstractContainerScreen<AbstractTankMenu> {
 
     @Nullable
     protected FluidSlot hoveredFluidSlot;
-
-    @Nullable
-    protected FluidSlot lastClickFluidSlot;
 
     public TankScreen(AbstractTankMenu menu, Inventory $$1, Component $$2, ResourceLocation background) {
         super(menu, $$1, $$2);
@@ -60,6 +54,19 @@ public class TankScreen extends AbstractContainerScreen<AbstractTankMenu> {
         } else {
             guiGraphics.blit(background, leftPos, topPos, 0, 0, imageWidth, imageHeight, 256, 512);
         }
+    }
+
+    protected static final Button.CreateNarration DEFAULT_NARRATION = Supplier::get;
+
+    @Override
+    protected void init() {
+        super.init();
+        int j = (this.height - this.imageHeight) / 2;
+        this.addRenderableWidget(new Button(leftPos + 143, topPos + 4, 26, 12, Component.literal("Sort"), b -> sendButtonToServer(AbstractTankMenu.ButtonAction.SORT),DEFAULT_NARRATION){});
+    }
+
+    private void sendButtonToServer(AbstractTankMenu.ButtonAction action) {
+        this.minecraft.gameMode.handleInventoryButtonClick(this.menu.containerId, action.ordinal());
     }
 
     /**
@@ -132,7 +139,6 @@ public class TankScreen extends AbstractContainerScreen<AbstractTankMenu> {
                 list.add(slot.getFluid().copy());
             }
 
-          //  abstractcontainermenu.clicked(pSlotId, pMouseButton, pClickType, player);
             Int2ObjectMap<MLFluidStack> int2objectmap = new Int2ObjectOpenHashMap<>();
 
             for (int j = 0; j < i; ++j) {
@@ -162,12 +168,13 @@ public class TankScreen extends AbstractContainerScreen<AbstractTankMenu> {
             if (stack.isEmpty()) {
                 ModClient.renderFluidInGui(pGuiGraphics,x,y,ghost,"Lock");
             }
-            pGuiGraphics.hLine(x-1,x+16,y-1,0xffff0000);
 
-            pGuiGraphics.hLine(x-1,x+16,y+16,0xffff0000);
+            int outlineColor = 0xffff0000;
 
-            pGuiGraphics.vLine(x-1,y-1,y+16,0xffff0000);
-            pGuiGraphics.vLine(x+16,y-1,y+16,0xffff0000);
+            pGuiGraphics.hLine(x-1,x+16,y-1,outlineColor);
+            pGuiGraphics.hLine(x-1,x+16,y+16,outlineColor);
+            pGuiGraphics.vLine(x-1,y-1,y+16,outlineColor);
+            pGuiGraphics.vLine(x+16,y-1,y+16,outlineColor);
         }
 
         pGuiGraphics.pose().popPose();
