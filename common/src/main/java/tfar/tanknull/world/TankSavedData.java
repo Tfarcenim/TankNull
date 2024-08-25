@@ -47,6 +47,10 @@ public class TankSavedData extends SavedData {
         setDirty();
     }
 
+    public TankStats getStats() {
+        return stats;
+    }
+
     protected void load(CompoundTag compoundTag) {
         stats = compoundTag.contains("Stats") ? TankStats.valueOf(compoundTag.getString("Stats")) : TankStats.zero;
         tag = compoundTag.getCompound("contents");

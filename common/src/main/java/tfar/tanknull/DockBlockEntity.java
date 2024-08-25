@@ -103,7 +103,7 @@ public class DockBlockEntity extends BlockEntity implements MenuProvider, Nameab
     @Nullable
     @Override
     public Component getCustomName() {
-        return tank.isEmpty() ? null : tank.getDisplayName();
+        return tank.isEmpty() ? null : tank.getHoverName();
     }
 
     @Nullable

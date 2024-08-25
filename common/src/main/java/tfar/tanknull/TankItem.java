@@ -123,6 +123,17 @@ public class TankItem extends Item {
 
             FluidInventory fluidInventory = tankSavedData.getOrCreateInventory();
 
+            if (stats != tankSavedData.getStats()) {
+                if (stack.getTag().contains(ModDataComponentTypes.UPGRADE) && stats.ordinal() > tankSavedData.getStats().ordinal()) {
+                    tankSavedData.setStats(stats);
+                    stack.getTag().remove(ModDataComponentTypes.UPGRADE);
+                } else {
+                    player.displayClientMessage(Component.literal("Backing inventory is tier "+tankSavedData.getStats().ordinal()
+                            +" while item is tier "+stats.ordinal()),false);
+                    return null;
+                }
+            }
+
             switch (stats) {
                 case zero -> {
                 }
