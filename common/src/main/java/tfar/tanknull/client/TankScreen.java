@@ -57,7 +57,7 @@ public class TankScreen extends AbstractContainerScreen<AbstractTankMenu> {
             guiGraphics.blit(background, i, j, 0, 0, this.imageWidth, menu.rows * 18 + 17);
             guiGraphics.blit(background, i, j + menu.rows * 18 + 17, 0, 126, this.imageWidth, 96);
         } else {
-
+            guiGraphics.blit(background, leftPos, topPos, 0, 0, imageWidth, imageHeight, 256, 512);
         }
     }
 

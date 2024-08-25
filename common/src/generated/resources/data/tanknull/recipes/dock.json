@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "c": {
+      "item": "minecraft:white_concrete"
+    }
+  },
+  "pattern": [
+    "ccc",
+    "c c",
+    "ccc"
+  ],
+  "result": {
+    "item": "tanknull:dock"
+  },
+  "show_notification": true
+}

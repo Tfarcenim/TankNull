@@ -1,0 +1,24 @@
+{
+  "type": "tanknull:upgrade",
+  "category": "equipment",
+  "key": {
+    "b": {
+      "item": "tanknull:tank_4"
+    },
+    "c": {
+      "item": "minecraft:diamond_block"
+    },
+    "d": {
+      "item": "minecraft:diamond_block"
+    }
+  },
+  "pattern": [
+    "dcd",
+    "cbc",
+    "dcd"
+  ],
+  "result": {
+    "item": "tanknull:tank_5"
+  },
+  "show_notification": true
+}

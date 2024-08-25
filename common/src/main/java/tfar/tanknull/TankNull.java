@@ -10,10 +10,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.storage.LevelStorageSource;
-import tfar.tanknull.init.ModBlockEntityTypes;
-import tfar.tanknull.init.ModBlocks;
-import tfar.tanknull.init.ModItems;
-import tfar.tanknull.init.ModMenuTypes;
+import tfar.tanknull.init.*;
 import tfar.tanknull.network.PacketHandler;
 import tfar.tanknull.platform.Services;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -46,9 +43,9 @@ public class TankNull {
         Services.PLATFORM.registerAll(ModBlockEntityTypes.class,BuiltInRegistries.BLOCK_ENTITY_TYPE, typeClass);
         Services.PLATFORM.unfreeze(BuiltInRegistries.ITEM);
         Services.PLATFORM.registerAll(ModItems.class, BuiltInRegistries.ITEM, Item.class);
-      //  Services.PLATFORM.registerAll(ModCreativeTabs.class,BuiltInRegistries.CREATIVE_MODE_TAB, CreativeModeTab.class);
+        Services.PLATFORM.registerAll(ModCreativeTabs.class,BuiltInRegistries.CREATIVE_MODE_TAB, CreativeModeTab.class);
         Services.PLATFORM.registerAll(ModMenuTypes.class,BuiltInRegistries.MENU, typeClass1);
-      //  Services.PLATFORM.registerAll(ModRecipeSerializers.class,BuiltInRegistries.RECIPE_SERIALIZER,typeClass2);
+        Services.PLATFORM.registerAll(ModRecipeSerializers.class,BuiltInRegistries.RECIPE_SERIALIZER,typeClass2);
 
         // It is common for all supported loaders to provide a similar feature that can not be used directly in the
         // common code. A popular way to get around this is using Java's built-in service loader feature to create

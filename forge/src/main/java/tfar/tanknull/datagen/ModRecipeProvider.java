@@ -12,6 +12,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.common.Tags;
 import tfar.tanknull.init.ModItems;
+import tfar.tanknull.init.ModRecipeSerializers;
 
 import java.util.function.Consumer;
 
@@ -24,7 +25,7 @@ public class ModRecipeProvider extends RecipeProvider {
     protected void buildRecipes(Consumer<FinishedRecipe> pWriter) {
         ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, ModItems.TANK_1)
                 .define('c', ItemTags.COALS)
-                .define('b', Tags.Items.BARRELS_WOODEN)
+                .define('b', Items.BUCKET)
                 .pattern("ccc")
                 .pattern("cbc")
                 .pattern("ccc")
@@ -32,11 +33,11 @@ public class ModRecipeProvider extends RecipeProvider {
                 .save(pWriter);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, ModItems.DOCK)
-                .define('c', Blocks.BLACK_CONCRETE)
+                .define('c', Blocks.WHITE_CONCRETE)
                 .pattern("ccc")
                 .pattern("c c")
                 .pattern("ccc")
-                .unlockedBy(getHasName(Blocks.BLACK_CONCRETE),has(Blocks.BLACK_CONCRETE))
+                .unlockedBy(getHasName(Blocks.WHITE_CONCRETE),has(Blocks.WHITE_CONCRETE))
                 .save(pWriter);
 
         createDankAndUpgrade(ModItems.TANK_2, ModItems.TANK_1,
@@ -59,14 +60,14 @@ public class ModRecipeProvider extends RecipeProvider {
     }
 
     protected void createDankAndUpgrade(Item dank, Item previousDank, Ingredient around,Ingredient around2,Consumer<FinishedRecipe> pWriter) {
-        ShapedRecipeBuilderCustom.shaped(RecipeCategory.TOOLS, dank)
+        CustomShapedRecipeBuilder.shapedCustom(RecipeCategory.TOOLS, dank)
+                .serializer(ModRecipeSerializers.UPGRADE)
                 .define('c', around)
                 .define('d', around2)
                 .define('b', previousDank)
                 .pattern("dcd")
                 .pattern("cbc")
                 .pattern("dcd")
-                //.serializer(ModRecipeSerializers.upgrade)
                 .unlockedBy(getHasName( previousDank),has(previousDank))
                 .save(pWriter);
     }
