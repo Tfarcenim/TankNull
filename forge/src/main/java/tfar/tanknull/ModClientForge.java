@@ -2,6 +2,7 @@ package tfar.tanknull;
 
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.client.event.InputEvent;
@@ -34,6 +35,8 @@ public class ModClientForge {
         ItemStack stack = player.getItemInHand(hand);
         if (player.level().isClientSide && stack.getItem() instanceof TankItem && Screen.hasAltDown() && TankItem.getUseMode(stack)!= UseMode.bag) {
             Services.PLATFORM.sendToServer(new C2SOpenMenuPacket(hand));
+            event.setCanceled(true);
+            event.setCancellationResult(InteractionResult.SUCCESS);
         }
     }
 

@@ -126,9 +126,9 @@ public class TankItem extends Item {
         BlockPos origin = blockhitresult.getBlockPos();
         Direction direction = blockhitresult.getDirection();
         BlockPos originRelative = origin.relative(direction);
+        int bucketSize = getBucketSize(stack);
 
-
-         BlockPos.breadthFirstTraversal(origin, 7, getBuckets(getBucketSize(stack)), (blockPos, consumer) -> {
+         BlockPos.breadthFirstTraversal(origin, 2 * bucketSize + 9, getBuckets(bucketSize), (blockPos, consumer) -> {
             for(Direction dir : ALL_DIRECTIONS) {
                 consumer.accept(blockPos.relative(dir));
             }
@@ -144,7 +144,6 @@ public class TankItem extends Item {
                      }
                  }
              }
-
             return true;
         });
 
