@@ -24,7 +24,7 @@ public class TankConfigScreen extends AbstractContainerScreen<TankConfigMenu> {
     protected void init() {
         super.init();
 
-        Button button = new Button(leftPos + 9, topPos + 24, 90, 16,Component.empty(), b -> sendButtonToServer(TankConfigMenu.ButtonAction.CHANGE_SORT_TYPE), Supplier::get) {
+        Button button = new Button(leftPos + 9, topPos + 24, 90, 16,Component.empty(), b -> sendButtonToServer(TankConfigMenu.ButtonAction.CYCLE_SORT_TYPE), Supplier::get) {
             @Override
             public Component getMessage() {
                 return Component.translatable("tanknull.sorting_type."+menu.getSortingType());
@@ -40,6 +40,15 @@ public class TankConfigScreen extends AbstractContainerScreen<TankConfigMenu> {
             }
         };
         this.addRenderableWidget(autoSort);
+
+     /*   Button autoBucket = new Button(leftPos + 9, topPos + 44, 90, 16,Component.empty(), b -> sendButtonToServer(TankConfigMenu.ButtonAction.CYCLE_BUCKET_SIZE), Supplier::get) {
+            @Override
+            public Component getMessage() {
+                return Component.translatable("tanknull.auto_sort").append(" ")
+                        .append(menu.autoSort() ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF);
+            }
+        };
+        this.addRenderableWidget(autoBucket);*/
 
 
 

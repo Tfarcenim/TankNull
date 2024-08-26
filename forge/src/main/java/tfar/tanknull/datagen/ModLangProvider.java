@@ -43,6 +43,7 @@ public class ModLangProvider extends LanguageProvider {
         addTranslatableComponent(TextComponents.OPEN_CONFIG,"Open Tank Config");
         addTranslatableComponent(TextComponents.SORT,"Sort");
         addTranslatableComponent(TextComponents.FREQUENCY,"Frequency:");
+        addTranslatableComponent(TextComponents.BUCKET_SIZE,"Buckets:");
         add(ModKeybinds.CATEGORY,"TankNull");
 
         add("tanknull.auto_sort","Auto Sort:");

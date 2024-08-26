@@ -52,8 +52,9 @@ public class TankConfigMenu extends AbstractContainerMenu {
     }
 
     public enum ButtonAction {
-        CHANGE_SORT_TYPE,
+        CYCLE_SORT_TYPE,
         TOGGLE_AUTO_SORT,
+        CYCLE_BUCKET_SIZE,
         CLOSE;
         static final ButtonAction[] VALUES = values();
     }
@@ -74,7 +75,7 @@ public class TankConfigMenu extends AbstractContainerMenu {
         ButtonAction buttonAction = ButtonAction.VALUES[id];
         if (player instanceof ServerPlayer serverPlayer) {
             switch (buttonAction) {
-                case CHANGE_SORT_TYPE -> {
+                case CYCLE_SORT_TYPE -> {
                     FluidInventory fluidInventory = TankItem.getInventoryFrom(getTank(), serverPlayer.server);
                     if (fluidInventory != null) {
                         fluidInventory.setSortingType(Utils.cycle(fluidInventory.getSortingType()));
@@ -85,6 +86,9 @@ public class TankConfigMenu extends AbstractContainerMenu {
                     if (fluidInventory != null) {
                         fluidInventory.toggleAutoSort();
                     }
+                }
+                case CYCLE_BUCKET_SIZE -> {
+
                 }
                 case CLOSE -> {
                     if (getTank().getItem() instanceof TankItem tankItem) {

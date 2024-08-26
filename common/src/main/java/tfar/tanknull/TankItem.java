@@ -41,6 +41,7 @@ import java.util.Optional;
 public class TankItem extends Item {
 
     public final TankStats stats;
+    public static final int MAX_BUCKET_SIZE = 4;
 
     public TankItem(Properties $$0, TankStats stats) {
         super($$0);
@@ -141,11 +142,16 @@ public class TankItem extends Item {
         BlockPos blockpos = blockhitresult.getBlockPos();
         Direction direction = blockhitresult.getDirection();
         BlockPos relative = blockpos.relative(direction);
+        MLFluidStack selected = getSelectedFluid(stack);
+
+        if (selected.isEmpty()) {
+            return InteractionResultHolder.fail(stack);
+        }
 
         if (!level.isClientSide) {
             FluidInventory fluidInventory = getInventoryFrom(stack, level.getServer());
             if (fluidInventory != null) {
-                Services.PLATFORM.tryPlaceFluid(player, level, hand, relative, fluidInventory, new MLFluidStack(Fluids.WATER, 1000));
+                Services.PLATFORM.tryPlaceFluid(player, level, hand, relative, fluidInventory, selected);
             }
         }
         return InteractionResultHolder.sidedSuccess(stack,level.isClientSide);
@@ -289,6 +295,14 @@ public class TankItem extends Item {
         }
     }
 
+    public static int getBucketSize(ItemStack bag) {
+        return bag.hasTag() && bag.getTag().contains(ModDataComponentTypes.BUCKET_SIZE) ? bag.getTag().getInt(ModDataComponentTypes.BUCKET_SIZE) : 0;
+    }
+
+    public static void setBucketSize(ItemStack bag,int size) {
+        bag.getOrCreateTag().putInt(ModDataComponentTypes.BUCKET_SIZE,size);
+    }
+
 
     public static FluidInventory getInventoryFrom(ItemStack bag,MinecraftServer server) {
         int frequency = getFrequency(bag);
@@ -308,6 +322,12 @@ public class TankItem extends Item {
     public static boolean isInteractive(ItemStack stack) {
         if (!(stack.getItem() instanceof TankItem)) return false;
         return getUseMode(stack).interactive;
+    }
+
+
+    public static int getBuckets(int size) {
+        int d = 2 * size + 1;
+        return d * d * d;
     }
 
 

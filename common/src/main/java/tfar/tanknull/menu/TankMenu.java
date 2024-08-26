@@ -13,12 +13,12 @@ import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 import tfar.tanknull.MLFluidStack;
+import tfar.tanknull.TankItem;
 import tfar.tanknull.TankStats;
 import tfar.tanknull.init.ModMenuTypes;
 import tfar.tanknull.inventory.FluidInventory;
 import tfar.tanknull.inventory.FluidSlot;
 import tfar.tanknull.inventory.LockedSlot;
-import tfar.tanknull.inventory.SortingType;
 import tfar.tanknull.network.client.S2CInitialSyncFluidInventoryPacket;
 import tfar.tanknull.network.client.S2CSetFluidSlotPacket;
 import tfar.tanknull.platform.Services;
@@ -51,7 +51,7 @@ public class TankMenu extends AbstractContainerMenu {
     }
 
     public enum ButtonAction {
-        LOCK_FREQUENCY, SORT,OPEN_CONFIG;
+        LOCK_FREQUENCY, SORT,OPEN_CONFIG, CYCLE_BUCKET_SIZE;
         static final ButtonAction[] VALUES = values();
     }
 
@@ -63,6 +63,13 @@ public class TankMenu extends AbstractContainerMenu {
         this.rows = fluidInventory.getSlots()/9;
         holder.setItem(0,stack);
         addPlayerSlots(playerInventory,-1);
+        Slot slot = new LockedSlot(holder,0,-100,-100) {
+            @Override
+            public boolean isActive() {
+                return false;
+            }
+        };
+        addSlot(slot);
         addTankSlots();
     }
 
@@ -124,9 +131,21 @@ public class TankMenu extends AbstractContainerMenu {
              //   case LOCK_FREQUENCY -> fluidInventory.toggleFrequencyLock();
                case SORT -> fluidInventory.sort();
                 case OPEN_CONFIG -> player.openMenu(new ConfigMenuProvider(holder.getItem(0)));
+                case CYCLE_BUCKET_SIZE -> {
+                    int size = TankItem.getBucketSize(getTank());
+                    size++;
+                    if (size > TankItem.MAX_BUCKET_SIZE) {
+                        size = 0;
+                    }
+                    TankItem.setBucketSize(getTank(),size);
+                }
             }
         }
         return true;
+    }
+
+    public ItemStack getTank() {
+        return holder.getItem(0);
     }
 
     public class ConfigMenuProvider implements MenuProvider {
@@ -179,7 +198,7 @@ public class TankMenu extends AbstractContainerMenu {
 
     @Override
     public boolean stillValid(@Nonnull Player playerIn) {
-        return true;
+        return getTank().getItem() instanceof TankItem;
     }
 
 

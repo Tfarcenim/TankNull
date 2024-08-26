@@ -10,12 +10,14 @@ import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.core.NonNullList;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import org.lwjgl.glfw.GLFW;
 import tfar.tanknull.MLFluidStack;
+import tfar.tanknull.TankItem;
 import tfar.tanknull.TankNull;
 import tfar.tanknull.TextComponents;
 import tfar.tanknull.inventory.ClickAction;
@@ -75,6 +77,23 @@ public class TankScreen extends AbstractContainerScreen<TankMenu> {
                 .pos(leftPos + 157, topPos + 4)
                 .size(12, 12)
                 .tooltip(tooltip).build());
+
+        DynamicTooltip dynamicTooltip = DynamicTooltip.dynamic(() -> Component.empty().append(TextComponents.BUCKET_SIZE).append(" ").
+                append(Component.literal("" + TankItem.getBuckets(TankItem.getBucketSize(menu.getTank())))));
+
+        Button cycleBucketSize = new Button(leftPos + 99, topPos + 4, 12, 12, Component.empty(), b -> {
+            sendButtonToServer(TankMenu.ButtonAction.CYCLE_BUCKET_SIZE);
+            dynamicTooltip.dirty = true;
+        }, Supplier::get) {
+            @Override
+            public Component getMessage() {
+                return Component.literal("" + TankItem.getBucketSize(menu.getTank()));
+            }
+        };
+
+        cycleBucketSize.setTooltip(dynamicTooltip);
+        this.addRenderableWidget(cycleBucketSize);
+
     }
 
     private void sendButtonToServer(TankMenu.ButtonAction action) {

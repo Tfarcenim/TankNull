@@ -15,7 +15,11 @@ import tfar.tanknull.TankStats;
 import tfar.tanknull.platform.Services;
 import tfar.tanknull.world.TankSavedData;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 
 //ifluidhandler adapted to common
@@ -346,6 +350,7 @@ public class FluidInventory implements ContainerData {
             int fill = fillSpecific(remainder,action,i);
             remainder.shrink(fill);
             total+=fill;
+            if (remainder.isEmpty())break;
         }
         return total;
     }
@@ -440,10 +445,11 @@ public class FluidInventory implements ContainerData {
      */
     @NotNull
     MLFluidStack drain(int maxDrain, Action action) {
-        MLFluidStack totalDrained = null;
+        MLFluidStack totalDrained = MLFluidStack.EMPTY;
+        int remainder = maxDrain;
         for (int i = 0; i < getSlots();i++) {
             MLFluidStack drained = drainSpecific(maxDrain,action,i);
-            if (totalDrained == null) {
+            if (totalDrained.isEmpty()) {
                 if (!drained.isEmpty()) {
                     totalDrained = drained;
                 }
@@ -452,8 +458,10 @@ public class FluidInventory implements ContainerData {
                     totalDrained.grow(drained.getAmount());
                 }
             }
+            remainder-= drained.getAmount();
+            if (remainder <= 0) break;
         }
-        return totalDrained != null ? totalDrained : MLFluidStack.EMPTY;
+        return totalDrained;
     }
 
     public MLFluidStack drainSpecific(int maxDrain,Action action,int tank) {
