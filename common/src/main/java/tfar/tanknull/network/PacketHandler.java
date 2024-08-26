@@ -24,6 +24,7 @@ public class PacketHandler {
         Services.PLATFORM.registerServerPacket(C2SSetFrequencyPacket.class, C2SSetFrequencyPacket::new);
         Services.PLATFORM.registerServerPacket(C2SClickFluidSlotPacket.class, C2SClickFluidSlotPacket::new);
         Services.PLATFORM.registerServerPacket(C2SRequestContentsPacket.class, C2SRequestContentsPacket::new);
+        Services.PLATFORM.registerServerPacket(C2SOpenMenuPacket.class, C2SOpenMenuPacket::new);
 
         ///////server to client
 

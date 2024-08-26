@@ -21,6 +21,13 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.BucketPickup;
+import net.minecraft.world.level.block.LiquidBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -116,18 +123,32 @@ public class TankItem extends Item {
         if (blockhitresult.getType() != HitResult.Type.BLOCK) {
             return InteractionResultHolder.pass(stack);
         }
-        BlockPos blockpos = blockhitresult.getBlockPos();
+        BlockPos origin = blockhitresult.getBlockPos();
         Direction direction = blockhitresult.getDirection();
-        BlockPos relative = blockpos.relative(direction);
-        if (level.mayInteract(player, blockpos) && player.mayUseItemAt(relative, direction, stack)) {
+        BlockPos originRelative = origin.relative(direction);
 
-            if (!level.isClientSide) {
-                FluidInventory fluidInventory = getInventoryFrom(stack, level.getServer());
-                if (fluidInventory != null) {
-                    Services.PLATFORM.tryPickUpFluid(fluidInventory,player, level, blockpos, direction);
-                }
+
+         BlockPos.breadthFirstTraversal(origin, 7, getBuckets(getBucketSize(stack)), (blockPos, consumer) -> {
+            for(Direction dir : ALL_DIRECTIONS) {
+                consumer.accept(blockPos.relative(dir));
             }
-        }
+
+        }, (blockPos) -> {
+             BlockPos relative = blockPos.relative(direction);
+             if (level.mayInteract(player, blockPos) && player.mayUseItemAt(relative, direction, stack)) {
+
+                 if (!level.isClientSide) {
+                     FluidInventory fluidInventory = getInventoryFrom(stack, level.getServer());
+                     if (fluidInventory != null) {
+                         Services.PLATFORM.tryPickUpFluid(fluidInventory,player, level, blockPos, direction);
+                     }
+                 }
+             }
+
+            return true;
+        });
+
+
         return InteractionResultHolder.fail(stack);
     }
 
@@ -176,8 +197,13 @@ public class TankItem extends Item {
                         .withStyle(ChatFormatting.YELLOW))
                 .withStyle(ChatFormatting.GRAY));
         tooltip.add(Component.translatable("tooltip.tanknull.tankitem.stacklimit", Component.literal(stats.stacklimit + "").withStyle(ChatFormatting.GREEN)).withStyle(ChatFormatting.GRAY));
-
     }
+
+    private static final Direction[] ALL_DIRECTIONS = Direction.values();
+
+
+
+
 
     static long lastRequest;
 
