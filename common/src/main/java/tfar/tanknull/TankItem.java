@@ -2,12 +2,14 @@ package tfar.tanknull;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
@@ -17,13 +19,21 @@ import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.BucketPickup;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import org.jetbrains.annotations.Nullable;
 import tfar.tanknull.init.ModDataComponentTypes;
 import tfar.tanknull.inventory.FluidInventory;
 import tfar.tanknull.inventory.FluidListTooltip;
 import tfar.tanknull.menu.TankMenu;
 import tfar.tanknull.network.server.C2SRequestContentsPacket;
+import tfar.tanknull.platform.Services;
 import tfar.tanknull.world.ClientData;
 import tfar.tanknull.world.TankSavedData;
 
@@ -46,17 +56,60 @@ public class TankItem extends Item {
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack bag = player.getItemInHand(hand);
-
-        if (getUseMode(bag) == UseMode.bag) {
+        UseMode useMode = getUseMode(bag);
+        if (useMode == UseMode.bag) {
             if (!level.isClientSide) {
                 player.openMenu(createProvider(bag));
             }
             return InteractionResultHolder.success(bag);
         } else {
-            if (!level.isClientSide) {
-            }
-            return new InteractionResultHolder<>(InteractionResult.PASS, player.getItemInHand(hand));
+                return switch (useMode) {
+                    case bucket_fill -> tryFill(level, player, hand, bag);
+                    case bucket_empty -> tryEmpty(level, player, hand, bag);
+                    default -> throw new IllegalStateException("Unexpected value: " + useMode);
+                };
         }
+    }
+
+    public InteractionResultHolder<ItemStack> tryFill(Level level,Player player,InteractionHand hand,ItemStack stack) {
+        BlockHitResult blockhitresult = getPlayerPOVHitResult(level, player, ClipContext.Fluid.SOURCE_ONLY);
+        if (blockhitresult.getType() != HitResult.Type.BLOCK) {
+            return InteractionResultHolder.pass(stack);
+        }
+        BlockPos blockpos = blockhitresult.getBlockPos();
+        Direction direction = blockhitresult.getDirection();
+        BlockPos relative = blockpos.relative(direction);
+        if (level.mayInteract(player, blockpos) && player.mayUseItemAt(relative, direction, stack)) {
+
+            if (!level.isClientSide) {
+                FluidInventory fluidInventory = getInventoryFrom(stack, level.getServer());
+                if (fluidInventory != null) {
+                    Services.PLATFORM.tryPickUpFluid(fluidInventory,player, level, blockpos, direction);
+                }
+            }
+        }
+        return InteractionResultHolder.fail(stack);
+    }
+
+    public InteractionResultHolder<ItemStack> tryEmpty(Level level,Player player,InteractionHand hand,ItemStack stack) {
+
+        BlockHitResult blockhitresult = getPlayerPOVHitResult(level, player, ClipContext.Fluid.SOURCE_ONLY);
+
+        if (blockhitresult.getType() != HitResult.Type.BLOCK) {
+            return InteractionResultHolder.pass(stack);
+        }
+
+        BlockPos blockpos = blockhitresult.getBlockPos();
+        Direction direction = blockhitresult.getDirection();
+        BlockPos relative = blockpos.relative(direction);
+
+        if (!level.isClientSide) {
+            FluidInventory fluidInventory = getInventoryFrom(stack, level.getServer());
+            if (fluidInventory != null) {
+                Services.PLATFORM.tryPlaceFluid(player, level, hand, relative, fluidInventory, new MLFluidStack(Fluids.WATER, 1000));
+            }
+        }
+        return InteractionResultHolder.sidedSuccess(stack,level.isClientSide);
     }
 
     @Override
@@ -229,7 +282,9 @@ public class TankItem extends Item {
 
         if (stack != null) {
             UseMode useMode = getUseMode(stack);
-            setUseMode(stack,Utils.cycle(useMode));
+            UseMode cycle = Utils.cycle(useMode);
+            setUseMode(stack,cycle);
+            player.displayClientMessage(Component.translatable("tooltip.tanknull.tank.use_mode."+cycle),true);
         }
     }
 }
