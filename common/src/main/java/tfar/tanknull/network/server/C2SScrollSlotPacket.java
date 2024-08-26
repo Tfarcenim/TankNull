@@ -26,10 +26,10 @@ public class C2SScrollSlotPacket implements C2SModPacket {
     }
 
     public void handleServer(ServerPlayer player) {
-    //    if (player.getMainHandItem().getItem() instanceof TankItem)
-    //        CommonUtils.changeSelectedSlot(player.getMainHandItem(), right,player);
-    //    else if (player.getOffhandItem().getItem() instanceof TankItem)
-    //        CommonUtils.changeSelectedSlot(player.getOffhandItem(), right,player);
+        if (player.getMainHandItem().getItem() instanceof TankItem)
+            TankItem.changeSelectedFluid(player.getMainHandItem(), right,player);
+        else if (player.getOffhandItem().getItem() instanceof TankItem)
+            TankItem.changeSelectedFluid(player.getOffhandItem(), right,player);
     }
 }
 

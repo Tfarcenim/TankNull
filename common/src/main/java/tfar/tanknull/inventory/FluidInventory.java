@@ -139,6 +139,32 @@ public class FluidInventory implements ContainerData {
         }
     }
 
+    public List<MLFluidStack> getUniqueFluids() {
+        List<MLFluidStack> gathered = new ArrayList<>();
+        for (MLFluidStack stack : fluids) {
+            if (!stack.isEmpty()) {
+                boolean matched = false;
+                for (MLFluidStack fluidStack : gathered) {
+                    if (MLFluidStack.areFluidsEqual(fluidStack, stack)) {
+                        fluidStack.grow(stack.getAmount());
+                        matched = true;
+                        break;
+                    }
+                }
+                if (!matched) {
+                    gathered.add(stack.copy());
+                }
+            }
+        }
+        return gathered;
+    }
+
+    public long countFluid(MLFluidStack stack) {
+        if (stack.isEmpty()) return 0;
+        long amount = fluids.stream().filter(fluidStack -> MLFluidStack.areFluidsEqual(stack, fluidStack)).mapToLong(MLFluidStack::getAmount).sum();
+        return amount;
+    }
+
     public void setSortingType(SortingType sortingType) {
         this.sortingType = sortingType;
         setDirty();

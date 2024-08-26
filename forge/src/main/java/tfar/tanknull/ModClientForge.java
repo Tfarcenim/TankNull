@@ -1,7 +1,10 @@
 package tfar.tanknull;
 
+import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RegisterClientTooltipComponentFactoriesEvent;
+import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
+import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -14,6 +17,7 @@ public class ModClientForge {
     static void setup(FMLClientSetupEvent event) {
         ModClient.setup();
         MinecraftForge.EVENT_BUS.addListener(ModClientForge::clientTick);
+        MinecraftForge.EVENT_BUS.addListener(ModClientForge::onScroll);
     }
 
     public static void clientTooltip(RegisterClientTooltipComponentFactoriesEvent e) {
@@ -29,4 +33,13 @@ public class ModClientForge {
             ModClient.keyPressed();
         }
     }
+
+    public static void renderStack(RegisterGuiOverlaysEvent e) {
+        e.registerBelow(VanillaGuiOverlay.CHAT_PANEL.id(), TankNull.MOD_ID,new TankHudOverlay());
+    }
+
+    public static void onScroll(InputEvent.MouseScrollingEvent e) {
+        if (ModClient.onScroll(e.getScrollDelta()))e.setCanceled(true);
+    }
+
 }

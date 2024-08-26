@@ -11,13 +11,13 @@
   "item.tanknull.tank_7": "Tank 7",
   "key.categories.tanknull": "TankNull",
   "key.tanknull.cycle_use_mode": "Cycle Use Mode",
-  "tanknull.auto_sort": "Auto Sort",
+  "tanknull.auto_sort": "Auto Sort:",
   "tanknull.sorting_type.ascending": "Sort: Ascending",
   "tanknull.sorting_type.descending": "Sort: Descending",
+  "tanknull.tank.use_mode.bag": "bag",
+  "tanknull.tank.use_mode.bucket_empty": "bucket_empty",
+  "tanknull.tank.use_mode.bucket_fill": "bucket_fill",
   "tooltip.tanknull.tank.current_use_mode": "Current Use Mode: %s",
   "tooltip.tanknull.tank.frequency": "Frequency:",
-  "tooltip.tanknull.tank.use_mode.bag": "bag",
-  "tooltip.tanknull.tank.use_mode.bucket_empty": "bucket_empty",
-  "tooltip.tanknull.tank.use_mode.bucket_fill": "bucket_fill",
   "tooltip.tanknull.tankitem.stacklimit": "Fluid Limit: %smB"
 }

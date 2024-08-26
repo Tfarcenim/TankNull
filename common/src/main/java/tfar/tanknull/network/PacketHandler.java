@@ -28,7 +28,6 @@ public class PacketHandler {
         ///////server to client
 
         Services.PLATFORM.registerClientPacket(S2CSendGhostSlotPacket.class, S2CSendGhostSlotPacket::new);
-        Services.PLATFORM.registerClientPacket(S2CSyncSelectedFluidPacket.class, S2CSyncSelectedFluidPacket::new);
         Services.PLATFORM.registerClientPacket(S2CInitialSyncFluidInventoryPacket.class, S2CInitialSyncFluidInventoryPacket::new);
         Services.PLATFORM.registerClientPacket(S2CTooltipContentsPacket.class, S2CTooltipContentsPacket::new);
         Services.PLATFORM.registerClientPacket(S2CSetFluidSlotPacket.class,S2CSetFluidSlotPacket::new);

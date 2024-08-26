@@ -8,10 +8,10 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -21,9 +21,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.BucketPickup;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -39,7 +36,6 @@ import tfar.tanknull.world.TankSavedData;
 
 import javax.annotation.Nonnull;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 
 public class TankItem extends Item {
@@ -49,6 +45,32 @@ public class TankItem extends Item {
     public TankItem(Properties $$0, TankStats stats) {
         super($$0);
         this.stats = stats;
+    }
+
+    public static void changeSelectedFluid(ItemStack mainHandItem, boolean right, ServerPlayer player) {
+        FluidInventory fluidInventory = getInventoryFrom(mainHandItem, player.server);
+        MLFluidStack current = getSelectedFluid(mainHandItem);
+        if (fluidInventory!=null) {
+            List<MLFluidStack> gathered = fluidInventory.getUniqueFluids();
+            if (!gathered.isEmpty()) {
+                int index = -1;
+                for (int i = 0; i < gathered.size();i++) {
+                    if (MLFluidStack.areFluidsEqual(current,gathered.get(i))) {
+                        index = i;
+                        break;
+                    }
+                }
+                if (index > -1) {
+                    int next = index+1;
+                    if (next >= gathered.size()) {
+                        next = 0;
+                    }
+                    setSelectedFluid(mainHandItem,gathered.get(next));
+                } else {
+                    setSelectedFluid(mainHandItem,gathered.get(0));
+                }
+            }
+        }
     }
 
 
@@ -68,6 +90,23 @@ public class TankItem extends Item {
                     case bucket_empty -> tryEmpty(level, player, hand, bag);
                     default -> throw new IllegalStateException("Unexpected value: " + useMode);
                 };
+        }
+    }
+
+    @Override
+    public void inventoryTick(ItemStack bag, Level level, Entity entity, int i, boolean equipped) {
+        //there has to be a better way
+        if (entity instanceof ServerPlayer player && equipped) {
+            MLFluidStack sel = getSelectedFluid(bag);
+            if (!sel.isEmpty()) {
+                FluidInventory fluidInventory = getInventoryFrom(bag, player.server);
+                if (fluidInventory != null) {
+                    long amount = fluidInventory.countFluid(sel);
+                    if (amount != sel.getAmount()) {
+                        setSelectedFluid(bag,sel.copyWithAmount((int) amount));
+                    }
+                }
+            }
         }
     }
 
@@ -121,14 +160,13 @@ public class TankItem extends Item {
                 tooltip.add(TextComponents.FREQUENCY.copy().append(Component.literal(" "+tag.getInt(ModDataComponentTypes.FREQUENCY))
                         .withStyle(ChatFormatting.AQUA)));
             } else {
-                tooltip.add(Component.translatable("Frequency: Unbound"));
+                tooltip.add(TextComponents.FREQUENCY.copy().append(Component.translatable(" "+-1)));
             }
         }
 
        // tooltip.add(CommonUtils.translatable("text.dankstorage.changeusetype", DankKeybinds.CONSTRUCTION.getTranslatedKeyMessage().copy().withStyle(ChatFormatting.YELLOW)).withStyle(ChatFormatting.GRAY));
         UseMode useMode = getUseMode(stack);
-        tooltip.add(Component.translatable("tooltip.tanknull.tank.current_use_mode", Component.translatable(
-                       "tooltip.tanknull.tank.use_mode." + useMode.name().toLowerCase(Locale.ROOT))
+        tooltip.add(Component.translatable("tooltip.tanknull.tank.current_use_mode", Component.translatable(useMode.translation())
                         .withStyle(ChatFormatting.YELLOW))
                 .withStyle(ChatFormatting.GRAY));
         tooltip.add(Component.translatable("tooltip.tanknull.tankitem.stacklimit", Component.literal(stats.stacklimit + "").withStyle(ChatFormatting.GREEN)).withStyle(ChatFormatting.GRAY));
@@ -148,7 +186,7 @@ public class TankItem extends Item {
                 C2SRequestContentsPacket.send(id);
                 lastRequest = Util.getMillis();
             }
-            return Optional.of(new FluidListTooltip(ClientData.cached, getSelectedSlot(itemStack)));
+            return Optional.of(new FluidListTooltip(ClientData.cached, -1));
         }
         return Optional.empty();
     }
@@ -157,7 +195,7 @@ public class TankItem extends Item {
         return new PortableTankProvider(stack);
     }
 
-    public class PortableTankProvider implements MenuProvider{
+    public class PortableTankProvider implements MenuProvider {
 
         private final ItemStack stack;
 
@@ -236,14 +274,21 @@ public class TankItem extends Item {
         bag.getOrCreateTag().putInt(ModDataComponentTypes.FREQUENCY,frequency);
     }
 
-    public static int getSelectedSlot(ItemStack bag) {
-        return bag.hasTag() && bag.getTag().contains(ModDataComponentTypes.SELECTED) ? bag.getTag().getInt(ModDataComponentTypes.SELECTED) : TankSavedData.INVALID;
+    public static MLFluidStack getSelectedFluid(ItemStack bag) {
+        return bag.hasTag() && bag.getTag().contains(ModDataComponentTypes.SELECTED) ?
+                MLFluidStack.fromNBT(bag.getTag().getCompound(ModDataComponentTypes.SELECTED)) : MLFluidStack.EMPTY;
     }
 
 
-    public static void setSelectedSlot(ItemStack bag,int frequency) {
-        bag.getOrCreateTag().putInt(ModDataComponentTypes.SELECTED,frequency);
+    public static void setSelectedFluid(ItemStack bag,MLFluidStack fluid) {
+        bag.getOrCreateTag();
+        if (fluid.isEmpty()) {
+            bag.getTag().remove(ModDataComponentTypes.SELECTED);
+        } else {
+            bag.getOrCreateTag().put(ModDataComponentTypes.SELECTED, fluid.writeToNBT(new CompoundTag()));
+        }
     }
+
 
     public static FluidInventory getInventoryFrom(ItemStack bag,MinecraftServer server) {
         int frequency = getFrequency(bag);
@@ -258,6 +303,11 @@ public class TankItem extends Item {
 
     public static void setUseMode(ItemStack bag, UseMode useMode) {
         bag.getOrCreateTag().putString(ModDataComponentTypes.USE_MODE, useMode.name());
+    }
+
+    public static boolean isInteractive(ItemStack stack) {
+        if (!(stack.getItem() instanceof TankItem)) return false;
+        return getUseMode(stack).interactive;
     }
 
 
@@ -284,7 +334,7 @@ public class TankItem extends Item {
             UseMode useMode = getUseMode(stack);
             UseMode cycle = Utils.cycle(useMode);
             setUseMode(stack,cycle);
-            player.displayClientMessage(Component.translatable("tooltip.tanknull.tank.use_mode."+cycle),true);
+            player.displayClientMessage(Component.translatable(cycle.translation()),true);
         }
     }
 }

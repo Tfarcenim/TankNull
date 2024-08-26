@@ -38,6 +38,7 @@ public class TankNullForge {
             bus.addListener(ModClientForge::setup);
             bus.addListener(ModClientForge::clientTooltip);
             bus.addListener(ModClientForge::keybinds);
+            bus.addListener(ModClientForge::renderStack);
         }
         // Use Forge to bootstrap the Common mod.
         TankNull.init();

@@ -61,7 +61,7 @@ public class ModLangProvider extends LanguageProvider {
 
     void addUseModes() {
         for (UseMode useMode : UseMode.values()) {
-            add("tooltip.tanknull.tank.use_mode." + useMode, useMode.name());
+            add(useMode.translation(), useMode.name());
         }
     }
 
